@@ -1,0 +1,36 @@
+{
+  "name": "nuxt4-nuxt-ui-better-auth-boilerplate",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": "v20.19.5",
+    "npm": "10.8.2"
+  },
+  "overrides": {
+    "@nuxtjs/mdc": "0.17.2"
+  },
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "add:content": "npm add @nuxt/content"
+  },
+  "dependencies": {
+    "@nuxt/image": "^1.11.0",
+    "@nuxt/scripts": "^0.13.1",
+    "@nuxt/ui": "^4.2.1",
+    "@unhead/vue": "^2.0.19",
+    "better-auth": "^1.4.7",
+    "better-sqlite3": "^12.5.0",
+    "nuxt": "^4.2.2",
+    "pg": "^8.16.3",
+    "vue": "^3.5.25",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.4",
+    "@types/pg": "^8.16.0"
+  }
+}
