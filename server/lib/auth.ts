@@ -25,31 +25,55 @@ const toCamelCase = (str: string): string => {
 }
 
 /**
+ * Parse environment variable value to appropriate type
+ *
+ * - If value contains comma, split into array
+ * - Otherwise return as string
+ *
+ * Examples:
+ *   "read,submit" -> ["read", "submit"]
+ *   "clientId" -> "clientId"
+ *   "user:read,email" -> ["user:read", "email"]
+ */
+const parseEnvValue = (value: string): string | string[] => {
+  // Check if it's an array (contains comma)
+  if (value.includes(',')) {
+    return value.split(',').map(item => item.trim())
+  }
+  return value
+}
+
+/**
  * Build social providers from SOCIAL_PROVIDER_* environment variables
  *
  * Convention: SOCIAL_PROVIDER_{PROVIDER}_{FIELD_NAME}
+ *
+ * Arrays: Use comma-separated values
+ * Example: SOCIAL_PROVIDER_REDDIT_SCOPE=read,submit
  *
  * Examples:
  *   SOCIAL_PROVIDER_GOOGLE_CLIENT_ID -> google.clientId
  *   SOCIAL_PROVIDER_TIKTOK_CLIENT_KEY -> tiktok.clientKey
  *   SOCIAL_PROVIDER_PAYPAL_CLIENT_SECRET -> paypal.clientSecret
  *   SOCIAL_PROVIDER_APPLE_APP_BUNDLE_IDENTIFIER -> apple.appBundleIdentifier
+ *   SOCIAL_PROVIDER_REDDIT_SCOPE=read,submit -> reddit.scope: ["read", "submit"]
  *
  * Features:
  * - 100% DYNAMIC: Works with ANY provider (Google, PayPal, Twitter, etc.)
  * - Automatic SNAKE_CASE to camelCase conversion
+ * - Automatic array detection (comma-separated values)
  * - NO PRE-VALIDATION: Better-Auth handles validation and errors
  * - No code changes needed for new providers
  */
 const buildSocialProviders = () => {
-  const providers: Record<string, Record<string, string>> = {}
+  const providers: Record<string, Record<string, string | string[]>> = {}
   
   // Find all SOCIAL_PROVIDER_* environment variables
   const providerVars = Object.keys(process.env)
     .filter(key => key.startsWith("SOCIAL_PROVIDER_"))
   
   // Group variables by provider name
-  const providersMap: Record<string, Record<string, string>> = {}
+  const providersMap: Record<string, Record<string, string | string[]>> = {}
   
   for (const varName of providerVars) {
     const value = process.env[varName]
@@ -64,11 +88,14 @@ const buildSocialProviders = () => {
     // Convert SNAKE_CASE to camelCase
     const field = toCamelCase(rawField)
     
+    // Parse value (string or array)
+    const parsedValue = parseEnvValue(value)
+    
     if (!providersMap[provider]) {
       providersMap[provider] = {}
     }
     
-    providersMap[provider][field] = value
+    providersMap[provider][field] = parsedValue
   }
   
   // Return all providers without validation
