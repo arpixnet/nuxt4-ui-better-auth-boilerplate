@@ -66,8 +66,6 @@ const parseEnvValue = (value: string): string | string[] => {
  * - No code changes needed for new providers
  */
 const buildSocialProviders = () => {
-  const providers: Record<string, Record<string, string | string[]>> = {}
-  
   // Find all SOCIAL_PROVIDER_* environment variables
   const providerVars = Object.keys(process.env)
     .filter(key => key.startsWith("SOCIAL_PROVIDER_"))
