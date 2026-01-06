@@ -5,37 +5,127 @@ import { Pool } from "pg"
 const config = useRuntimeConfig()
 
 /**
+ * Provider configuration schema
+ * Maps each provider to its required and optional fields
+ */
+type ProviderFieldsConfig = {
+  fields: string[]
+  optional?: string[]
+}
+
+const PROVIDER_CONFIG: Record<string, ProviderFieldsConfig> = {
+  // Standard OAuth 2.0 providers
+  google: { fields: ['clientId', 'clientSecret'] },
+  facebook: { fields: ['clientId', 'clientSecret'] },
+  github: { fields: ['clientId', 'clientSecret'] },
+  discord: { fields: ['clientId', 'clientSecret'] },
+  linkedin: { fields: ['clientId', 'clientSecret'] },
+  spotify: { fields: ['clientId', 'clientSecret'] },
+  twitch: { fields: ['clientId', 'clientSecret'] },
+  
+  // Special providers
+  tiktok: { fields: ['clientKey', 'clientSecret'] },
+  
+  // Providers with optional configuration
+  microsoft: { 
+    fields: ['clientId', 'clientSecret'],
+    optional: ['tenantId', 'authority', 'prompt']
+  },
+  apple: { 
+    fields: ['clientId', 'clientSecret'],
+    optional: ['teamId', 'keyId', 'privateKey']
+  },
+}
+
+/**
+ * Build social providers configuration
+ * 
+ * Priority order:
+ * 1. Explicit config in runtimeConfig.betterAuth.providers
+ * 2. Environment variables with custom fields
+ * 3. Standard CLIENT_ID/CLIENT_SECRET pattern
+ */
+const buildSocialProviders = () => {
+  const providers: Record<string, Record<string, string>> = {}
+  
+  // 1. Check if there's explicit provider config in runtimeConfig
+  const explicitProviders = config.betterAuth?.providers || {}
+  
+  // 2. Build providers from environment variables
+  const providerNames = Object.keys(PROVIDER_CONFIG) as Array<keyof typeof PROVIDER_CONFIG>
+  
+  for (const providerName of providerNames) {
+    // Skip if already configured in runtimeConfig
+    if (explicitProviders[providerName]) {
+      providers[providerName] = explicitProviders[providerName]
+      continue
+    }
+    
+    const providerConfig = PROVIDER_CONFIG[providerName]
+    const providerConfigObj: Record<string, string> = {}
+    
+    // Read required fields
+    let hasRequiredFields = false
+    for (const field of providerConfig.fields) {
+      const envVar = `${providerName.toUpperCase()}_${field.toUpperCase()}`
+      const value = process.env[envVar]
+      
+      if (value) {
+        providerConfigObj[field] = value
+        hasRequiredFields = true
+      }
+    }
+    
+    // Read optional fields
+    if (providerConfig.optional && hasRequiredFields) {
+      for (const field of providerConfig.optional) {
+        const envVar = `${providerName.toUpperCase()}_${field.toUpperCase()}`
+        const value = process.env[envVar]
+        
+        if (value) {
+          providerConfigObj[field] = value
+        }
+      }
+    }
+    
+    // Only add provider if it has at least one field configured
+    if (hasRequiredFields) {
+      providers[providerName] = providerConfigObj
+    }
+  }
+  
+  return providers
+}
+
+/**
  * Better-Auth Server Configuration
- *
- * Configures authentication with JWT support and custom Hasura claims.
- * The JWT tokens include x-hasura-* claims required by Hasura GraphQL Engine.
+ * 
+ * Flexible boilerplate that works with:
+ * - Hasura GraphQL Engine or direct database access
+ * - Any number of social providers (dynamic configuration)
+ * - Custom provider configurations via runtimeConfig
+ * - Email/password authentication
  */
 export const auth = betterAuth({
-  // Base URL para tu aplicación
   baseURL: config.betterAuth.url,
-  // Secret for signing sessions and tokens
   secret: config.betterAuth.secret,
 
-  // Database configuration
   database: new Pool({
     connectionString: config.databaseUrl,
   }),
 
-  // Configuración de sesión con soporte JWT para Hasura
   session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // 1 day
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60, // 5 minutes
+      maxAge: 5 * 60,
       strategy: "jwt",
       refreshCache: true,
     }
   },
 
-  // Plugin JWT para generar tokens compatibles con Hasura
   plugins: [
-    // JWT plugin with custom Hasura claims
     jwt({
       jwt: {
         expirationTime: "7d",
@@ -53,14 +143,24 @@ export const auth = betterAuth({
 
           if (!hasuraEnabled) return base
 
-          // Enable if you want to use Hasura
+          // Hasura JWT claims
+          // Note: Roles and permissions are project-specific.
+          // Uncomment and customize as needed:
+          //
           // const rolesData = await getUserRolesAndOrganization(user.id)
+          //
+          // return {
+          //   ...base,
+          //   "https://hasura.io/jwt/claims": {
+          //     "x-hasura-default-role": rolesData.defaultRole,
+          //     "x-hasura-allowed-roles": rolesData.allowedRoles,
+          //     "x-hasura-user-id": user.id,
+          //   },
+          // }
 
           return {
             ...base,
             "https://hasura.io/jwt/claims": {
-              // "x-hasura-default-role": rolesData.defaultRole,
-              // "x-hasura-allowed-roles": rolesData.allowedRoles,
               "x-hasura-user-id": user.id,
             },
           }
@@ -69,18 +169,10 @@ export const auth = betterAuth({
     }),
   ],
 
-  // Social providers (Google, Facebook, etc.)
-  socialProviders: {
-    google: {
-      clientId: config.socialProviders.google.clientId,
-      clientSecret: config.socialProviders.google.clientSecret,
-    },
-    // ... more providers
-  },
+  socialProviders: buildSocialProviders(),
 
-  // email/password credentials
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
+    requireEmailVerification: config.betterAuth.emailVerification || false,
   },
-});
+})
