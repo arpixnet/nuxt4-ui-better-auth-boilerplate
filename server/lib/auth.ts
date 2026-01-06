@@ -128,11 +128,11 @@ export const auth = betterAuth({
   }),
 
   session: {
-    expiresIn: 60 * 60 * 24 * 7,
-    updateAge: 60 * 60 * 24,
+    expiresIn: parseInt(process.env.BETTER_AUTH_SESSION_EXPIRES_IN || "") || 60 * 60 * 24 * 7,
+    updateAge: parseInt(process.env.BETTER_AUTH_SESSION_UPDATE_AGE || "") || 60 * 60 * 24,
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60,
+      maxAge: parseInt(process.env.BETTER_AUTH_COOKIE_MAX_AGE || "") || 5 * 60,
       strategy: "jwt",
       refreshCache: true,
     }
@@ -141,7 +141,7 @@ export const auth = betterAuth({
   plugins: [
     jwt({
       jwt: {
-        expirationTime: "7d",
+        expirationTime: process.env.BETTER_AUTH_JWT_EXPIRATION_TIME || "7d",
         issuer: config.betterAuth.url,
         audience: ["hasura"],
 

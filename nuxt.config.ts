@@ -1,12 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-interface BetterAuthConfig {
-  secret: string
-  url: string
-  withHasura: boolean
-  emailVerification: boolean
-}
-
 // Helper function to conditionally load modules
 function optionalModule(name: string) {
   try {
@@ -59,7 +52,7 @@ export default defineNuxtConfig({
       secret: process.env.BETTER_AUTH_SECRET || "",
       url: process.env.BETTER_AUTH_URL || "http://localhost:3000",
       withHasura: process.env.BETTER_AUTH_WITH_HASURA === "true",
-      emailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
+      emailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true"
     },
     databaseUrl: process.env.DATABASE_URL || "",
   }
