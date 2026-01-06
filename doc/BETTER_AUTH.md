@@ -513,26 +513,38 @@ trustedOrigins: [
 import { createAuthClient } from "better-auth/vue"
 import { jwtClient } from "better-auth/client/plugins"
 
-const config = useRuntimeConfig()
+// Singleton client instance
+let authClientInstance: ReturnType<typeof createAuthClient> | null = null
 
-export const authClient = createAuthClient({
-  baseURL: config.public.betterAuth.url,
-  plugins: [
-    jwtClient(),
-  ],
-})
+export const useAuthClient = () => {
+  const config = useRuntimeConfig()
+  
+  // Create singleton instance if not exists
+  if (!authClientInstance) {
+    authClientInstance = createAuthClient({
+      baseURL: config.public.betterAuth.url,
+      plugins: [
+        jwtClient(),
+      ],
+    })
+  }
+  
+  return authClientInstance
+}
 
-export type AuthClient = typeof authClient
+export type AuthClient = ReturnType<typeof createAuthClient>
 ```
 
 ### Purpose
 
-The authentication client is used in the frontend to:
-- Sign in with social providers
-- Sign in with email/password
-- Sign out
-- Get current session
-- Get JWT tokens
+The authentication client composable provides a singleton instance of the Better-Auth client for use in Vue components. It:
+- Signs in with social providers
+- Signs in with email/password
+- Signs out
+- Gets current session
+- Gets JWT tokens
+
+**Important:** This must be called from within a Vue component's `<script setup>`, a Nuxt plugin, or another composable. It cannot be called from the top-level of a module.
 
 ### Available Methods
 
@@ -566,7 +578,10 @@ const jwt = await authClient.getJWT()
 
 ```vue
 <script setup lang="ts">
-import { authClient } from '~/lib/auth-client'
+// ✅ Call the composable within Vue setup
+import { useAuthClient } from '~/lib/auth-client'
+
+const authClient = useAuthClient()
 
 const signInWithGoogle = async () => {
   await authClient.signIn.social({
@@ -602,6 +617,25 @@ const signOut = async () => {
   </button>
 </template>
 ```
+
+### Singleton Pattern
+
+The client uses a singleton pattern:
+- The instance is created once on first call
+- Subsequent calls return the same instance
+- This ensures `useRuntimeConfig()` is only called from within a valid Nuxt context (Vue setup, plugin, or composable)
+
+### Usage Guidelines
+
+**✅ Supported contexts:**
+- Vue component `<script setup>`
+- Nuxt plugins
+- Other composables
+
+**❌ Not supported:**
+- Top-level of module files
+- Outside of Nuxt context
+- Before Nuxt initialization
 
 ---
 
