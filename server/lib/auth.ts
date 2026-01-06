@@ -5,106 +5,94 @@ import { Pool } from "pg"
 const config = useRuntimeConfig()
 
 /**
- * Provider configuration schema
- * Maps each provider to its required and optional fields
+ * Convert SNAKE_CASE to camelCase
+ *
+ * Examples:
+ *   CLIENT_ID -> clientId
+ *   CLIENT_SECRET -> clientSecret
+ *   CLIENT_KEY -> clientKey
+ *   APP_BUNDLE_IDENTIFIER -> appBundleIdentifier
+ *   TENANT_ID -> tenantId
  */
-type ProviderFieldsConfig = {
-  fields: string[]
-  optional?: string[]
-}
-
-const PROVIDER_CONFIG: Record<string, ProviderFieldsConfig> = {
-  // Standard OAuth 2.0 providers
-  google: { fields: ['clientId', 'clientSecret'] },
-  facebook: { fields: ['clientId', 'clientSecret'] },
-  github: { fields: ['clientId', 'clientSecret'] },
-  discord: { fields: ['clientId', 'clientSecret'] },
-  linkedin: { fields: ['clientId', 'clientSecret'] },
-  spotify: { fields: ['clientId', 'clientSecret'] },
-  twitch: { fields: ['clientId', 'clientSecret'] },
-  
-  // Special providers
-  tiktok: { fields: ['clientKey', 'clientSecret'] },
-  
-  // Providers with optional configuration
-  microsoft: { 
-    fields: ['clientId', 'clientSecret'],
-    optional: ['tenantId', 'authority', 'prompt']
-  },
-  apple: { 
-    fields: ['clientId', 'clientSecret'],
-    optional: ['teamId', 'keyId', 'privateKey']
-  },
+const toCamelCase = (str: string): string => {
+  return str
+    .toLowerCase()
+    .split("_")
+    .map((word, index) => 
+      index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+    )
+    .join("")
 }
 
 /**
- * Build social providers configuration
- * 
- * Priority order:
- * 1. Explicit config in runtimeConfig.betterAuth.providers
- * 2. Environment variables with custom fields
- * 3. Standard CLIENT_ID/CLIENT_SECRET pattern
+ * Build social providers from SOCIAL_PROVIDER_* environment variables
+ *
+ * Convention: SOCIAL_PROVIDER_{PROVIDER}_{FIELD_NAME}
+ *
+ * Examples:
+ *   SOCIAL_PROVIDER_GOOGLE_CLIENT_ID -> google.clientId
+ *   SOCIAL_PROVIDER_TIKTOK_CLIENT_KEY -> tiktok.clientKey
+ *   SOCIAL_PROVIDER_PAYPAL_CLIENT_SECRET -> paypal.clientSecret
+ *   SOCIAL_PROVIDER_APPLE_APP_BUNDLE_IDENTIFIER -> apple.appBundleIdentifier
+ *
+ * Features:
+ * - 100% DYNAMIC: Works with ANY provider (Google, PayPal, Twitter, etc.)
+ * - Automatic SNAKE_CASE to camelCase conversion
+ * - NO PRE-VALIDATION: Better-Auth handles validation and errors
+ * - No code changes needed for new providers
  */
 const buildSocialProviders = () => {
   const providers: Record<string, Record<string, string>> = {}
   
-  // 1. Check if there's explicit provider config in runtimeConfig
-  const explicitProviders = config.betterAuth?.providers || {}
+  // Find all SOCIAL_PROVIDER_* environment variables
+  const providerVars = Object.keys(process.env)
+    .filter(key => key.startsWith("SOCIAL_PROVIDER_"))
   
-  // 2. Build providers from environment variables
-  const providerNames = Object.keys(PROVIDER_CONFIG) as Array<keyof typeof PROVIDER_CONFIG>
+  // Group variables by provider name
+  const providersMap: Record<string, Record<string, string>> = {}
   
-  for (const providerName of providerNames) {
-    // Skip if already configured in runtimeConfig
-    if (explicitProviders[providerName]) {
-      providers[providerName] = explicitProviders[providerName]
-      continue
+  for (const varName of providerVars) {
+    const value = process.env[varName]
+    if (!value) continue
+    
+    // Extract provider and field name
+    // Format: SOCIAL_PROVIDER_GOOGLE_CLIENT_ID
+    const parts = varName.split("_")
+    const provider = parts[2].toLowerCase()
+    const rawField = parts.slice(3).join("_") // CLIENT_ID
+    
+    // Convert SNAKE_CASE to camelCase
+    const field = toCamelCase(rawField)
+    
+    if (!providersMap[provider]) {
+      providersMap[provider] = {}
     }
     
-    const providerConfig = PROVIDER_CONFIG[providerName]
-    const providerConfigObj: Record<string, string> = {}
-    
-    // Read required fields
-    let hasRequiredFields = false
-    for (const field of providerConfig.fields) {
-      const envVar = `${providerName.toUpperCase()}_${field.toUpperCase()}`
-      const value = process.env[envVar]
-      
-      if (value) {
-        providerConfigObj[field] = value
-        hasRequiredFields = true
-      }
-    }
-    
-    // Read optional fields
-    if (providerConfig.optional && hasRequiredFields) {
-      for (const field of providerConfig.optional) {
-        const envVar = `${providerName.toUpperCase()}_${field.toUpperCase()}`
-        const value = process.env[envVar]
-        
-        if (value) {
-          providerConfigObj[field] = value
-        }
-      }
-    }
-    
-    // Only add provider if it has at least one field configured
-    if (hasRequiredFields) {
-      providers[providerName] = providerConfigObj
-    }
+    providersMap[provider][field] = value
   }
   
-  return providers
+  // Return all providers without validation
+  // Better-Auth will handle validation and throw errors if something is missing
+  return providersMap
 }
 
 /**
  * Better-Auth Server Configuration
- * 
+ *
  * Flexible boilerplate that works with:
  * - Hasura GraphQL Engine or direct database access
- * - Any number of social providers (dynamic configuration)
- * - Custom provider configurations via runtimeConfig
+ * - ANY social provider via SOCIAL_PROVIDER_* convention (100% dynamic)
  * - Email/password authentication
+ *
+ * Social Providers Configuration:
+ * Use SOCIAL_PROVIDER_{PROVIDER}_{FIELD} convention in .env
+ * All fields in SNAKE_CASE, automatically converted to camelCase
+ *
+ * Examples:
+ *   SOCIAL_PROVIDER_GOOGLE_CLIENT_ID=xxx
+ *   SOCIAL_PROVIDER_GOOGLE_CLIENT_SECRET=xxx
+ *   SOCIAL_PROVIDER_TIKTOK_CLIENT_KEY=xxx
+ *   SOCIAL_PROVIDER_PAYPAL_CLIENT_SECRET=xxx
  */
 export const auth = betterAuth({
   baseURL: config.betterAuth.url,
@@ -170,6 +158,9 @@ export const auth = betterAuth({
   ],
 
   socialProviders: buildSocialProviders(),
+
+  // Required for Apple Sign In
+  trustedOrigins: ["https://appleid.apple.com"],
 
   emailAndPassword: {
     enabled: true,

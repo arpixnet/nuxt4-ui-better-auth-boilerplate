@@ -5,7 +5,6 @@ interface BetterAuthConfig {
   url: string
   withHasura: boolean
   emailVerification: boolean
-  providers: Record<string, Record<string, string>>
 }
 
 // Helper function to conditionally load modules
@@ -61,7 +60,6 @@ export default defineNuxtConfig({
       url: process.env.BETTER_AUTH_URL || "http://localhost:3000",
       withHasura: process.env.BETTER_AUTH_WITH_HASURA === "true",
       emailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
-      providers: {},
     },
     databaseUrl: process.env.DATABASE_URL || "",
   }
