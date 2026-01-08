@@ -90,8 +90,8 @@ const handleLogin = async (event: any) => {
 <template>
   <div class="h-screen flex flex-col lg:flex-row overflow-hidden">
     <!-- Left Side - Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-      <div class="w-full max-w-md">
+    <div class="w-full lg:w-1/2 h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+      <div class="w-full max-w-md h-full flex flex-col justify-between">
         <!-- Logo/Brand -->
         <div class="mb-6">
           <img
@@ -111,147 +111,149 @@ const handleLogin = async (event: any) => {
           </h2>
         </div>
 
-        <!-- Avatar Circle with Double Border -->
-        <div class="flex justify-start mb-5">
-          <div class="relative">
-            <!-- Outer circle border -->
-            <div class="w-20 h-20 rounded-full border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-              <!-- Inner circle with icon -->
-              <div class="w-14 h-14 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-md shadow-gray-200/50 dark:shadow-gray-900/50">
-                <Icon name="heroicons:user-20-solid" class="w-6 h-6 text-gray-400 dark:text-gray-500" />
+        <div>
+          <!-- Avatar Circle with Double Border -->
+          <div class="flex justify-start mb-5">
+            <div class="relative">
+              <!-- Outer circle border -->
+              <div class="w-20 h-20 rounded-full border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+                <!-- Inner circle with icon -->
+                <div class="w-14 h-14 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-md shadow-gray-200/50 dark:shadow-gray-900/50">
+                  <Icon name="heroicons:user-20-solid" class="w-6 h-6 text-gray-400 dark:text-gray-500" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Header -->
-        <div class="mb-4">
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-            Welcome Back
-          </h1>
-          <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-            Log in to continue your visa application journey
-          </p>
-        </div>
-
-        <!-- Form -->
-        <UForm
-          :schema="loginSchema"
-          :state="formState"
-          @submit="handleLogin"
-        >
-          <!-- Error Alert -->
-          <UAlert
-            v-if="error"
-            :description="error"
-            color="error"
-            variant="subtle"
-            icon="heroicons:information-circle-20-solid"
-            class="mb-6"
-          />
-
-          <!-- Success Alert -->
-          <UAlert
-            v-if="success"
-            description="Login successful! Redirecting..."
-            color="success"
-            variant="subtle"
-            icon="heroicons:check-circle-20-solid"
-            class="mb-6"
-          />
-
-          <!-- Email Input -->
-          <div class="mb-3">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Email address
-            </label>
-            <UInput
-              v-model="formState.email"
-              type="email"
-              placeholder="Enter email address"
-              size="lg"
-              :disabled="loading"
-              autofocus
-              :color="formState.email && !isEmailValid ? 'error' : undefined"
-              class="w-full"
-            >
-              <template #leading>
-                <Icon name="heroicons:envelope-20-solid" class="w-4 h-4" />
-              </template>
-            </UInput>
-            <p v-if="formState.email && !isEmailValid" class="text-red-500 text-xs mt-1.5">
-              Please enter a valid email address
+          <!-- Header -->
+          <div class="mb-4">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
+              Welcome Back
+            </h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+              Log in to continue your visa application journey
             </p>
           </div>
 
-          <!-- Password Input -->
-          <div class="mb-3">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Password
-            </label>
-            <UInput
-              v-model="formState.password"
-              type="password"
-              placeholder="Enter Password"
+          <!-- Form -->
+          <UForm
+            :schema="loginSchema"
+            :state="formState"
+            @submit="handleLogin"
+          >
+            <!-- Error Alert -->
+            <UAlert
+              v-if="error"
+              :description="error"
+              color="error"
+              variant="subtle"
+              icon="heroicons:information-circle-20-solid"
+              class="mb-6"
+            />
+
+            <!-- Success Alert -->
+            <UAlert
+              v-if="success"
+              description="Login successful! Redirecting..."
+              color="success"
+              variant="subtle"
+              icon="heroicons:check-circle-20-solid"
+              class="mb-6"
+            />
+
+            <!-- Email Input -->
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                Email address
+              </label>
+              <UInput
+                v-model="formState.email"
+                type="email"
+                placeholder="Enter email address"
+                size="lg"
+                :disabled="loading"
+                autofocus
+                :color="formState.email && !isEmailValid ? 'error' : undefined"
+                class="w-full"
+              >
+                <template #leading>
+                  <Icon name="heroicons:envelope-20-solid" class="w-4 h-4" />
+                </template>
+              </UInput>
+              <p v-if="formState.email && !isEmailValid" class="text-red-500 text-xs mt-1.5">
+                Please enter a valid email address
+              </p>
+            </div>
+
+            <!-- Password Input -->
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                Password
+              </label>
+              <UInput
+                v-model="formState.password"
+                type="password"
+                placeholder="Enter Password"
+                size="lg"
+                :disabled="loading"
+                :color="formState.password && !isPasswordValid ? 'error' : undefined"
+                class="w-full"
+              >
+                <template #leading>
+                  <Icon name="heroicons:lock-closed-20-solid" class="w-4 h-4" />
+                </template>
+              </UInput>
+              <p v-if="formState.password && !isPasswordValid" class="text-red-500 text-xs mt-1.5">
+                Password must be at least 8 characters
+              </p>
+            </div>
+
+            <!-- Forgot Password Link -->
+            <div class="mb-3 text-right">
+              <!-- TODO: Implement forgot password feature -->
+              <span class="text-sm text-gray-900 dark:text-white font-medium cursor-not-allowed">
+                Forgot Password?
+              </span>
+            </div>
+
+            <!-- Submit Button -->
+            <UButton
+              type="submit"
+              color="primary"
+              variant="solid"
               size="lg"
-              :disabled="loading"
-              :color="formState.password && !isPasswordValid ? 'error' : undefined"
-              class="w-full"
+              block
+              :loading="loading"
+              :disabled="loading || !isFormValid"
+              class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold shadow-md shadow-gray-200/50 dark:shadow-gray-900/50 transition-all duration-200"
             >
-              <template #leading>
-                <Icon name="heroicons:lock-closed-20-solid" class="w-4 h-4" />
-              </template>
-            </UInput>
-            <p v-if="formState.password && !isPasswordValid" class="text-red-500 text-xs mt-1.5">
-              Password must be at least 8 characters
+              <span v-if="!loading" class="flex items-center justify-center gap-2">
+                Sign In
+                <Icon name="heroicons:arrow-right-20-solid" class="w-4 h-4" />
+              </span>
+              <span v-else>Signing in...</span>
+            </UButton>
+          </UForm>
+
+          <!-- Register Link -->
+          <div class="text-center mt-4">
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+              Don't have an account yet?
+            </span>
+            <ULink
+              to="/auth/register"
+              class="text-sm font-semibold text-gray-900 dark:text-white hover:underline ml-1"
+            >
+              Create an account
+            </ULink>
+          </div>
+
+          <!-- Security Note -->
+          <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <p class="text-xs text-center text-gray-400 dark:text-gray-500">
+              Your data is protected with industry-grade encryption
             </p>
           </div>
-
-          <!-- Forgot Password Link -->
-          <div class="mb-3 text-right">
-            <!-- TODO: Implement forgot password feature -->
-            <span class="text-sm text-gray-900 dark:text-white font-medium cursor-not-allowed">
-              Forgot Password?
-            </span>
-          </div>
-
-          <!-- Submit Button -->
-          <UButton
-            type="submit"
-            color="primary"
-            variant="solid"
-            size="lg"
-            block
-            :loading="loading"
-            :disabled="loading || !isFormValid"
-            class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold shadow-md shadow-gray-200/50 dark:shadow-gray-900/50 transition-all duration-200"
-          >
-            <span v-if="!loading" class="flex items-center justify-center gap-2">
-              Sign In
-              <Icon name="heroicons:arrow-right-20-solid" class="w-4 h-4" />
-            </span>
-            <span v-else>Signing in...</span>
-          </UButton>
-        </UForm>
-
-        <!-- Register Link -->
-        <div class="text-center mt-4">
-          <span class="text-sm text-gray-500 dark:text-gray-400">
-            Don't have an account yet?
-          </span>
-          <ULink
-            to="/auth/register"
-            class="text-sm font-semibold text-gray-900 dark:text-white hover:underline ml-1"
-          >
-            Create an account
-          </ULink>
-        </div>
-
-        <!-- Security Note -->
-        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-          <p class="text-xs text-center text-gray-400 dark:text-gray-500">
-            Your data is protected with industry-grade encryption
-          </p>
         </div>
 
         <!-- Footer -->
