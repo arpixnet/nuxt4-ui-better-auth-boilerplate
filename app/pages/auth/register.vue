@@ -5,8 +5,21 @@ import { useRuntimeConfig } from '#app'
 import { registerSchema } from '~/schemas/auth'
 
 // Auth configuration
-const { config: authPageConfig, getDecorativePanel } = useAuthConfig()
+const { config: authPageConfig, getDecorativePanel, getGradientStyle } = useAuthConfig()
 const panelConfig = getDecorativePanel('register')
+
+// Computed style for gradient background
+const gradientStyle = computed(() => {
+  const lightStyle = getGradientStyle('register', 'light')
+  const darkStyle = getGradientStyle('register', 'dark')
+  
+  // Use dark mode style when in dark mode, light mode style otherwise
+  return {
+    ...lightStyle,
+    '--gradient-bg': lightStyle.background,
+    '--gradient-bg-dark': darkStyle.background,
+  }
+})
 
 // Redirect configuration - change as needed
 const DEFAULT_REDIRECT = '/'
@@ -267,11 +280,12 @@ const handleRegister = async (event: any) => {
     <!-- Right Side - Decorative Panel (Hidden on mobile) -->
     <div
       :class="[
-        'hidden lg:flex lg:w-1/2 items-center justify-center p-8 relative overflow-hidden',
-        `bg-gradient-to-br from-${panelConfig.gradient.light.from} via-${panelConfig.gradient.light.via} to-${panelConfig.gradient.light.to}`,
-        `dark:from-${panelConfig.gradient.dark.from} dark:via-${panelConfig.gradient.dark.via} dark:to-${panelConfig.gradient.dark.to}`
+        'hidden lg:flex lg:w-1/2 items-center justify-center p-8 relative overflow-hidden'
       ]"
-      :style="panelConfig.backgroundImage ? `background-image: url('${panelConfig.backgroundImage}'); background-size: cover; background-position: center;` : ''"
+      :style="[
+        gradientStyle,
+        panelConfig.backgroundImage ? `background-image: url('${panelConfig.backgroundImage}'), var(--gradient-bg); background-size: cover; background-position: center;` : ''
+      ]"
     >
       <!-- Overlay for better text readability when using background image -->
       <div v-if="panelConfig.backgroundImage" class="absolute inset-0 bg-black/40"></div>

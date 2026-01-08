@@ -71,12 +71,12 @@ export const authConfig: AuthPageConfig = {
       subtitle: 'Your trusted partner for innovative solutions',
       gradient: {
         light: {
-          from: 'blue-500',
-          via: 'purple-500',
-          to: 'pink-500',
+          from: 'black',
+          via: '#7f18e0',
+          to: 'purple-500',
         },
         dark: {
-          from: 'blue-900',
+          from: 'gray-900',
           via: 'purple-900',
           to: 'pink-900',
         },
@@ -88,14 +88,14 @@ export const authConfig: AuthPageConfig = {
       subtitle: 'Start your journey with us today',
       gradient: {
         light: {
-          from: 'green-500',
-          via: 'teal-500',
-          to: 'blue-500',
+          from: 'black',
+          via: '#7f18e0',
+          to: 'purple-500',
         },
         dark: {
-          from: 'green-900',
-          via: 'teal-900',
-          to: 'blue-900',
+          from: 'gray-900',
+          via: 'purple-900',
+          to: 'pink-900',
         },
       },
       // backgroundImage: '/images/register-bg.jpg', // Optional background image
