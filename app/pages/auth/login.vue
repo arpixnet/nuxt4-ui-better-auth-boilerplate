@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { useAuthClient } from '~/lib/auth-client'
 import { navigateTo } from '#app'
+import { loginSchema } from '~/schemas/auth'
 
 // Redirect configuration - change as needed
 const DEFAULT_REDIRECT = '/'
 
 // Form state
-const email = ref('')
-const password = ref('')
+const formState = ref({
+  email: '',
+  password: '',
+})
 const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
@@ -15,43 +18,65 @@ const success = ref(false)
 // Auth client
 const authClient = useAuthClient()
 
+// Validate form in real-time
+const isEmailValid = computed(() => {
+  if (!formState.value.email) return true // Allow empty initially
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(formState.value.email)
+})
+
+const isPasswordValid = computed(() => {
+  if (!formState.value.password) return true // Allow empty initially
+  return formState.value.password.length >= 8
+})
+
+const isFormValid = computed(() => {
+  return isEmailValid.value && 
+         isPasswordValid.value && 
+         formState.value.email && 
+         formState.value.password
+})
+
 /**
  * Handle login with email and password
  */
-const handleLogin = async () => {
+const handleLogin = async (event: any) => {
   // Clear previous errors
   error.value = null
   success.value = false
   
-  // Basic validation
-  if (!email.value || !password.value) {
-    error.value = 'Please enter your email and password'
-    return
-  }
-  
-  if (!email.value.includes('@')) {
-    error.value = 'Please enter a valid email address'
-    return
-  }
-  
   loading.value = true
   
   try {
-    await authClient.signIn.email({
-      email: email.value,
-      password: password.value,
+    const response = await authClient.signIn.email({
+      email: formState.value.email,
+      password: formState.value.password,
       callbackURL: DEFAULT_REDIRECT,
     })
     
-    success.value = true
-    
-    // Redirect after successful login
-    setTimeout(() => {
-      navigateTo(DEFAULT_REDIRECT)
-    }, 500)
-  } catch (err) {
+    // Check if login was successful
+    if (response && !response.error) {
+      success.value = true
+      
+      // Redirect after successful login
+      setTimeout(() => {
+        navigateTo(DEFAULT_REDIRECT)
+      }, 500)
+    } else {
+      // Better-Auth returned an error
+      throw new Error(response?.error?.message || 'Invalid email or password')
+    }
+  } catch (err: any) {
     console.error('Login error:', err)
-    error.value = 'Invalid email or password'
+    
+    // Handle different types of errors
+    if (err.message?.includes('email') || err.message?.includes('password')) {
+      error.value = 'Invalid email or password'
+    } else if (err.message?.includes('network') || err.code === 'NETWORK_ERROR') {
+      error.value = 'Network error. Please check your connection.'
+    } else {
+      error.value = err.message || 'An error occurred. Please try again.'
+    }
   } finally {
     loading.value = false
   }
@@ -73,28 +98,30 @@ const handleLogin = async () => {
       </template>
 
       <template #default>
-        <UForm @submit.prevent="handleLogin">
+        <UForm 
+          :schema="loginSchema" 
+          :state="formState"
+          @submit="handleLogin"
+        >
           <!-- Error Alert -->
           <UAlert
             v-if="error"
+            :description="error"
             color="error"
             variant="subtle"
             icon="heroicons:information-circle-20-solid"
             class="mb-4"
-          >
-            {{ error }}
-          </UAlert>
+          />
 
           <!-- Success Alert -->
           <UAlert
             v-if="success"
+            description="Login successful! Redirecting..."
             color="success"
             variant="subtle"
             icon="heroicons:check-circle-20-solid"
             class="mb-4"
-          >
-            Login successful! Redirecting...
-          </UAlert>
+          />
 
           <!-- Email Input -->
           <div class="mb-4">
@@ -102,14 +129,18 @@ const handleLogin = async () => {
               Email
             </label>
             <UInput
-              v-model="email"
+              v-model="formState.email"
               type="email"
               placeholder="you@example.com"
               icon="heroicons:envelope-20-solid"
               size="lg"
               :disabled="loading"
               autofocus
+              :color="formState.email && !isEmailValid ? 'error' : undefined"
             />
+            <p v-if="formState.email && !isEmailValid" class="text-red-500 text-sm mt-1">
+              Please enter a valid email address
+            </p>
           </div>
 
           <!-- Password Input -->
@@ -118,22 +149,23 @@ const handleLogin = async () => {
               Password
             </label>
             <UInput
-              v-model="password"
+              v-model="formState.password"
               type="password"
-              placeholder="••••••"
+              placeholder="•••••"
               icon="heroicons:lock-closed-20-solid"
               size="lg"
               :disabled="loading"
+              :color="formState.password && !isPasswordValid ? 'error' : undefined"
             />
+            <p v-if="formState.password && !isPasswordValid" class="text-red-500 text-sm mt-1">
+              Password must be at least 8 characters
+            </p>
           </div>
 
           <!-- Forgot Password Link -->
           <div class="mb-4 text-right">
             <!-- TODO: Implement forgot password feature -->
             <!-- Will require email service integration (Resend, SendGrid, Mailgun, etc.) -->
-            <!-- <ULink to="/auth/forgot-password" class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"> -->
-            <!--   Forgot password? -->
-            <!-- </ULink> -->
             <span class="text-sm text-gray-500 dark:text-gray-400">
               Forgot password?
             </span>
@@ -147,7 +179,7 @@ const handleLogin = async () => {
             size="lg"
             block
             :loading="loading"
-            :disabled="loading"
+            :disabled="loading || !isFormValid"
           >
             <span v-if="!loading">Sign In</span>
             <span v-else>Signing in...</span>

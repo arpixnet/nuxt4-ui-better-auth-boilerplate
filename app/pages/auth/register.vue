@@ -2,14 +2,16 @@
 import { useAuthClient } from '~/lib/auth-client'
 import { navigateTo } from '#app'
 import { useRuntimeConfig } from '#app'
+import { registerSchema } from '~/schemas/auth'
 
 // Redirect configuration - change as needed
 const DEFAULT_REDIRECT = '/'
 
 // Form state
-const email = ref('')
-const password = ref('')
-const name = ref('')
+const formState = ref({
+  email: '',
+  password: '',
+})
 const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
@@ -18,49 +20,71 @@ const success = ref(false)
 const authClient = useAuthClient()
 const config = useRuntimeConfig()
 
+// Validate form in real-time
+const isEmailValid = computed(() => {
+  if (!formState.value.email) return true // Allow empty initially
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(formState.value.email)
+})
+
+const isPasswordValid = computed(() => {
+  if (!formState.value.password) return true // Allow empty initially
+  return formState.value.password.length >= 8
+})
+
+const isFormValid = computed(() => {
+  return isEmailValid.value && 
+         isPasswordValid.value && 
+         formState.value.email && 
+         formState.value.password
+})
+
 /**
  * Handle registration with email and password
  */
-const handleRegister = async () => {
+const handleRegister = async (event: any) => {
   // Clear previous errors
   error.value = null
   success.value = false
   
-  // Basic validation
-  if (!email.value || !password.value) {
-    error.value = 'Please fill in all fields'
-    return
-  }
-  
-  if (!email.value.includes('@')) {
-    error.value = 'Please enter a valid email address'
-    return
-  }
-  
-  if (password.value.length < 8) {
-    error.value = 'Password must be at least 8 characters'
-    return
-  }
-  
   loading.value = true
   
   try {
-    await authClient.signUp.email({
-      email: email.value,
-      password: password.value,
-      name: name.value || email.value.split('@')[0]!, // Use email prefix as default name (! asserts non-null for TypeScript)
+    const emailParts = formState.value.email.split('@')
+    const defaultName = emailParts[0] || 'User'
+    
+    const response = await authClient.signUp.email({
+      email: formState.value.email,
+      password: formState.value.password,
+      name: defaultName,
       callbackURL: DEFAULT_REDIRECT,
     })
     
-    success.value = true
-    
-    // Redirect after successful registration
-    setTimeout(() => {
-      navigateTo(DEFAULT_REDIRECT)
-    }, 500)
-  } catch (err) {
+    // Check if registration was successful
+    if (response && !response.error) {
+      success.value = true
+      
+      // Redirect after successful registration
+      setTimeout(() => {
+        navigateTo(DEFAULT_REDIRECT)
+      }, 500)
+    } else {
+      // Better-Auth returned an error
+      throw new Error(response?.error?.message || 'Registration failed')
+    }
+  } catch (err: any) {
     console.error('Registration error:', err)
-    error.value = 'Registration failed. Email may already be in use.'
+    
+    // Handle different types of errors
+    if (err.message?.includes('email') || err.message?.includes('already')) {
+      error.value = 'Email already in use'
+    } else if (err.message?.includes('password')) {
+      error.value = 'Password requirements not met'
+    } else if (err.message?.includes('network') || err.code === 'NETWORK_ERROR') {
+      error.value = 'Network error. Please check your connection.'
+    } else {
+      error.value = err.message || 'An error occurred. Please try again.'
+    }
   } finally {
     loading.value = false
   }
@@ -82,31 +106,30 @@ const handleRegister = async () => {
       </template>
 
       <template #default>
-        <UForm @submit.prevent="handleRegister">
+        <UForm 
+          :schema="registerSchema" 
+          :state="formState"
+          @submit="handleRegister"
+        >
           <!-- Error Alert -->
           <UAlert
             v-if="error"
+            :description="error"
             color="error"
             variant="subtle"
             icon="heroicons:information-circle-20-solid"
             class="mb-4"
-          >
-            {{ error }}
-          </UAlert>
+          />
 
           <!-- Success Alert -->
           <UAlert
             v-if="success"
+            description="Registration successful! Redirecting..."
             color="success"
             variant="subtle"
             icon="heroicons:check-circle-20-solid"
             class="mb-4"
-          >
-            Registration successful! Redirecting...
-            <p v-if="config.public.betterAuth.emailVerification" class="mt-2 text-sm">
-              Please check your email to verify your account before signing in.
-            </p>
-          </UAlert>
+          />
 
           <!-- Email Input -->
           <div class="mb-4">
@@ -114,14 +137,17 @@ const handleRegister = async () => {
               Email
             </label>
             <UInput
-              v-model="email"
+              v-model="formState.email"
               type="email"
               placeholder="you@example.com"
               icon="heroicons:envelope-20-solid"
               size="lg"
               :disabled="loading"
-              autofocus
+              :color="formState.email && !isEmailValid ? 'error' : undefined"
             />
+            <p v-if="formState.email && !isEmailValid" class="text-red-500 text-sm mt-1">
+              Please enter a valid email address
+            </p>
           </div>
 
           <!-- Password Input -->
@@ -130,14 +156,18 @@ const handleRegister = async () => {
               Password
             </label>
             <UInput
-              v-model="password"
+              v-model="formState.password"
               type="password"
-              placeholder="••••••••••"
+              placeholder="••••••"
               icon="heroicons:lock-closed-20-solid"
               size="lg"
               :disabled="loading"
+              :color="formState.password && !isPasswordValid ? 'error' : undefined"
             />
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <p v-if="formState.password && !isPasswordValid" class="text-red-500 text-sm mt-1">
+              Password must be at least 8 characters
+            </p>
+            <p v-else class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Must be at least 8 characters
             </p>
           </div>
@@ -150,7 +180,7 @@ const handleRegister = async () => {
             size="lg"
             block
             :loading="loading"
-            :disabled="loading"
+            :disabled="loading || !isFormValid"
           >
             <span v-if="!loading">Create Account</span>
             <span v-else>Creating account...</span>
