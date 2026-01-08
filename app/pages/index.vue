@@ -28,11 +28,9 @@
         <!-- Contenido solo después de inicializar -->
         <template v-else>
             <!-- Usuario autenticado -->
-            <div v-if="session" class="mb-4">
+            <div v-if="session.data?.user" class="flex flex-col gap-4">
                 <!-- Logout Component -->
-                <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <AuthLogout />
-                </div>
+                <AuthLogout />
                 
                 <!-- Session Info -->
                 <div class="mb-4 p-4 bg-gray-100 rounded">
@@ -42,11 +40,28 @@
             </div>
             
             <!-- Usuario no autenticado -->
-            <div v-else class="mb-4 p-4 bg-red-100 rounded">
-                <p class="text-red-700">No active session</p>
-                <NuxtLink to="/auth/login" class="text-blue-600 hover:underline ml-2">
-                    Sign in
-                </NuxtLink>
+             <div v-else class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-end">
+                <div class="flex gap-3">
+                    <UButton
+                        color="primary"
+                        variant="soft"
+                        class="cursor-pointer"
+                    >
+                        <NuxtLink to="/auth/login">
+                            Sign in
+                        </NuxtLink>
+                    </UButton>
+
+                    <UButton
+                        color="secondary"
+                        variant="soft"
+                        class="cursor-pointer"
+                    >
+                        <NuxtLink to="/auth/register">
+                            Sign up
+                        </NuxtLink>
+                    </UButton>
+                </div>
             </div>
         </template>
         

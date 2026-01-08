@@ -63,17 +63,6 @@ const handleLogout = async () => {
 
 <template>
   <div>
-    <!-- Debug Info -->
-    <div class="p-4 bg-yellow-50 border border-yellow-200 rounded mb-4">
-      <p class="font-bold text-yellow-800">Debug AuthLogout:</p>
-      <p class="text-sm text-yellow-700">Session exists: {{ !!session }}</p>
-      <p class="text-sm text-yellow-700">User extracted: {{ !!user }}</p>
-      <details class="mt-2">
-        <summary class="cursor-pointer text-sm font-mono">Session Data:</summary>
-        <pre class="mt-2 text-xs bg-yellow-100 p-2 rounded">{{ JSON.stringify(session, null, 2) }}</pre>
-      </details>
-    </div>
-
     <!-- Actual Logout UI -->
     <div v-if="user" class="p-4 bg-gray-50 rounded-lg border border-gray-200">
       <!-- Error Alert -->

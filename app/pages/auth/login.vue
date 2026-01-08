@@ -107,21 +107,23 @@ const handleLogin = async (event: any) => {
       <div class="w-full max-w-md h-full flex flex-col justify-between">
         <!-- Logo/Brand -->
         <div class="mb-6">
-          <img
-            v-if="authPageConfig.logo.imageUrl"
-            :src="authPageConfig.logo.imageUrl"
-            :alt="authPageConfig.logo.imageAlt || 'Logo'"
-            class="h-10 w-auto"
-          />
-          <h2
-            v-else
-            :class="[
-              'font-bold text-gray-900 dark:text-white tracking-tight',
-              `text-${authPageConfig.logo.size}`
-            ]"
-          >
-            {{ authPageConfig.logo.text }}
-          </h2>
+          <NuxtLink to="/">
+            <img
+              v-if="authPageConfig.logo.imageUrl"
+              :src="authPageConfig.logo.imageUrl"
+              :alt="authPageConfig.logo.imageAlt || 'Logo'"
+              class="h-10 w-auto"
+            />
+            <h2
+              v-else
+              :class="[
+                'font-bold text-gray-900 dark:text-white tracking-tight',
+                `text-${authPageConfig.logo.size}`
+              ]"
+            >
+              {{ authPageConfig.logo.text }}
+            </h2>
+          </NuxtLink>
         </div>
 
         <div>
