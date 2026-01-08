@@ -31,17 +31,37 @@ import { useAuthClient } from '~/lib/auth-client'
 export const useAuthSession = () => {
   const authClient = useAuthClient()
   
-  // useLazyAsyncData ejecuta la función en el cliente y cachea el resultado
-  // Key 'auth-session' asegura que se use el mismo cache en toda la app
-  const { data: session, pending, error, refresh } = useLazyAsyncData(
-    'auth-session',
-    () => authClient.getSession()
-  )
+  // Estado reactiva para la sesión
+  const session = ref<any>(null)
+  const pending = ref(true) // Start with pending = true to prevent showing "No session" initially
+  const error = ref<any>(null)
+  
+  // Función para cargar la sesión
+  const loadSession = async () => {
+    try {
+      pending.value = true
+      error.value = null
+      
+      const sessionData = await authClient.getSession()
+      session.value = sessionData as any
+    } catch (err) {
+      console.error('Error loading session:', err)
+      error.value = err
+      session.value = null
+    } finally {
+      pending.value = false
+    }
+  }
+  
+  // Cargar sesión inicialmente
+  onMounted(() => {
+    loadSession()
+  })
   
   return {
     session,
     pending,
     error,
-    refresh,
+    refresh: loadSession,
   }
 }
