@@ -59,7 +59,8 @@ Expone la configuración a los componentes:
 - `config`: Objeto completo de configuración
 - `getLogo()`: Configuración del logo
 - `getDecorativePanel(page)`: Configuración del panel de una página
-- `getGradientClasses(page, mode)`: Clases CSS para gradientes
+- `getGradientClasses(page, mode)`: Clases CSS para gradientes (deprecated)
+- `getGradientStyle(page, mode)`: Estilos CSS inline para gradientes
 
 ### 3. Componentes de UI
 **Rutas:** `app/pages/auth/login.vue` y `app/pages/auth/register.vue`
@@ -404,7 +405,7 @@ gradient: {
 
 ### Cómo Funciona
 
-El sistema genera automáticamente las clases de Tailwind:
+El sistema genera automáticamente estilos CSS inline:
 
 ```vue
 <!-- Entrada en config.ts -->
@@ -414,12 +415,18 @@ gradient: {
     via: 'purple-500',
     to: 'pink-500',
   },
+  dark: {
+    from: 'blue-900',
+    via: 'purple-900',
+    to: 'pink-900',
+  },
 }
 
-<!-- Clases generadas -->
-bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500
-dark:from-blue-900 dark:via-purple-900 dark:to-pink-900
+<!-- Estilos CSS inline generados -->
+background: linear-gradient(to bottom right, #3b82f6, #a855f7, #ec4899);
 ```
+
+**Nota técnica:** El sistema usa estilos CSS inline en lugar de clases dinámicas de Tailwind para asegurar compatibilidad con Tailwind 4 y evitar problemas de purging. Los nombres de colores de Tailwind se mapean internamente a valores hexadecimales.
 
 ### Colores Disponibles
 
@@ -810,12 +817,14 @@ export const authConfig: AuthPageConfig = {
    ├── config: authConfig
    ├── getLogo()
    ├── getDecorativePanel(page)
-   └── getGradientClasses(page, mode)
+   ├── getGradientClasses(page, mode) (deprecated)
+   └── getGradientStyle(page, mode)
            ↓
 3. Componentes (login.vue / register.vue)
-   ├── { config: authPageConfig, getDecorativePanel }
+   ├── { config: authPageConfig, getDecorativePanel, getGradientStyle }
    ├── const panelConfig = getDecorativePanel('login')
-   └── Renderizado con datos de configuración
+   ├── const gradientStyle = computed(() => getGradientStyle('login', 'light'))
+   └── Renderizado con datos de configuración y estilos inline
            ↓
 4. Página renderizada con personalización
 ```
@@ -825,10 +834,22 @@ export const authConfig: AuthPageConfig = {
 ```vue
 <script setup>
 // Importar composable
-const { config: authPageConfig, getDecorativePanel } = useAuthConfig()
+const { config: authPageConfig, getDecorativePanel, getGradientStyle } = useAuthConfig()
 
 // Obtener configuración específica
 const panelConfig = getDecorativePanel('login')
+
+// Computed style para gradient background
+const gradientStyle = computed(() => {
+  const lightStyle = getGradientStyle('login', 'light')
+  const darkStyle = getGradientStyle('login', 'dark')
+  
+  return {
+    ...lightStyle,
+    '--gradient-bg': lightStyle.background,
+    '--gradient-bg-dark': darkStyle.background,
+  }
+})
 </script>
 
 <template>
@@ -851,18 +872,14 @@ const panelConfig = getDecorativePanel('login')
   <!-- Panel Decorativo -->
   <div
     :class="[
-      'bg-gradient-to-br',
-      `from-${panelConfig.gradient.light.from}`,
-      `via-${panelConfig.gradient.light.via}`,
-      `to-${panelConfig.gradient.light.to}`,
-      'dark:from-' + panelConfig.gradient.dark.from,
-      'dark:via-' + panelConfig.gradient.dark.via,
-      'dark:to-' + panelConfig.gradient.dark.to
+      'hidden lg:flex lg:w-1/2 items-center justify-center p-12 relative overflow-hidden'
     ]"
-    :style="panelConfig.backgroundImage ? 
-      `background-image: url('${panelConfig.backgroundImage}')` : 
-      undefined
-    "
+    :style="[
+      gradientStyle,
+      panelConfig.backgroundImage ? 
+        `background-image: url('${panelConfig.backgroundImage}'), var(--gradient-bg); background-size: cover; background-position: center;` : 
+        ''
+    ]"
   >
     <h2>{{ panelConfig.title }}</h2>
     <p>{{ panelConfig.subtitle }}</p>
@@ -888,7 +905,36 @@ export const useAuthConfig = () => {
       return authConfig.decorativePanel[page]
     },
     
-    // Generar clases de gradiente para Tailwind
+    // Generar estilos CSS inline para gradientes (método recomendado)
+    getGradientStyle: (page: 'login' | 'register', mode: 'light' | 'dark' = 'light') => {
+      const panel = authConfig.decorativePanel[page]
+      const gradient = panel.gradient[mode]
+      
+      // Mapa de colores Tailwind a valores hexadecimales
+      const colorMap: Record<string, string> = {
+        'blue-500': '#3b82f6',
+        'blue-900': '#1e3a8a',
+        'purple-500': '#a855f7',
+        'purple-900': '#581c87',
+        'pink-500': '#ec4899',
+        'pink-900': '#831843',
+        'green-500': '#22c55e',
+        'green-900': '#14532d',
+        'teal-500': '#14b8a6',
+        'teal-900': '#134e4a',
+        // Agregar más colores según se necesiten
+      }
+      
+      const fromColor = colorMap[gradient.from] || gradient.from
+      const viaColor = colorMap[gradient.via] || gradient.via
+      const toColor = colorMap[gradient.to] || gradient.to
+      
+      return {
+        background: `linear-gradient(to bottom right, ${fromColor}, ${viaColor}, ${toColor})`,
+      }
+    },
+    
+    // Generar clases de gradiente para Tailwind (deprecated)
     getGradientClasses: (page: 'login' | 'register', mode: 'light' | 'dark' = 'light') => {
       const panel = authConfig.decorativePanel[page]
       const gradient = panel.gradient[mode]
@@ -966,6 +1012,20 @@ Para personalizar tu sistema de autenticación:
 ---
 
 ## 🔧 Solución de Problemas
+
+### Problema: Los gradientes aparecen en blanco en Tailwind 4
+
+**Causa posible:** Tailwind 4 no puede detectar clases generadas dinámicamente con template literals durante el proceso de purging/optimización del CSS.
+
+**Contexto técnico:** Anteriormente, el sistema usaba clases dinámicas de Tailwind (`from-${panelConfig.gradient.light.from}`) que se eliminaban del CSS final porque Tailwind no podía prever qué clases se generarían en tiempo de ejecución.
+
+**Solución implementada:** El sistema ahora usa estilos CSS inline generados por la función `getGradientStyle()` en lugar de clases dinámicas de Tailwind. Esta función mapea los nombres de colores de Tailwind a valores hexadecimales y genera gradientes CSS directamente.
+
+**Resultado:** Los gradientes ahora funcionan correctamente en Tailwind 4 y las clases dinámicas no se eliminan durante el build.
+
+**Nota para desarrolladores:** Si necesitas agregar más colores al mapa, actualiza la función `getGradientStyle()` en `app/composables/useAuthConfig.ts` agregando los nuevos pares color-hexadecimal.
+
+---
 
 ### Problema: El gradiente no se muestra
 
@@ -1050,6 +1110,23 @@ backgroundImage: '/images/bg.jpg'
 
 ## 📝 Changelog
 
+### v1.2.0 (2026)
+- **Migración a estilos CSS inline para Tailwind 4**
+  - Nueva función `getGradientStyle()` para generar gradientes con estilos inline
+  - Mapeo de nombres de colores de Tailwind a valores hexadecimales
+  - Solución al problema de clases dinámicas eliminadas durante el build de Tailwind 4
+  - Compatibilidad mejorada con Tailwind 4 y @nuxt/ui
+  - Marca `getGradientClasses()` como deprecated
+- **Documentación actualizada**
+  - Explicación técnica del cambio de implementación
+  - Guía de troubleshooting para problemas de gradientes en blanco
+  - Ejemplos actualizados para reflejar el nuevo enfoque
+
+### v1.1.0 (2026)
+- Agregados subtítulos del formulario configurables
+- Separación de subtítulos de panel y formulario
+- Ejemplos ampliados para diferentes casos de uso
+
 ### v1.0.0 (2026)
 - Sistema de configuración inicial
 - Soporte para logo (texto e imagen)
@@ -1058,12 +1135,7 @@ backgroundImage: '/images/bg.jpg'
 - Imágenes de fondo opcionales
 - Separación de configuración por página
 
-### v1.1.0 (2026)
-- Agregados subtítulos del formulario configurables
-- Separación de subtítulos de panel y formulario
-- Ejemplos ampliados para diferentes casos de uso
-
 ---
 
 **Última actualización:** Enero 2026  
-**Versión:** 1.1.0
+**Versión:** 1.2.0
