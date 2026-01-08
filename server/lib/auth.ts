@@ -2,8 +2,6 @@ import { betterAuth } from "better-auth"
 import { jwt } from "better-auth/plugins"
 import { Pool } from "pg"
 
-const config = useRuntimeConfig()
-
 /**
  * Convert SNAKE_CASE to camelCase
  *
@@ -120,11 +118,11 @@ const buildSocialProviders = () => {
  *   SOCIAL_PROVIDER_PAYPAL_CLIENT_SECRET=xxx
  */
 export const auth = betterAuth({
-  baseURL: config.betterAuth.url,
-  secret: config.betterAuth.secret,
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  secret: process.env.BETTER_AUTH_SECRET || "",
 
   database: new Pool({
-    connectionString: config.databaseUrl,
+    connectionString: process.env.DATABASE_URL || "",
   }),
 
   session: {
@@ -142,11 +140,11 @@ export const auth = betterAuth({
     jwt({
       jwt: {
         expirationTime: process.env.BETTER_AUTH_JWT_EXPIRATION_TIME || "7d",
-        issuer: config.betterAuth.url,
+        issuer: process.env.BETTER_AUTH_URL || "http://localhost:3000",
         audience: ["hasura"],
 
         definePayload: async ({ user, session }) => {
-          const hasuraEnabled = config.betterAuth.withHasura
+          const hasuraEnabled = process.env.BETTER_AUTH_WITH_HASURA === "true"
 
           const base = {
             sub: user.id,
@@ -189,6 +187,6 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: config.betterAuth.emailVerification || false,
+    requireEmailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
   },
 })

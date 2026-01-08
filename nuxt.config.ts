@@ -1,5 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
+// Type definition for Better-Auth public runtime config
+interface BetterAuthRuntimeConfig {
+  url: string
+  emailVerification?: boolean
+  defaultRedirect: string
+}
+
 // Helper function to conditionally load modules
 function optionalModule(name: string) {
   try {
@@ -46,14 +53,9 @@ export default defineNuxtConfig({
     public: {
       betterAuth: {
         url: process.env.BETTER_AUTH_URL || "http://localhost:3000",
-      }
-    },
-    betterAuth: {
-      secret: process.env.BETTER_AUTH_SECRET || "",
-      url: process.env.BETTER_AUTH_URL || "http://localhost:3000",
-      withHasura: process.env.BETTER_AUTH_WITH_HASURA === "true",
-      emailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true"
-    },
-    databaseUrl: process.env.DATABASE_URL || "",
+        emailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
+        defaultRedirect: process.env.BETTER_AUTH_DEFAULT_REDIRECT || "/"
+      } as BetterAuthRuntimeConfig
+    }
   }
 })
