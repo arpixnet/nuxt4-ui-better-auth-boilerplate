@@ -3,11 +3,13 @@ import { useAuthClient } from '~/lib/auth-client'
 import { navigateTo } from '#app'
 import { useRuntimeConfig } from '#app'
 
+// Redirect configuration - change as needed
+const DEFAULT_REDIRECT = '/'
+
 // Form state
-const name = ref('')
 const email = ref('')
 const password = ref('')
-const confirmPassword = ref('')
+const name = ref('')
 const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
@@ -15,12 +17,6 @@ const success = ref(false)
 // Auth client
 const authClient = useAuthClient()
 const config = useRuntimeConfig()
-
-// Password match validation
-const passwordsMatch = computed(() => {
-  if (!password.value || !confirmPassword.value) return null
-  return password.value === confirmPassword.value
-})
 
 /**
  * Handle registration with email and password
@@ -31,7 +27,7 @@ const handleRegister = async () => {
   success.value = false
   
   // Basic validation
-  if (!name.value || !email.value || !password.value || !confirmPassword.value) {
+  if (!email.value || !password.value) {
     error.value = 'Please fill in all fields'
     return
   }
@@ -46,26 +42,21 @@ const handleRegister = async () => {
     return
   }
   
-  if (passwordsMatch.value === false) {
-    error.value = 'Passwords do not match'
-    return
-  }
-  
   loading.value = true
   
   try {
     await authClient.signUp.email({
       email: email.value,
       password: password.value,
-      name: name.value,
-      callbackURL: config.public.betterAuth.defaultRedirect,
+      name: name.value || email.value.split('@')[0]!, // Use email prefix as default name (! asserts non-null for TypeScript)
+      callbackURL: DEFAULT_REDIRECT,
     })
     
     success.value = true
     
     // Redirect after successful registration
     setTimeout(() => {
-      navigateTo(config.public.betterAuth.defaultRedirect)
+      navigateTo(DEFAULT_REDIRECT)
     }, 500)
   } catch (err) {
     console.error('Registration error:', err)
@@ -117,22 +108,6 @@ const handleRegister = async () => {
             </p>
           </UAlert>
 
-          <!-- Name Input -->
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Full Name
-            </label>
-            <UInput
-              v-model="name"
-              type="text"
-              placeholder="John Doe"
-              icon="heroicons:user-20-solid"
-              size="lg"
-              :disabled="loading"
-              autofocus
-            />
-          </div>
-
           <!-- Email Input -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -145,11 +120,12 @@ const handleRegister = async () => {
               icon="heroicons:envelope-20-solid"
               size="lg"
               :disabled="loading"
+              autofocus
             />
           </div>
 
           <!-- Password Input -->
-          <div class="mb-4">
+          <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Password
             </label>
@@ -166,27 +142,6 @@ const handleRegister = async () => {
             </p>
           </div>
 
-          <!-- Confirm Password Input -->
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Confirm Password
-            </label>
-            <UInput
-              v-model="confirmPassword"
-              type="password"
-              placeholder="••••••"
-              icon="heroicons:lock-closed-20-solid"
-              size="lg"
-              :disabled="loading"
-            />
-            <p
-              v-if="passwordsMatch === false"
-              class="mt-1 text-xs text-red-500"
-            >
-              Passwords do not match
-            </p>
-          </div>
-
           <!-- Submit Button -->
           <UButton
             type="submit"
@@ -195,7 +150,7 @@ const handleRegister = async () => {
             size="lg"
             block
             :loading="loading"
-            :disabled="loading || passwordsMatch === false"
+            :disabled="loading"
           >
             <span v-if="!loading">Create Account</span>
             <span v-else>Creating account...</span>
