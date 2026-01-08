@@ -139,7 +139,7 @@ const handleRegister = async (event: any) => {
               Create Account
             </h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-              Join us to get started with your application
+              {{ authPageConfig.formSubtitle.register }}
             </p>
           </div>
 
@@ -180,6 +180,7 @@ const handleRegister = async (event: any) => {
                 placeholder="Enter email address"
                 size="lg"
                 :disabled="loading"
+                autofocus
                 :color="formState.email && !isEmailValid ? 'error' : undefined"
                 class="w-full"
               >
@@ -249,17 +250,13 @@ const handleRegister = async (event: any) => {
               Sign in
             </ULink>
           </div>
-
-          <!-- Security Note -->
-          <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <p class="text-xs text-center text-gray-400 dark:text-gray-500">
-              Your data is protected with industry-grade encryption
-            </p>
-          </div>
         </div>
 
         <!-- Footer -->
         <div class="mt-4">
+          <p class="text-xs text-gray-400 dark:text-gray-500">
+            Your data is protected with industry-grade encryption
+          </p>
           <p class="text-xs text-gray-400 dark:text-gray-500">
             © {{ new Date().getFullYear() }} {{ authPageConfig.logo.text }}. All rights reserved.
           </p>

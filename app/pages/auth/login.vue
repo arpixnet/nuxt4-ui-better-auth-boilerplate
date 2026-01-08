@@ -131,7 +131,7 @@ const handleLogin = async (event: any) => {
               Welcome Back
             </h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-              Log in to continue your visa application journey
+              {{ authPageConfig.formSubtitle.login }}
             </p>
           </div>
 
@@ -247,17 +247,13 @@ const handleLogin = async (event: any) => {
               Create an account
             </ULink>
           </div>
-
-          <!-- Security Note -->
-          <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <p class="text-xs text-center text-gray-400 dark:text-gray-500">
-              Your data is protected with industry-grade encryption
-            </p>
-          </div>
         </div>
 
         <!-- Footer -->
         <div class="mt-4">
+          <p class="text-xs text-gray-400 dark:text-gray-500">
+            Your data is protected with industry-grade encryption
+          </p>
           <p class="text-xs text-gray-400 dark:text-gray-500">
             © {{ new Date().getFullYear() }} {{ authPageConfig.logo.text }}. All rights reserved.
           </p>

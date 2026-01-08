@@ -1,7 +1,7 @@
 /**
  * Authentication Pages Configuration
  * 
- * This file contains all customizable settings for the login and register pages.
+ * This file contains all customizable settings for login and register pages.
  * Modify these values to personalize your authentication experience.
  */
 
@@ -48,19 +48,27 @@ export interface AuthPageConfig {
       backgroundImage?: string
     }
   }
+  formSubtitle: {
+    login: string
+    register: string
+  }
 }
 
 export const authConfig: AuthPageConfig = {
   logo: {
-    text: 'Orineum',
+    text: 'Arpix Solutions',
     size: '2xl',
     // imageUrl: '/logo.svg', // Uncomment and set path to use an image logo
     // imageAlt: 'Company Logo',
   },
+  formSubtitle: {
+    login: 'Log in to continue your application journey',
+    register: 'Join us to get started with your application',
+  },
   decorativePanel: {
     login: {
-      title: 'Welcome to Orineum',
-      subtitle: 'Your trusted partner for visa applications',
+      title: 'Welcome to Arpix Solutions',
+      subtitle: 'Your trusted partner for innovative solutions',
       gradient: {
         light: {
           from: 'blue-500',
@@ -76,8 +84,8 @@ export const authConfig: AuthPageConfig = {
       // backgroundImage: '/images/login-bg.jpg', // Optional background image
     },
     register: {
-      title: 'Join Orineum Today',
-      subtitle: 'Start your visa application journey with us',
+      title: 'Join Arpix Solutions Today',
+      subtitle: 'Start your journey with us today',
       gradient: {
         light: {
           from: 'green-500',
@@ -94,4 +102,3 @@ export const authConfig: AuthPageConfig = {
     },
   },
 }
-

@@ -33,6 +33,14 @@ export const useAuthConfig = () => {
       
       return `from-${gradient.from} via-${gradient.via} to-${gradient.to}`
     },
+    
+    /**
+     * Get form subtitle configuration for a specific page
+     * @param page - 'login' or 'register'
+     */
+    getFormSubtitle: (page: 'login' | 'register') => {
+      return authConfig.formSubtitle[page]
+    },
   }
 }
 
