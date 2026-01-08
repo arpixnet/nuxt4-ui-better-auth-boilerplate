@@ -184,7 +184,7 @@ const handleRegister = async (event: any) => {
                 class="w-full"
               >
                 <template #leading>
-                  <Icon name="heroicons:envelope-20-solid" class="w-4 h-4" />
+                  <Icon name="heroicons:envelope-20-solid" class="w-4 h-4 text-gray-400 dark:text-gray-500" />
                 </template>
               </UInput>
               <p v-if="formState.email && !isEmailValid" class="text-red-500 text-xs mt-1.5">
@@ -207,7 +207,7 @@ const handleRegister = async (event: any) => {
                 class="w-full"
               >
                 <template #leading>
-                  <Icon name="heroicons:lock-closed-20-solid" class="w-4 h-4" />
+                  <Icon name="heroicons:lock-closed-20-solid" class="w-4 h-4 text-gray-400 dark:text-gray-500" />
                 </template>
               </UInput>
               <p v-if="formState.password && !isPasswordValid" class="text-red-500 text-xs mt-1.5">
@@ -227,7 +227,7 @@ const handleRegister = async (event: any) => {
               block
               :loading="loading"
               :disabled="loading || !isFormValid"
-              class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold shadow-md shadow-gray-200/50 dark:shadow-gray-900/50 transition-all duration-200"
+              class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold shadow-md shadow-gray-200/50 dark:shadow-gray-900/50 transition-all duration-200 cursor-pointer"
             >
               <span v-if="!loading" class="flex items-center justify-center gap-2">
                 Create Account
