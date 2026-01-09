@@ -32,6 +32,7 @@ const formState = ref({
 const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
+const show = ref(false)
 
 // Auth client
 const authClient = useAuthClient()
@@ -215,15 +216,28 @@ const handleRegister = async (event: any) => {
               </label>
               <UInput
                 v-model="formState.password"
-                type="password"
+                :type="show ? 'text' : 'password'"
                 placeholder="Enter Password"
                 size="lg"
                 :disabled="loading"
                 :color="formState.password && !isPasswordValid ? 'error' : undefined"
                 class="w-full"
+                :ui="{ trailing: 'pe-1' }"
               >
                 <template #leading>
                   <Icon name="heroicons:lock-closed-20-solid" class="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                </template>
+                <template #trailing>
+                  <UButton
+                    color="neutral"
+                    variant="link"
+                    size="sm"
+                    :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                    :aria-label="show ? 'Hide password' : 'Show password'"
+                    :aria-pressed="show"
+                    aria-controls="formState.password"
+                    @click="show = !show"
+                  />
                 </template>
               </UInput>
               <p v-if="formState.password && !isPasswordValid" class="text-red-500 text-xs mt-1.5">
