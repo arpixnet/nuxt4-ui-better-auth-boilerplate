@@ -85,7 +85,27 @@ const handleLogin = async (event: any) => {
       throw new Error(response?.error?.message || 'Invalid email or password')
     }
   } catch (err: any) {
-    console.error('Login error:', err)
+    console.error('[Login] Login error:', err)
+    
+    // Handle email not verified error
+    if (err.message?.toLowerCase().includes('not verified') || 
+        err.message?.toLowerCase().includes('email verification') ||
+        err.message?.toLowerCase().includes('verify your email')) {
+      console.log('[Login] Email not verified detected. Redirecting to verify-email page with email:', formState.value.email)
+      
+      // Store email in a more persistent way for verify-email page
+      const email = formState.value.email
+      
+      // Show error message to user
+      error.value = 'Email not verified. Redirecting...'
+      
+      // Redirect to verify-email page with email parameter
+      setTimeout(() => {
+        navigateTo(`/verify-email?email=${encodeURIComponent(email)}`)
+      }, 1000)
+      
+      return
+    }
     
     // Handle different types of errors
     if (err.message?.includes('email') || err.message?.includes('password')) {
@@ -239,10 +259,12 @@ const handleLogin = async (event: any) => {
 
             <!-- Forgot Password Link -->
             <div class="mb-3 text-right">
-              <!-- TODO: Implement forgot password feature -->
-              <span class="text-sm text-gray-900 dark:text-white font-medium cursor-not-allowed">
+              <ULink
+                to="/auth/forgot-password"
+                class="text-sm text-gray-900 dark:text-white font-medium hover:underline"
+              >
                 Forgot Password?
-              </span>
+              </ULink>
             </div>
 
             <!-- Submit Button -->

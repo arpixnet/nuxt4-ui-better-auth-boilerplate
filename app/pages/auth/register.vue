@@ -38,6 +38,11 @@ const show = ref(false)
 const authClient = useAuthClient()
 const config = useRuntimeConfig()
 
+// Check if email verification is required
+const requiresEmailVerification = computed(() => {
+  return config.public.betterAuth.emailVerification === true
+})
+
 // Validate form in real-time
 const isEmailValid = computed(() => {
   if (!formState.value.email) return true // Allow empty initially
@@ -83,8 +88,13 @@ const handleRegister = async (event: any) => {
       success.value = true
       
       // Redirect after successful registration
+      // If email verification is required, redirect to verify-email page with email
+      // Otherwise, redirect to default page
       setTimeout(() => {
-        navigateTo(DEFAULT_REDIRECT)
+        const redirectUrl = requiresEmailVerification.value 
+          ? `/verify-email?email=${encodeURIComponent(formState.value.email)}`
+          : DEFAULT_REDIRECT
+        navigateTo(redirectUrl)
       }, 500)
     } else {
       // Better-Auth returned an error
@@ -178,7 +188,9 @@ const handleRegister = async (event: any) => {
             <!-- Success Alert -->
             <UAlert
               v-if="success"
-              description="Registration successful! Redirecting..."
+              :description="requiresEmailVerification 
+                ? 'Registration successful! Please check your email to verify your account.'
+                : 'Registration successful! Redirecting...'"
               color="success"
               variant="subtle"
               icon="heroicons:check-circle-20-solid"

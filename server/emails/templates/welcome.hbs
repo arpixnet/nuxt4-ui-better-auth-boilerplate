@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Welcome to {{appName}}</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      color: #ffffff;
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .welcome-text {
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+    .welcome-text strong {
+      color: #667eea;
+    }
+    .verification-section {
+      background-color: #f8f9ff;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      margin: 30px 0;
+      border-radius: 4px;
+    }
+    .verification-section h3 {
+      margin: 0 0 10px 0;
+      color: #667eea;
+      font-size: 18px;
+    }
+    .verification-section p {
+      margin: 0 0 15px 0;
+      font-size: 14px;
+      color: #666;
+    }
+    .button {
+      display: inline-block;
+      background-color: #667eea;
+      color: #ffffff;
+      padding: 14px 28px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 10px 0;
+    }
+    .button:hover {
+      background-color: #5568d3;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid #e0e0e0;
+      margin: 30px 0;
+    }
+    .info-section {
+      font-size: 14px;
+      color: #666;
+      margin: 20px 0;
+    }
+    .info-section p {
+      margin: 8px 0;
+    }
+    .footer {
+      background-color: #f8f8f8;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      border-top: 1px solid #e0e0e0;
+    }
+    .footer a {
+      color: #667eea;
+      text-decoration: none;
+    }
+    @media only screen and (max-width: 600px) {
+      .container {
+        margin: 0;
+        border-radius: 0;
+      }
+      .header {
+        padding: 30px 20px;
+      }
+      .content {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Welcome to {{appName}}!</h1>
+    </div>
+    
+    <div class="content">
+      <div class="welcome-text">
+        <p>Hello <strong>{{userName}}</strong>,</p>
+        <p>We're excited to have you on board! Your account has been successfully created.</p>
+      </div>
+
+      {{#if requiresVerification}}
+      <div class="verification-section">
+        <h3>📧 Verify Your Email Address</h3>
+        <p>Before you can start using your account, please verify your email address by clicking the button below:</p>
+        <a href="{{verificationLink}}" class="button" target="_blank">Verify Email Address</a>
+        <p style="font-size: 12px; margin-top: 10px; color: #999;">
+          This link will expire in 24 hours for security reasons.
+        </p>
+      </div>
+      {{else}}
+      <p style="margin-bottom: 20px;">You're all set! You can now access your account and start using all our features.</p>
+      {{/if}}
+
+      <div class="divider"></div>
+
+      <div class="info-section">
+        <p><strong>🔐 Your account details:</strong></p>
+        <p>Email: {{userEmail}}</p>
+        {{#if requiresVerification}}
+        <p>Status: <span style="color: #f59e0b;">Pending verification</span></p>
+        {{else}}
+        <p>Status: <span style="color: #10b981;">Active</span></p>
+        {{/if}}
+      </div>
+
+      {{#unless requiresVerification}}
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="{{loginUrl}}" class="button" target="_blank">Sign In to Your Account</a>
+      </div>
+      {{/unless}}
+
+      <div class="divider"></div>
+
+      <div style="text-align: center; margin: 20px 0;">
+        <p style="font-size: 14px; color: #666; margin: 0;">
+          If you have any questions, feel free to contact our support team.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>© {{currentYear}} {{appName}}. All rights reserved.</p>
+      <p style="margin-top: 5px;">
+        You received this email because you created an account with {{appName}}.
+      </p>
+      <p style="margin-top: 5px;">
+        <a href="{{unsubscribeUrl}}" style="color: #999;">Unsubscribe from marketing emails</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

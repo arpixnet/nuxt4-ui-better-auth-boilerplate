@@ -12,8 +12,299 @@ A modern, production-ready boilerplate for building web applications with Nuxt 4
 - 🎯 **TypeScript** - Full TypeScript support out of the box
 - 📱 **Responsive Design** - Mobile-first approach with Tailwind CSS
 - ⚙️ **Optimized Configuration** - Production-ready settings and performance optimizations
-- 🗃️ **SQLite Database** - Lightweight database with better-sqlite3
+- 🔐 **Better-Auth Integration** - Complete authentication system with email verification
+- 📧 **Email System** - Beautiful email templates with nuxt-arpix-email-sender
 - 🔧 **Development Tools** - Nuxt DevTools enabled for better DX
+
+## Authentication System
+
+This boilerplate includes a complete authentication system powered by **Better-Auth** with integrated email functionality using **nuxt-arpix-email-sender**.
+
+### Features
+
+- ✅ **Email & Password Authentication** - Secure user registration and login
+- ✅ **Email Verification** - Optional email verification for new users
+- ✅ **Password Reset** - Complete forgot password flow with email recovery
+- ✅ **Welcome Emails** - Automatic welcome emails on registration
+- ✅ **Beautiful Email Templates** - Professional HTML email templates
+- ✅ **OAuth2 Social Login** - Support for multiple social providers
+- ✅ **JWT Sessions** - Token-based authentication with Hasura integration
+- ✅ **Password Strength** - Minimum 8 characters requirement
+- ✅ **Real-time Validation** - Form validation with helpful error messages
+- ✅ **Responsive Auth Pages** - Mobile-friendly authentication UI
+
+### Configuration
+
+#### Email Setup (Required for Email Features)
+
+The email system uses **nuxt-arpix-email-sender** module. Configure it in `nuxt.config.ts`:
+
+**Gmail OAuth2 (Recommended for Production):**
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing one
+3. Enable Gmail API
+4. Create OAuth 2.0 credentials
+5. Add `http://localhost:3000` as authorized redirect URI (development)
+6. Generate refresh token using OAuth 2.0 playground
+
+```typescript
+// nuxt.config.ts
+arpixEmailSender: {
+  transport: 'smtp',
+  defaultFrom: '"Your App" <your-email@gmail.com>',
+  smtp: {
+    service: 'gmail',
+    auth: {
+      type: 'OAuth2',
+      user: 'your-email@gmail.com',
+      clientId: process.env.GMAIL_CLIENT_ID,
+      clientSecret: process.env.GMAIL_CLIENT_SECRET,
+      refreshToken: process.env.GMAIL_REFRESH_TOKEN,
+    }
+  },
+  templates: {
+    dir: 'server/emails/templates',
+  },
+}
+```
+
+**Gmail App Password (Development Only):**
+
+1. Enable 2-factor authentication on your Google account
+2. Generate an App Password: https://myaccount.google.com/apppasswords
+3. Use the 16-character password
+
+```typescript
+// nuxt.config.ts
+arpixEmailSender: {
+  transport: 'smtp',
+  defaultFrom: '"Your App" <your-email@gmail.com>',
+  smtp: {
+    service: 'gmail',
+    auth: {
+      user: 'your-email@gmail.com',
+      pass: process.env.GMAIL_APP_PASSWORD,
+    }
+  },
+  templates: {
+    dir: 'server/emails/templates',
+  },
+}
+```
+
+#### Better-Auth Configuration
+
+Better-Auth is configured in `server/lib/auth.ts` with the following options:
+
+```typescript
+export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  secret: process.env.BETTER_AUTH_SECRET,
+  
+  database: new Pool({
+    connectionString: process.env.DATABASE_URL,
+  }),
+  
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
+    sendVerificationEmail: async ({ user, url }) => {
+      // Sends welcome/verification email via nuxt-arpix-email-sender
+    },
+    sendResetPasswordEmail: async ({ user, url }) => {
+      // Sends password reset email via nuxt-arpix-email-sender
+    },
+  },
+  
+  // Social providers are automatically configured from environment variables
+  socialProviders: buildSocialProviders(),
+})
+```
+
+#### Environment Variables
+
+Create a `.env` file based on `.env.example`:
+
+```bash
+# Application
+APP_NAME=Your App Name
+
+# Better-Auth
+BETTER_AUTH_SECRET=your-secret-key
+BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_EMAIL_VERIFICATION=true
+BETTER_AUTH_DEFAULT_REDIRECT=/
+
+# Database
+DATABASE_URL=postgres://user:password@localhost:5432/your-db
+
+# Email (Gmail OAuth2)
+EMAIL_USER=your-email@gmail.com
+GMAIL_CLIENT_ID=your-client-id
+GMAIL_CLIENT_SECRET=your-client-secret
+GMAIL_REFRESH_TOKEN=your-refresh-token
+```
+
+### Email Templates
+
+The system includes three professionally designed email templates:
+
+#### 1. Welcome Email (`welcome.hbs`)
+- Sent automatically on user registration
+- Includes verification link if email verification is enabled
+- Shows login link if verification is not required
+- Responsive design with brand colors
+
+#### 2. Verification Email (`verify-again.hbs`)
+- Used for resending verification emails
+- Clear call-to-action with verification button
+- Includes helpful instructions
+- Professional security messaging
+
+#### 3. Password Reset Email (`reset-password.hbs`)
+- Sent when user requests password reset
+- Includes temporary reset link (1-hour expiration)
+- Shows request details (IP, date) for security
+- Warns about unauthorized requests
+
+**Customizing Templates:**
+
+Edit templates in `server/emails/templates/`:
+- All templates use Handlebars syntax
+- Variables available: `userName`, `userEmail`, `verificationLink`, `resetLink`, `loginUrl`, `appName`
+- Fully responsive HTML/CSS included
+- Easy to customize colors and branding
+
+### Authentication Pages
+
+The system includes the following pages:
+
+#### Login (`/auth/login`)
+- Email and password authentication
+- Forgot password link
+- Social login buttons (when configured)
+- Remember me functionality
+- Error handling with helpful messages
+
+#### Register (`/auth/register`)
+- Email and password registration
+- Real-time form validation
+- Automatic email verification (if enabled)
+- Redirects to verify-email page after registration
+
+#### Verify Email (`/auth/verify-email`)
+- Shows verification status
+- Option to resend verification email
+- Clear instructions for user
+- Already verified link
+
+#### Forgot Password (`/auth/forgot-password`)
+- Request password reset
+- Email input with validation
+- Success message (doesn't reveal if email exists)
+
+#### Reset Password (`/auth/reset-password`)
+- New password form
+- Password confirmation
+- Token-based validation
+- Auto-redirect to login after success
+
+### Usage Examples
+
+#### Register a New User
+
+```typescript
+import { useAuthClient } from '~/lib/auth-client'
+
+const authClient = useAuthClient()
+
+const response = await authClient.signUp.email({
+  email: 'user@example.com',
+  password: 'password123',
+  name: 'John Doe',
+  callbackURL: '/',
+})
+```
+
+#### Login User
+
+```typescript
+const response = await authClient.signIn.email({
+  email: 'user@example.com',
+  password: 'password123',
+  callbackURL: '/',
+})
+```
+
+#### Reset Password
+
+```typescript
+// Request reset
+await authClient.resetPassword({
+  email: 'user@example.com',
+  redirectTo: '/auth/reset-password',
+})
+
+// Update password with token from email
+await authClient.resetPassword({
+  newPassword: 'newpassword123',
+  token: 'reset-token-from-email',
+})
+```
+
+#### Access Session
+
+```typescript
+import { useAuthSession } from '~/composables/useAuthSession'
+
+const session = useAuthSession()
+
+// Access user data
+console.log(session.session?.value?.user)
+
+// Check if authenticated
+console.log(session.session?.value !== null)
+
+// Logout
+await authClient.signOut()
+```
+
+### Social Login Configuration
+
+Social providers are 100% dynamic and configured via environment variables:
+
+```bash
+# Google
+SOCIAL_PROVIDER_GOOGLE_CLIENT_ID=your-client-id
+SOCIAL_PROVIDER_GOOGLE_CLIENT_SECRET=your-client-secret
+
+# GitHub
+SOCIAL_PROVIDER_GITHUB_CLIENT_ID=your-client-id
+SOCIAL_PROVIDER_GITHUB_CLIENT_SECRET=your-client-secret
+
+# Apple
+SOCIAL_PROVIDER_APPLE_CLIENT_ID=your-client-id
+SOCIAL_PROVIDER_APPLE_CLIENT_SECRET=your-client-secret
+```
+
+**Any OAuth 2.0 provider works automatically!**
+
+Just add the environment variables following the convention:
+`SOCIAL_PROVIDER_{PROVIDER}_{FIELD}`
+
+Example: `SOCIAL_PROVIDER_PAYPAL_CLIENT_ID` → paypal.clientId
+
+### Security Features
+
+- 🔒 **Password Requirements** - Minimum 8 characters
+- 🔒 **Email Verification** - Prevents fake accounts
+- 🔒 **Token-based Reset** - Time-limited password reset tokens
+- 🔒 **Secure Sessions** - JWT-based authentication
+- 🔒 **Hasura Integration** - JWT claims for GraphQL
+- 🔒 **Rate Limiting** - Email sending rate limits
+- 🔒 **Environment Variables** - Sensitive data in `.env` only
+- 🔒 **SQL Injection Protection** - Parameterized queries via Better-Auth
 
 ## Installation Instructions
 

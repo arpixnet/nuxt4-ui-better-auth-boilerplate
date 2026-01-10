@@ -75,6 +75,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
+      appName: process.env.APP_NAME || "Arpix Solutions",
       betterAuth: {
         url: process.env.BETTER_AUTH_URL || "http://localhost:3000",
         emailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
