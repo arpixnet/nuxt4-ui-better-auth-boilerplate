@@ -62,27 +62,39 @@ const handleLogin = async (event: any) => {
   // Clear previous errors
   error.value = null
   success.value = false
-  
+
   loading.value = true
-  
+
   try {
     const response = await authClient.signIn.email({
       email: formState.value.email,
       password: formState.value.password,
       callbackURL: DEFAULT_REDIRECT,
     })
-    
+
     // Check if login was successful
     if (response && !response.error) {
       success.value = true
-      
+
       // Redirect after successful login
       setTimeout(() => {
         navigateTo(DEFAULT_REDIRECT)
       }, 500)
     } else {
-      // Better-Auth returned an error
-      throw new Error(response?.error?.message || 'Invalid email or password')
+      // Check if error is due to email not being verified
+      const errorMessage = response?.error?.message || ''
+
+      if (errorMessage.toLowerCase().includes('email') &&
+          (errorMessage.toLowerCase().includes('verify') ||
+           errorMessage.toLowerCase().includes('verification'))) {
+        // Email verification required - redirect to verify-email-pending page
+        console.log('[Login] Email verification required, redirecting...')
+        navigateTo(`/auth/verify-email-pending?email=${encodeURIComponent(formState.value.email)}`)
+        return
+      }
+
+      // Other error - show error message
+      throw new Error(errorMessage || 'Invalid email or password')
     }
   } catch (err: any) {
     console.error('[Login] Login error:', err)

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useAuthClient } from '~/lib/auth-client'
 import { navigateTo, useRoute } from '#app'
 import { authConfig } from '~/config/auth.config'
 
@@ -20,9 +19,6 @@ const error = ref<string | null>(null)
 const success = ref(false)
 const showPassword = ref(false)
 
-// Auth client
-const authClient = useAuthClient()
-
 // Validate form in real-time
 const isPasswordValid = computed(() => {
   if (!formState.value.password) return true
@@ -42,42 +38,28 @@ const isFormValid = computed(() => {
 })
 
 /**
- * Validate token (simple validation for demo)
- * In production, Better-Auth handles this automatically
+ * Check if token is valid (exists and not empty)
  */
-const isTokenValid = computed(() => {
-  if (!token.value) return false
-  try {
-    // Decode the base64 token to check if it's valid
-    const decoded = atob(token.value)
-    const parts = decoded.split(':')
-    return parts.length === 2 && parts[1] // email:timestamp format
-  } catch {
-    return false
-  }
-})
+const isTokenValid = computed(() => !!token.value && token.value.length > 0)
 
 /**
  * Handle password reset
  */
-const handleResetPassword = async (event: any) => {
+const handleResetPassword = async () => {
   error.value = null
   success.value = false
   loading.value = true
-  
-  if (!isTokenValid.value) {
+
+  console.log('[Reset-Password] Submitting password reset')
+
+  if (!token.value) {
     error.value = 'Invalid or expired reset token. Please request a new password reset.'
     loading.value = false
     return
   }
-  
+
   try {
-    // Decode token to get email
-    const decoded = atob(token.value)
-    const [email] = decoded.split(':')
-    
-    // In production, this should call Better-Auth's resetPassword method
-    // For now, we'll simulate the reset
+    // Call Better-Auth's reset password endpoint
     const response = await fetch('/api/auth/reset-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -86,24 +68,26 @@ const handleResetPassword = async (event: any) => {
         newPassword: formState.value.password,
       }),
     })
-    
+
+    const data = await response.json()
+
     if (response.ok) {
-      const data = await response.json()
       if (data.success) {
         success.value = true
-        
+        console.log('[Reset-Password] ✅ Password reset successfully')
+
         // Redirect to login after successful reset
         setTimeout(() => {
           navigateTo('/auth/login')
         }, 2000)
       } else {
-        throw new Error(data.error || 'Failed to reset password')
+        throw new Error(data.message || 'Failed to reset password')
       }
     } else {
-      throw new Error('Failed to reset password')
+      throw new Error(data.message || 'Failed to reset password')
     }
   } catch (err: any) {
-    console.error('Reset password error:', err)
+    console.error('[Reset-Password] ❌ Error:', err)
     error.value = err.message || 'An error occurred. Please try again.'
   } finally {
     loading.value = false

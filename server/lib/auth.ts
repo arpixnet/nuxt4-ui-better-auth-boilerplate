@@ -12,16 +12,6 @@ interface EmailHookUser {
   [key: string]: any
 }
 
-interface VerificationEmailHookParams {
-  user: EmailHookUser
-  url: string
-}
-
-interface ResetPasswordEmailHookParams {
-  user: EmailHookUser
-  url: string
-}
-
 /**
  * Convert SNAKE_CASE to camelCase
  *
@@ -215,37 +205,39 @@ export const auth = betterAuth({
   emailVerification: {
     sendVerificationEmail: async ({ user, url, token }: { user: EmailHookUser, url: string, token: string }) => {
       try {
-        console.log('[Better-Auth Hook] Sending verification email to:', user.email)
+        console.log('[Better-Auth Hook] sendVerificationEmail called for:', user.email)
         console.log('[Better-Auth Hook] Verification URL:', url)
         console.log('[Better-Auth Hook] Token:', token)
-        
-        // Call internal API endpoint to send verification email
-        // Better-Auth automatically generates and stores the token in the verification table
-        const response = await fetch(`${process.env.BETTER_AUTH_URL}/api/email/send-verification`, {
+
+        const requiresVerification = process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true"
+
+        // Send welcome email with verification link
+        // This hook is called ONLY on sign-up (sendOnSignUp: true, sendOnSignIn: false)
+        const response = await fetch(`${process.env.BETTER_AUTH_URL}/api/email/send-welcome`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userEmail: user.email,
             userName: user.name || user.email.split('@')[0],
-            verificationLink: url,
+            verificationLink: requiresVerification ? url : undefined,
             loginUrl: `${process.env.BETTER_AUTH_URL}/auth/login`,
           }),
         })
-        
+
         if (!response.ok) {
           const errorText = await response.text()
-          console.error('[Better-Auth Hook] Failed to send verification email. Status:', response.status, 'Error:', errorText)
+          console.error('[Better-Auth Hook] Failed to send welcome email. Status:', response.status, 'Error:', errorText)
         } else {
-          console.log('[Better-Auth Hook] Verification email sent successfully to:', user.email)
+          console.log('[Better-Auth Hook] ✅ Welcome email sent successfully to:', user.email)
         }
       } catch (error) {
-        console.error('[Better-Auth Hook] Failed to send verification email:', error)
+        console.error('[Better-Auth Hook] ❌ Failed to send welcome email:', error)
         // Don't throw error to allow registration to complete even if email fails
       }
     },
     sendOnSignUp: true, // Send verification email on registration
     autoSignInAfterVerification: true, // Automatically sign in after verification
-    sendOnSignIn: false, // Don't send on sign-in (only on registration)
+    sendOnSignIn: false, // Don't send on sign-in - we handle this separately in login page
     expiresIn: 3600, // Token expires in 1 hour
   },
 
@@ -253,11 +245,13 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
-    sendResetPasswordEmail: async ({ user, url }: { user: EmailHookUser, url: string }) => {
+    sendResetPassword: async ({ user, url }: { user: EmailHookUser, url: string }) => {
       try {
-        console.log('[Better-Auth Hook] Sending reset password email to:', user.email)
+        console.log('[Better-Auth Hook] sendResetPassword called for:', user.email)
+        console.log('[Better-Auth Hook] Reset URL:', url)
+
         // Call internal API endpoint to send reset password email
-        await fetch(`${process.env.BETTER_AUTH_URL}/api/email/send-reset-password`, {
+        const response = await fetch(`${process.env.BETTER_AUTH_URL}/api/email/send-reset-password`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -268,8 +262,15 @@ export const auth = betterAuth({
             ipAddress: 'Unknown', // Can be enhanced with request IP
           }),
         })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('[Better-Auth Hook] Failed to send reset password email. Status:', response.status, 'Error:', errorText)
+        } else {
+          console.log('[Better-Auth Hook] ✅ Reset password email sent successfully to:', user.email)
+        }
       } catch (error) {
-        console.error('[Better-Auth Hook] Failed to send reset password email:', error)
+        console.error('[Better-Auth Hook] ❌ Failed to send reset password email:', error)
         // Don't throw error to allow reset request to complete even if email fails
       }
     },

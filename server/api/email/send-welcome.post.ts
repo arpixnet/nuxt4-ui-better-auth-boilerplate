@@ -1,19 +1,20 @@
 /**
  * Send Welcome Email
- * 
+ *
  * Sends a welcome email to a newly registered user.
- * Note: The welcome email is sent AFTER Better-Auth has already sent the verification email.
- * If email verification is required, Better-Auth handles the verification email separately.
- * The welcome email is complementary and does NOT include the verification link.
- * Users can request a new verification email from /verify-email page if needed.
+ * This email is called by Better-Auth hooks and includes the verification link
+ * if email verification is enabled.
+ *
+ * This is the ONLY email sent on registration - it combines welcome + verification.
  */
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { userEmail, userName, loginUrl } = body
+  const { userEmail, userName, verificationLink, loginUrl } = body
 
   console.log('[Send-Welcome] Preparing to send welcome email...')
   console.log('[Send-Welcome] Recipient:', userEmail)
   console.log('[Send-Welcome] User name:', userName)
+  console.log('[Send-Welcome] Verification link:', verificationLink || 'Not required')
 
   // Validate required fields
   if (!userEmail || !userName) {
@@ -26,16 +27,16 @@ export default defineEventHandler(async (event) => {
 
   const sender = useMailSender()
   const config = event.context.runtimeConfig || useRuntimeConfig()
-  
-  // Check if email verification is required
-  const requiresVerification = config.public.betterAuth.emailVerification
+
+  // Check if email verification is required based on whether verificationLink was provided
+  const requiresVerification = !!verificationLink
   const appName = config?.public?.appName || 'Your App'
-  
+
   console.log('[Send-Welcome] Template: welcome')
   console.log('[Send-Welcome] App Name:', appName)
   console.log('[Send-Welcome] Email verification required:', requiresVerification)
   console.log('[Send-Welcome] Login URL:', loginUrl)
-  
+
   try {
     const info = await sender.send({
       to: userEmail,
@@ -44,6 +45,7 @@ export default defineEventHandler(async (event) => {
       context: {
         userName,
         userEmail,
+        verificationLink: verificationLink || undefined,
         loginUrl,
         appName,
         requiresVerification,

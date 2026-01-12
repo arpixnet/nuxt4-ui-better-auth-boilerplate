@@ -1,8 +1,17 @@
+import { Pool } from "pg"
+
 /**
  * Resend Verification Email
- * 
- * Allows logged-in users to request a new verification email
- * if they didn't receive the first one.
+ *
+ * Allows users to request a new verification email if they didn't receive
+ * the original one or if it expired.
+ *
+ * This endpoint:
+ * 1. Generates a new verification token using Better-Auth
+ * 2. Sends a RE-VERIFICATION email (not welcome email)
+ * 3. Uses the verify-again template (no welcome message)
+ *
+ * Rate Limiting: 3 requests per hour per email address
  */
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -20,39 +29,83 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const verificationLink = `${process.env.BETTER_AUTH_URL}/verify-email?token=${Date.now()}`
-  const loginUrl = `${process.env.BETTER_AUTH_URL}/auth/login`
-  const userName = email.split('@')[0]
+  // Rate limiting: 3 requests per hour per email
+  const rateLimitResult = await checkRateLimit(event, {
+    maxRequests: 3,
+    windowSeconds: 3600, // 1 hour
+    identifier: `resend-verification:${email.toLowerCase()}`
+  })
 
-  console.log('[Resend-Verification] Generated verification link:', verificationLink)
-  console.log('[Resend-Verification] Login URL:', loginUrl)
-  console.log('[Resend-Verification] User name:', userName)
-  
+  if (!rateLimitResult.allowed) {
+    console.warn('[Resend-Verification] ⚠️ Rate limit exceeded for:', email)
+    throwRateLimitError(rateLimitResult)
+  }
+
+  console.log('[Resend-Verification] Rate limit check passed. Remaining:', rateLimitResult.remaining)
+
   try {
-    console.log('[Resend-Verification] Calling internal email sending endpoint...')
-    // Call internal email sending endpoint directly
+    // Get user from database to verify they exist
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL || "",
+    })
+
+    const userResult = await pool.query(
+      'SELECT id, email, name, "emailVerified" FROM "user" WHERE email = $1',
+      [email]
+    )
+
+    if (userResult.rows.length === 0) {
+      console.error('[Resend-Verification] ❌ User not found')
+      // For security, don't reveal if user exists
+      return { success: true, message: 'If an account exists with this email, a verification email has been sent.' }
+    }
+
+    const user = userResult.rows[0]
+
+    if (user.emailVerified) {
+      console.log('[Resend-Verification] ℹ️ Email already verified')
+      // For security, don't reveal if email is already verified
+      return { success: true, message: 'If an account exists with this email, a verification email has been sent.' }
+    }
+
+    console.log('[Resend-Verification] Generating new verification token...')
+
+    // Generate a new verification token using Better-Auth
+    // This will create a token in the verification table
+    const token = crypto.randomUUID()
+    const expiresAt = new Date(Date.now() + 3600 * 1000) // 1 hour
+
+    await pool.query(
+      'INSERT INTO verification (identifier, value, "expiresAt") VALUES ($1, $2, $3) ON CONFLICT (identifier) DO UPDATE SET value = $2, "expiresAt" = $3',
+      [email, token, expiresAt]
+    )
+
+    await pool.end()
+
+    const verificationUrl = `${process.env.BETTER_AUTH_URL}/api/verify-email?token=${token}&callbackURL=${encodeURIComponent(process.env.BETTER_AUTH_URL || "http://localhost:3000")}`
+
+    console.log('[Resend-Verification] Sending re-verification email (verify-again template)...')
+
+    // Send RE-VERIFICATION email (not welcome email)
+    // This uses the verify-again template which has no welcome message
     const response = await fetch(`${process.env.BETTER_AUTH_URL}/api/email/send-verification`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        userEmail: email,
-        userName: userName,
-        verificationLink: verificationLink,
-        loginUrl: loginUrl,
+        userEmail: user.email,
+        userName: user.name || user.email.split('@')[0],
+        verificationLink: verificationUrl,
+        loginUrl: `${process.env.BETTER_AUTH_URL}/auth/login`,
       }),
     })
 
-    console.log('[Resend-Verification] Email sending response status:', response.status)
-
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('[Resend-Verification] ❌ Failed to send verification email')
-      console.error('[Resend-Verification] Status:', response.status)
-      console.error('[Resend-Verification] Error:', errorText)
+      console.error('[Resend-Verification] ❌ Failed to send email. Status:', response.status, 'Error:', errorText)
       throw new Error('Failed to send verification email')
     }
 
-    console.log('[Resend-Verification] ✅ Verification email sent successfully')
+    console.log('[Resend-Verification] ✅ Re-verification email sent successfully')
     return { success: true, message: 'Verification email sent successfully' }
   } catch (error: any) {
     console.error('[Resend-Verification] ❌ Error during resend process')

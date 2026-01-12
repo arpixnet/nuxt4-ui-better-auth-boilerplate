@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useAuthClient } from '~/lib/auth-client'
-import { navigateTo } from '#app'
 import { authConfig } from '~/config/auth.config'
 
 // Auth configuration
@@ -13,9 +11,6 @@ const formState = ref({
 const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
-
-// Auth client
-const authClient = useAuthClient()
 
 // Validate form in real-time
 const isEmailValid = computed(() => {
@@ -35,7 +30,9 @@ const handleForgotPassword = async (event: any) => {
   error.value = null
   success.value = false
   loading.value = true
-  
+
+  console.log('[Forgot-Password] Submitting password reset request for:', formState.value.email)
+
   try {
     // Call the Better-Auth server endpoint directly
     const response = await fetch('/api/auth/forgot-password', {
@@ -46,19 +43,28 @@ const handleForgotPassword = async (event: any) => {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       }),
     })
-    
+
+    const data = await response.json()
+
     if (response.ok) {
-      const data = await response.json()
       if (data.success) {
         success.value = true
+        console.log('[Forgot-Password] ✅ Password reset email sent successfully')
       } else {
-        throw new Error(data.error || 'Failed to send reset email')
+        throw new Error(data.message || 'Failed to send reset email')
       }
     } else {
-      throw new Error('Failed to send reset email')
+      // Handle rate limiting error
+      if (response.status === 429) {
+        const resetIn = data.data?.resetAt
+          ? Math.ceil((data.data.resetAt * 1000 - Date.now()) / 1000 / 60)
+          : 60
+        throw new Error(`Too many requests. Please try again in ${resetIn} minute${resetIn !== 1 ? 's' : ''}.`)
+      }
+      throw new Error(data.message || 'Failed to send reset email')
     }
   } catch (err: any) {
-    console.error('Forgot password error:', err)
+    console.error('[Forgot-Password] ❌ Error:', err)
     error.value = err.message || 'An error occurred. Please try again.'
   } finally {
     loading.value = false
