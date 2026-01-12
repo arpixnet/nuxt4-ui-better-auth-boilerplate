@@ -1,84 +1,89 @@
 <script setup lang="ts">
-import { useAuthClient } from '~/lib/auth-client'
-import { useAuthSession } from '~/composables/useAuthSession'
-import { useRoute } from '#app'
-import { authConfig } from '~/config/auth.config'
+import { onMounted } from 'vue'
 
-// Auth configuration
-const authPageConfig = authConfig
-
-// Route and session data
 const route = useRoute()
-const session = useAuthSession()
+const router = useRouter()
 
-// Email from URL query parameter takes priority over session email
-const userEmail = computed(() => {
-  const emailFromUrl = route.query.email as string
-  if (emailFromUrl) {
-    return decodeURIComponent(emailFromUrl)
-  }
-  return session.session?.value?.user?.email || ''
-})
+// Get token from query parameters
+const token = computed(() => route.query.token as string)
 
-const userName = computed(() => session.session?.value?.user?.name || userEmail.value.split('@')[0] || 'User')
-
-// Form state
-const loading = ref(false)
+// Verification state
+const loading = ref(true)
 const error = ref<string | null>(null)
 const success = ref(false)
 
-// Auth client
-const authClient = useAuthClient()
-
 /**
- * Resend verification email
+ * Process email verification
  */
-const handleResendEmail = async () => {
-  error.value = null
-  success.value = false
-  loading.value = true
-  
-  const emailToSend = userEmail.value
-  console.log('[Verify-Email] Attempting to resend verification email to:', emailToSend)
-  
+const processVerification = async () => {
+  if (!token.value) {
+    error.value = 'No verification token provided'
+    loading.value = false
+    return
+  }
+
   try {
-    // Call internal API endpoint to resend verification email
-    const response = await fetch('/api/auth/resend-verification', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: emailToSend,
-      }),
+    console.log('[Verify-Email] Processing token:', token.value)
+    
+    // Call Better-Auth verify endpoint
+    // The endpoint will validate token and update emailVerified status
+    const response = await fetch('/verify-email', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
-    
-    console.log('[Verify-Email] Resend verification response status:', response.status)
-    
+
+    console.log('[Verify-Email] Response status:', response.status)
+
     if (response.ok) {
-      const data = await response.json()
-      console.log('[Verify-Email] Resend verification response data:', data)
-      if (data.success) {
-        success.value = true
-      } else {
-        throw new Error(data.error || 'Failed to send verification email')
-      }
+      success.value = true
+      console.log('[Verify-Email] Verification successful')
+      
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        router.push('/auth/login')
+      }, 2000)
     } else {
       const errorText = await response.text()
-      console.error('[Verify-Email] Resend verification failed. Status:', response.status, 'Error:', errorText)
-      throw new Error('Failed to send verification email')
+      console.error('[Verify-Email] Verification failed:', errorText)
+      
+      // Better-Auth might have redirected already, so check if we got HTML
+      if (response.headers.get('content-type')?.includes('text/html')) {
+        // Better-Auth handled the redirect
+        success.value = true
+        setTimeout(() => {
+          router.push('/auth/login')
+        }, 1000)
+      } else {
+        error.value = 'Invalid or expired verification link. Please request a new verification email.'
+      }
     }
   } catch (err: any) {
-    console.error('[Verify-Email] Resend verification error:', err)
+    console.error('[Verify-Email] Error:', err)
     error.value = err.message || 'An error occurred. Please try again.'
   } finally {
     loading.value = false
-    // Reset success message after 5 seconds
-    if (success.value) {
-      setTimeout(() => {
-        success.value = false
-      }, 5000)
-    }
   }
 }
+
+/**
+ * Go back to login
+ */
+const goBackToLogin = () => {
+  router.push('/auth/login')
+}
+
+/**
+ * Go to check email page to resend verification
+ */
+const goToCheckEmail = () => {
+  router.push('/auth/check-email')
+}
+
+onMounted(() => {
+  processVerification()
+})
 </script>
 
 <template>
@@ -87,135 +92,96 @@ const handleResendEmail = async () => {
       <!-- Logo/Brand -->
       <div class="mb-6 text-center">
         <NuxtLink to="/">
-          <img
-            v-if="authPageConfig.logo.imageUrl"
-            :src="authPageConfig.logo.imageUrl"
-            :alt="authPageConfig.logo.imageAlt || 'Logo'"
-            class="h-10 mx-auto"
-          />
-          <h2
-            v-else
-            :class="[
-              'font-bold text-gray-900 dark:text-white tracking-tight',
-              `text-${authPageConfig.logo.size}`
-            ]"
-          >
-            {{ authPageConfig.logo.text }}
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+            {{ $config.public.appName }}
           </h2>
         </NuxtLink>
       </div>
 
       <!-- Card -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 sm:p-8">
-        <!-- Avatar Circle -->
-        <div class="flex justify-center mb-5">
-          <div class="relative">
-            <div class="w-20 h-20 rounded-full border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-              <div class="w-14 h-14 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center shadow-md shadow-gray-200/50 dark:shadow-gray-900/50">
-                <Icon name="heroicons:envelope-20-solid" class="w-6 h-6 text-amber-500 dark:text-amber-400" />
-              </div>
-            </div>
+        <!-- Loading State -->
+        <div v-if="loading" class="text-center py-8">
+          <div class="flex justify-center mb-4">
+            <div class="w-16 h-16 rounded-full border-4 border-gray-200 dark:border-gray-700 border-t-blue-500 animate-spin"></div>
           </div>
+          <p class="text-gray-600 dark:text-gray-400">
+            Verifying your email...
+          </p>
         </div>
 
-        <!-- Header -->
-        <div class="text-center mb-6">
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-            Verify Your Email
+        <!-- Success State -->
+        <div v-else-if="success" class="text-center py-8">
+          <div class="flex justify-center mb-4">
+            <div class="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <Icon name="heroicons:check-circle-20-solid" class="w-12 h-12 text-green-500 dark:text-green-400" />
+            </div>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Email Verified!
           </h1>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            We've sent a verification email to:
+          <p class="text-gray-600 dark:text-gray-400 mb-6">
+            Your email has been successfully verified. Redirecting to login...
           </p>
-          <p class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ userEmail }}
-          </p>
+          <UButton
+            color="primary"
+            variant="solid"
+            size="lg"
+            block
+            @click="goBackToLogin"
+            class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold"
+          >
+            Go to Login
+          </UButton>
         </div>
 
-        <!-- Error Alert -->
-        <UAlert
-          v-if="error"
-          :description="error"
-          color="error"
-          variant="subtle"
-          icon="heroicons:information-circle-20-solid"
-          class="mb-6"
-        />
-
-        <!-- Success Alert -->
-        <UAlert
-          v-if="success"
-          description="Verification email sent! Please check your inbox."
-          color="success"
-          variant="subtle"
-          icon="heroicons:check-circle-20-solid"
-          class="mb-6"
-        />
-
-        <!-- Info Box -->
-        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-          <div class="flex items-start gap-3">
-            <Icon name="heroicons:information-circle-20-solid" class="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-            <div class="flex-1">
-              <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                What's next?
-              </h3>
-              <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                <li class="flex items-start gap-2">
-                  <span class="text-blue-500 font-bold">1.</span>
-                  <span>Check your email inbox (and spam folder)</span>
-                </li>
-                <li class="flex items-start gap-2">
-                  <span class="text-blue-500 font-bold">2.</span>
-                  <span>Click verification link in the email</span>
-                </li>
-                <li class="flex items-start gap-2">
-                  <span class="text-blue-500 font-bold">3.</span>
-                  <span>Come back to sign in</span>
-                </li>
-              </ul>
+        <!-- Error State -->
+        <div v-else class="text-center py-8">
+          <div class="flex justify-center mb-4">
+            <div class="w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+              <Icon name="heroicons:x-circle-20-solid" class="w-12 h-12 text-red-500 dark:text-red-400" />
             </div>
           </div>
-        </div>
-
-        <!-- Resend Button -->
-        <UButton
-          color="primary"
-          variant="solid"
-          size="lg"
-          block
-          :loading="loading"
-          :disabled="loading"
-          @click="handleResendEmail"
-          class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold shadow-md shadow-gray-200/50 dark:shadow-gray-900/50 transition-all duration-200 cursor-pointer mb-4"
-        >
-          <span v-if="!loading" class="flex items-center justify-center gap-2">
-            Resend Verification Email
-            <Icon name="heroicons:arrow-path-20-solid" class="w-4 h-4" />
-          </span>
-          <span v-else>Sending...</span>
-        </UButton>
-
-        <!-- Links -->
-        <div class="text-center space-y-2">
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            Already verified?
-          </p>
-          <ULink
-            to="/auth/login"
-            class="text-sm font-semibold text-gray-900 dark:text-white hover:underline"
-          >
-            Sign in to your account
-          </ULink>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Verification Failed
+          </h1>
+          <UAlert
+            v-if="error"
+            :description="error"
+            color="error"
+            variant="subtle"
+            icon="heroicons:information-circle-20-solid"
+            class="mb-6"
+          />
+          <div class="space-y-3">
+            <UButton
+              color="primary"
+              variant="solid"
+              size="lg"
+              block
+              @click="goToCheckEmail"
+              class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold"
+            >
+              Resend Verification Email
+            </UButton>
+            <UButton
+              color="neutral"
+              variant="ghost"
+              size="lg"
+              block
+              @click="goBackToLogin"
+              class="w-full"
+            >
+              Back to Login
+            </UButton>
+          </div>
         </div>
       </div>
 
       <!-- Footer -->
       <div class="mt-4 text-center">
         <p class="text-xs text-gray-400 dark:text-gray-500">
-          Email verification powered by {{ authPageConfig.logo.text }}
-        </p>
-        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-          © {{ new Date().getFullYear() }} {{ authPageConfig.logo.text }}. All rights reserved.
+          © {{ new Date().getFullYear() }} {{ $config.public.appName }}. All rights reserved.
         </p>
       </div>
     </div>

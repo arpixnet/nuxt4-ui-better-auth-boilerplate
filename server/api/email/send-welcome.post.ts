@@ -2,12 +2,14 @@
  * Send Welcome Email
  * 
  * Sends a welcome email to a newly registered user.
- * If email verification is required, includes verification link.
- * Otherwise, includes login link only.
+ * Note: The welcome email is sent AFTER Better-Auth has already sent the verification email.
+ * If email verification is required, Better-Auth handles the verification email separately.
+ * The welcome email is complementary and does NOT include the verification link.
+ * Users can request a new verification email from /verify-email page if needed.
  */
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { userEmail, userName, verificationLink, loginUrl } = body
+  const { userEmail, userName, loginUrl } = body
 
   console.log('[Send-Welcome] Preparing to send welcome email...')
   console.log('[Send-Welcome] Recipient:', userEmail)
@@ -31,8 +33,7 @@ export default defineEventHandler(async (event) => {
   
   console.log('[Send-Welcome] Template: welcome')
   console.log('[Send-Welcome] App Name:', appName)
-  console.log('[Send-Welcome] Requires Verification:', requiresVerification)
-  console.log('[Send-Welcome] Verification link:', verificationLink)
+  console.log('[Send-Welcome] Email verification required:', requiresVerification)
   console.log('[Send-Welcome] Login URL:', loginUrl)
   
   try {
@@ -43,7 +44,6 @@ export default defineEventHandler(async (event) => {
       context: {
         userName,
         userEmail,
-        verificationLink,
         loginUrl,
         appName,
         requiresVerification,

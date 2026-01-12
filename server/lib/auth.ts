@@ -205,13 +205,22 @@ export const auth = betterAuth({
   // Required for Apple Sign In
   trustedOrigins: ["https://appleid.apple.com"],
 
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
-    sendVerificationEmail: async ({ user, url }: VerificationEmailHookParams) => {
+  // Database Table Names Configuration
+  // Match our SQL migration table names exactly
+  verification: {
+    modelName: "verification",
+  },
+
+  // Email Verification Configuration
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url, token }: { user: EmailHookUser, url: string, token: string }) => {
       try {
-        console.log('[Better-Auth Hook] Sending verification email to:', user.email, 'url:', url)
+        console.log('[Better-Auth Hook] Sending verification email to:', user.email)
+        console.log('[Better-Auth Hook] Verification URL:', url)
+        console.log('[Better-Auth Hook] Token:', token)
+        
         // Call internal API endpoint to send verification email
+        // Better-Auth automatically generates and stores the token in the verification table
         const response = await fetch(`${process.env.BETTER_AUTH_URL}/api/email/send-verification`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -234,8 +243,19 @@ export const auth = betterAuth({
         // Don't throw error to allow registration to complete even if email fails
       }
     },
-    sendResetPasswordEmail: async ({ user, url }: ResetPasswordEmailHookParams) => {
+    sendOnSignUp: true, // Send verification email on registration
+    autoSignInAfterVerification: true, // Automatically sign in after verification
+    sendOnSignIn: false, // Don't send on sign-in (only on registration)
+    expiresIn: 3600, // Token expires in 1 hour
+  },
+
+  // Email & Password Authentication
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
+    sendResetPasswordEmail: async ({ user, url }: { user: EmailHookUser, url: string }) => {
       try {
+        console.log('[Better-Auth Hook] Sending reset password email to:', user.email)
         // Call internal API endpoint to send reset password email
         await fetch(`${process.env.BETTER_AUTH_URL}/api/email/send-reset-password`, {
           method: 'POST',
@@ -249,7 +269,7 @@ export const auth = betterAuth({
           }),
         })
       } catch (error) {
-        console.error('Failed to send reset password email:', error)
+        console.error('[Better-Auth Hook] Failed to send reset password email:', error)
         // Don't throw error to allow reset request to complete even if email fails
       }
     },

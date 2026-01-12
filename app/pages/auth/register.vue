@@ -87,12 +87,29 @@ const handleRegister = async (event: any) => {
     if (response && !response.error) {
       success.value = true
       
+      // Send welcome email after successful registration
+      try {
+        await fetch('/api/email/send-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userEmail: formState.value.email,
+            userName: defaultName,
+            loginUrl: `${config.public.betterAuth.url}/auth/login`,
+          }),
+        })
+        console.log('[Register] Welcome email sent to:', formState.value.email)
+      } catch (welcomeError) {
+        // Log but don't fail registration if welcome email fails
+        console.error('[Register] Failed to send welcome email:', welcomeError)
+      }
+      
       // Redirect after successful registration
-      // If email verification is required, redirect to verify-email page with email
+      // If email verification is required, redirect to check-email page with email
       // Otherwise, redirect to default page
       setTimeout(() => {
         const redirectUrl = requiresEmailVerification.value 
-          ? `/verify-email?email=${encodeURIComponent(formState.value.email)}`
+          ? `/auth/check-email?email=${encodeURIComponent(formState.value.email)}`
           : DEFAULT_REDIRECT
         navigateTo(redirectUrl)
       }, 500)

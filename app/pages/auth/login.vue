@@ -91,17 +91,40 @@ const handleLogin = async (event: any) => {
     if (err.message?.toLowerCase().includes('not verified') || 
         err.message?.toLowerCase().includes('email verification') ||
         err.message?.toLowerCase().includes('verify your email')) {
-      console.log('[Login] Email not verified detected. Redirecting to verify-email page with email:', formState.value.email)
+      console.log('[Login] Email not verified detected. Sending verification email and redirecting...')
       
-      // Store email in a more persistent way for verify-email page
+      // Store email for verify-email page
       const email = formState.value.email
       
       // Show error message to user
-      error.value = 'Email not verified. Redirecting...'
+      error.value = 'Email not verified. Sending verification email...'
       
-      // Redirect to verify-email page with email parameter
+      try {
+        // Send verification email before redirecting
+        const resendResponse = await fetch('/api/auth/resend-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+          }),
+        })
+        
+        if (resendResponse.ok) {
+          console.log('[Login] Verification email sent successfully to:', email)
+          error.value = 'Verification email sent! Redirecting...'
+        } else {
+          console.error('[Login] Failed to send verification email')
+          error.value = 'Email not verified. Redirecting...'
+        }
+      } catch (resendError) {
+        console.error('[Login] Error sending verification email:', resendError)
+        // Continue with redirect even if email sending fails
+        error.value = 'Email not verified. Redirecting...'
+      }
+      
+      // Redirect to check-email page with email parameter
       setTimeout(() => {
-        navigateTo(`/verify-email?email=${encodeURIComponent(email)}`)
+        navigateTo(`/auth/check-email?email=${encodeURIComponent(email)}`)
       }, 1000)
       
       return
