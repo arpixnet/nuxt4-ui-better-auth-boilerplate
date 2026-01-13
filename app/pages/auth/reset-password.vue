@@ -45,7 +45,10 @@ const isTokenValid = computed(() => !!token.value && token.value.length > 0)
 /**
  * Handle password reset
  */
-const handleResetPassword = async () => {
+const handleResetPassword = async (event: Event) => {
+  // Prevent form from reloading page
+  event.preventDefault()
+  
   error.value = null
   success.value = false
   loading.value = true
@@ -89,6 +92,10 @@ const handleResetPassword = async () => {
   } catch (err: any) {
     console.error('[Reset-Password] ❌ Error:', err)
     error.value = err.message || 'An error occurred. Please try again.'
+    // Show error for 5 seconds then clear it
+    setTimeout(() => {
+      error.value = null
+    }, 5000)
   } finally {
     loading.value = false
   }
@@ -152,15 +159,21 @@ const handleResetPassword = async () => {
           class="mb-6"
         />
 
-        <!-- Success Alert -->
-        <UAlert
-          v-if="success"
-          description="Password reset successfully! Redirecting to login..."
-          color="success"
-          variant="subtle"
-          icon="heroicons:check-circle-20-solid"
-          class="mb-6"
-        />
+        <!-- Success Alert - More prominent -->
+        <div v-if="success" class="mb-6">
+          <UAlert
+            description="Password reset successfully! Redirecting to login..."
+            color="success"
+            variant="subtle"
+            icon="heroicons:check-circle-20-solid"
+          />
+          <div class="mt-4 text-center">
+            <div class="inline-flex items-center justify-center">
+              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-200 dark:border-gray-700 border-t-2 border-green-600 dark:border-green-400"></div>
+              <span class="ml-3 text-sm text-gray-600 dark:text-gray-400">Redirecting...</span>
+            </div>
+          </div>
+        </div>
 
         <!-- Form -->
         <form @submit="handleResetPassword">

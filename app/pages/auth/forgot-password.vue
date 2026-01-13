@@ -26,7 +26,10 @@ const isFormValid = computed(() => {
 /**
  * Handle forgot password request
  */
-const handleForgotPassword = async (event: any) => {
+const handleForgotPassword = async (event: Event) => {
+  // Prevent form from reloading the page
+  event.preventDefault()
+  
   error.value = null
   success.value = false
   loading.value = true
@@ -34,7 +37,7 @@ const handleForgotPassword = async (event: any) => {
   console.log('[Forgot-Password] Submitting password reset request for:', formState.value.email)
 
   try {
-    // Call the Better-Auth server endpoint directly
+    // Call Better-Auth server endpoint directly
     const response = await fetch('/api/auth/forgot-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -50,6 +53,11 @@ const handleForgotPassword = async (event: any) => {
       if (data.success) {
         success.value = true
         console.log('[Forgot-Password] ✅ Password reset email sent successfully')
+        
+        // Redirect to check-reset-email page for better UX
+        setTimeout(() => {
+          navigateTo(`/auth/check-reset-email?email=${encodeURIComponent(formState.value.email)}`)
+        }, 1000)
       } else {
         throw new Error(data.message || 'Failed to send reset email')
       }
@@ -66,6 +74,10 @@ const handleForgotPassword = async (event: any) => {
   } catch (err: any) {
     console.error('[Forgot-Password] ❌ Error:', err)
     error.value = err.message || 'An error occurred. Please try again.'
+    // Show error for 3 seconds then clear it
+    setTimeout(() => {
+      error.value = null
+    }, 3000)
   } finally {
     loading.value = false
   }
