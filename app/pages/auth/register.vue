@@ -87,22 +87,9 @@ const handleRegister = async (event: any) => {
     if (response && !response.error) {
       success.value = true
       
-      // Send welcome email after successful registration
-      try {
-        await fetch('/api/email/send-welcome', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userEmail: formState.value.email,
-            userName: defaultName,
-            loginUrl: `${config.public.betterAuth.url}/auth/login`,
-          }),
-        })
-        console.log('[Register] Welcome email sent to:', formState.value.email)
-      } catch (welcomeError) {
-        // Log but don't fail registration if welcome email fails
-        console.error('[Register] Failed to send welcome email:', welcomeError)
-      }
+      // Note: Better-Auth automatically sends welcome email via sendVerificationEmail hook
+      // configured in server/lib/auth.ts with sendOnSignUp: true
+      // No manual email sending needed here
       
       // Redirect after successful registration
       // If email verification is required, redirect to check-email page with email

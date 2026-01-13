@@ -3,6 +3,10 @@ import { useAuthClient } from '~/lib/auth-client'
 import { useAuthSession } from '~/composables/useAuthSession'
 import { useRoute } from '#app'
 import { authConfig } from '~/config/auth.config'
+import { useEmailRateLimit } from '~/composables/useEmailRateLimit'
+
+// Rate limiting for email verification
+const { checkRateLimit, recordRequest } = useEmailRateLimit()
 
 // Auth configuration
 const authPageConfig = authConfig
@@ -31,41 +35,45 @@ const success = ref(false)
 const authClient = useAuthClient()
 
 /**
- * Resend verification email
+ * Resend verification email using Better-Auth API
  */
 const handleResendEmail = async () => {
   error.value = null
   success.value = false
   loading.value = true
-  
+
   const emailToSend = userEmail.value
   console.log('[Check-Email] Attempting to resend verification email to:', emailToSend)
-  
+
   try {
-    // Call internal API endpoint to resend verification email
-    const response = await fetch('/api/auth/resend-verification', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: emailToSend,
-      }),
-    })
-    
-    console.log('[Check-Email] Resend verification response status:', response.status)
-    
-    if (response.ok) {
-      const data = await response.json()
-      console.log('[Check-Email] Resend verification response data:', data)
-      if (data.success) {
-        success.value = true
-      } else {
-        throw new Error(data.error || 'Failed to send verification email')
-      }
-    } else {
-      const errorText = await response.text()
-      console.error('[Check-Email] Resend verification failed. Status:', response.status, 'Error:', errorText)
-      throw new Error('Failed to send verification email')
+    // Check rate limit before sending
+    const rateLimit = checkRateLimit(emailToSend)
+
+    if (!rateLimit.allowed) {
+      error.value = `Too many requests. Please try again later. (${rateLimit.remaining} remaining)`
+      loading.value = false
+      return
     }
+
+    console.log('[Check-Email] Rate limit check passed. Remaining:', rateLimit.remaining)
+
+    // Send verification email using Better-Auth API
+    const result = await authClient.sendVerificationEmail({
+      email: emailToSend,
+      callbackURL: '/auth/login',
+    })
+
+    console.log('[Check-Email] Send verification response:', result)
+
+    if (result.error) {
+      throw new Error(result.error.message || 'Failed to send verification email')
+    }
+
+    // Record successful request for rate limiting
+    recordRequest(emailToSend)
+
+    success.value = true
+    console.log('[Check-Email] Verification email sent successfully')
   } catch (err: any) {
     console.error('[Check-Email] Resend verification error:', err)
     error.value = err.message || 'An error occurred. Please try again.'

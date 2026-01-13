@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from '#app'
 import { useRuntimeConfig } from '#app'
+import { useAuthClient } from '~/lib/auth-client'
+import { useEmailRateLimit } from '~/composables/useEmailRateLimit'
+
+// Auth client and rate limiting
+const authClient = useAuthClient()
+const { checkRateLimit, recordRequest } = useEmailRateLimit()
 
 // Auth configuration
 const route = useRoute()
@@ -21,33 +27,45 @@ const error = ref<string | null>(null)
 const success = ref(false)
 
 /**
- * Resend verification email
+ * Resend verification email using Better-Auth API
  */
 const handleResendEmail = async () => {
   error.value = null
   success.value = false
   loading.value = true
-  
+
   const emailToSend = userEmail.value
   console.log('[Verify-Email-Pending] Attempting to resend verification email to:', emailToSend)
-  
+
   try {
-    // Call internal API endpoint to resend verification email
-    const response = await fetch('/api/auth/resend-verification', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: emailToSend,
-      }),
-    })
-    
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || 'Failed to resend verification email')
+    // Check rate limit before sending
+    const rateLimit = checkRateLimit(emailToSend)
+
+    if (!rateLimit.allowed) {
+      error.value = `Too many requests. Please try again later. (${rateLimit.remaining} remaining)`
+      loading.value = false
+      return
     }
-    
+
+    console.log('[Verify-Email-Pending] Rate limit check passed. Remaining:', rateLimit.remaining)
+
+    // Send verification email using Better-Auth API
+    const result = await authClient.sendVerificationEmail({
+      email: emailToSend,
+      callbackURL: '/auth/login',
+    })
+
+    console.log('[Verify-Email-Pending] Send verification response:', result)
+
+    if (result.error) {
+      throw new Error(result.error.message || 'Failed to send verification email')
+    }
+
+    // Record successful request for rate limiting
+    recordRequest(emailToSend)
+
     success.value = true
-    console.log('[Verify-Email-Pending] Verification email resent successfully')
+    console.log('[Verify-Email-Pending] Verification email sent successfully')
   } catch (err: any) {
     console.error('[Verify-Email-Pending] Error:', err)
     error.value = err.message || 'Failed to resend verification email. Please try again.'
@@ -145,7 +163,7 @@ const goBackToLogin = () => {
 
         <!-- Back to Login -->
         <UButton
-          color="gray"
+          color="neutral"
           variant="ghost"
           size="lg"
           block
@@ -157,4 +175,3 @@ const goBackToLogin = () => {
     </div>
   </div>
 </template>
-

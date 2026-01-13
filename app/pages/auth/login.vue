@@ -2,10 +2,14 @@
 import { useAuthClient } from '~/lib/auth-client'
 import { navigateTo } from '#app'
 import { loginSchema } from '~/schemas/auth'
+import { useEmailRateLimit } from '~/composables/useEmailRateLimit'
 
 // Auth configuration
 const { config: authPageConfig, getDecorativePanel, getGradientStyle } = useAuthConfig()
 const panelConfig = getDecorativePanel('login')
+
+// Rate limiting for email verification
+const { checkRateLimit, recordRequest } = useEmailRateLimit()
 
 // Computed style for gradient background
 const gradientStyle = computed(() => {
@@ -32,6 +36,7 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
 const show = ref(false)
+const resendLoading = ref(false)
 
 // Auth client
 const authClient = useAuthClient()
@@ -112,26 +117,37 @@ const handleLogin = async (event: any) => {
       error.value = 'Email not verified. Sending verification email...'
       
       try {
-        // Send verification email before redirecting
-        const resendResponse = await fetch('/api/auth/resend-verification', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: email,
-          }),
+        // Check rate limit before sending
+        resendLoading.value = true
+        const rateLimit = checkRateLimit(email)
+
+        if (!rateLimit.allowed) {
+          error.value = `Too many requests. Please try again later.`
+          resendLoading.value = false
+          return
+        }
+
+        // Send verification email using Better-Auth API
+        const result = await authClient.sendVerificationEmail({
+          email,
+          callbackURL: '/auth/login',
         })
-        
-        if (resendResponse.ok) {
-          console.log('[Login] Verification email sent successfully to:', email)
-          error.value = 'Verification email sent! Redirecting...'
-        } else {
-          console.error('[Login] Failed to send verification email')
+
+        if (result.error) {
+          console.error('[Login] Failed to send verification email:', result.error.message)
+          // Still redirect even if email sending fails
           error.value = 'Email not verified. Redirecting...'
+        } else {
+          console.log('[Login] Verification email sent successfully to:', email)
+          recordRequest(email)
+          error.value = 'Verification email sent! Redirecting...'
         }
       } catch (resendError) {
         console.error('[Login] Error sending verification email:', resendError)
         // Continue with redirect even if email sending fails
         error.value = 'Email not verified. Redirecting...'
+      } finally {
+        resendLoading.value = false
       }
       
       // Redirect to check-email page with email parameter
