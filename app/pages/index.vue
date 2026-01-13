@@ -1,4 +1,9 @@
 <script setup lang="ts">
+    // Mark this page as public (no auth required)
+    definePageMeta({
+      requiresAuth: false
+    })
+
     // En Nuxt 4, los composables son auto-importables
     const { session, pending } = useAuthSession();
     
@@ -43,23 +48,19 @@
              <div v-else class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-end">
                 <div class="flex gap-3">
                     <UButton
+                        to="/auth/login"
                         color="primary"
                         variant="soft"
-                        class="cursor-pointer"
                     >
-                        <NuxtLink to="/auth/login">
-                            Sign in
-                        </NuxtLink>
+                        Sign in
                     </UButton>
 
                     <UButton
+                        to="/auth/register"
                         color="secondary"
                         variant="soft"
-                        class="cursor-pointer"
                     >
-                        <NuxtLink to="/auth/register">
-                            Sign up
-                        </NuxtLink>
+                        Sign up
                     </UButton>
                 </div>
             </div>

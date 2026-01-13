@@ -10,10 +10,13 @@ let authClientInstance: ReturnType<typeof createAuthClient> | null = null
  * This composable returns a singleton instance of the client-side
  * authentication client that communicates with Better-Auth server endpoints.
  * 
- * It includes JWT plugin to enable JWT token retrieval.
+ * Features:
+ * - JWT plugin for token management
+ * - 401 interceptor for automatic session expiration handling
+ * - Singleton pattern for optimal performance
  * 
  * Usage in Vue component:
- * const { authClient } = useAuthClient()
+ * const authClient = useAuthClient()
  * 
  * Usage in non-Vue file:
  * Not supported - must be called from Vue setup, plugin, or composable
@@ -28,6 +31,50 @@ export const useAuthClient = () => {
       plugins: [
         jwtClient(),
       ],
+      fetchOptions: {
+        // Global error handler for all API calls
+        onError: async (context) => {
+          const { response } = context
+          
+          // Handle 401 Unauthorized - Session expired or invalid
+          if (response?.status === 401) {
+            console.warn('[Auth Client] 401 Unauthorized - Session expired or invalid')
+            
+            // Only redirect on client-side
+            if (import.meta.client) {
+              // Clear local session state
+              try {
+                // Get current route to preserve redirect
+                const router = useRouter()
+                const currentPath = router.currentRoute.value.fullPath
+                
+                // Redirect to login with return URL
+                await navigateTo({
+                  path: '/auth/login',
+                  query: { 
+                    redirect: currentPath,
+                    expired: 'true' // Flag to show "session expired" message
+                  }
+                })
+              } catch (error) {
+                console.error('[Auth Client] Error during 401 redirect:', error)
+                // Fallback: just go to login
+                window.location.href = '/auth/login?expired=true'
+              }
+            }
+          }
+          
+          // Handle 403 Forbidden - Insufficient permissions
+          if (response?.status === 403) {
+            console.warn('[Auth Client] 403 Forbidden - Insufficient permissions')
+          }
+          
+          // Handle 429 Too Many Requests - Rate limited
+          if (response?.status === 429) {
+            console.warn('[Auth Client] 429 Too Many Requests - Rate limited')
+          }
+        }
+      }
     })
   }
   
