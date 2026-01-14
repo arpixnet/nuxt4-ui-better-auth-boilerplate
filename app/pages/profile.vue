@@ -51,6 +51,8 @@ const twoFactorData = ref<{ secret: string, totpURI: string, backupCodes: string
 const twoFactorPassword = ref('')
 const twoFactorVerifyCode = ref<string[]>([])
 const loadingTwoFactor = ref(false)
+const showDisableTwoFactorModal = ref(false)
+const disableTwoFactorPassword = ref('')
 
 // Active Sessions State
 const sessions = ref<any[]>([])
@@ -241,23 +243,24 @@ const verifyTwoFactor = async () => {
     }
 }
 
-const disableTwoFactor = async () => {
-    if (!confirm('Are you sure you want to disable 2FA? This will make your account less secure.')) return
+const initiateDisableTwoFactor = () => {
+    disableTwoFactorPassword.value = ''
+    showDisableTwoFactorModal.value = true
+}
 
+const confirmDisableTwoFactor = async () => {
     loadingTwoFactor.value = true
     try {
-        // Disable usually requires password too in better-auth? 
-        // Documentation says twoFactor.disable({ password, ... })
-        // For simplicity let's assume we need to ask for password again.
-        // But for this MVP let's try direct disable if session is active (might fail if requires password re-entry)
-
-        const response = await authClient.twoFactor.disable()
+        const response = await authClient.twoFactor.disable({
+            password: disableTwoFactorPassword.value
+        })
 
         if (response.error) {
             throw new Error(response.error.message)
         }
 
         twoFactorEnabled.value = false
+        showDisableTwoFactorModal.value = false
         toast.add({
             title: 'Success',
             description: 'Two-Factor Authentication disabled',
@@ -583,7 +586,7 @@ const getSessionDeviceName = (userAgent?: string) => {
                                 <UBadge v-if="twoFactorEnabled" color="success" variant="subtle">Enabled</UBadge>
                                 <UButton :color="twoFactorEnabled ? 'error' : 'primary'"
                                     :variant="twoFactorEnabled ? 'soft' : 'solid'" size="sm"
-                                    @click="twoFactorEnabled ? disableTwoFactor() : initiateTwoFactor()"
+                                    @click="twoFactorEnabled ? initiateDisableTwoFactor() : initiateTwoFactor()"
                                     :loading="loadingTwoFactor">
                                     {{ twoFactorEnabled ? 'Disable' : 'Enable 2FA' }}
                                 </UButton>
@@ -694,6 +697,31 @@ const getSessionDeviceName = (userAgent?: string) => {
                     <UButton v-else color="primary" @click="verifyTwoFactor" :loading="loadingTwoFactor"
                         :disabled="!twoFactorVerifyCode || twoFactorVerifyCode.length < 6">
                         Verify & Activate
+                    </UButton>
+                </div>
+            </template>
+        </UModal>
+
+        <!-- Disable 2FA Modal -->
+        <UModal v-model:open="showDisableTwoFactorModal" title="Disable Two-Factor Authentication"
+            description="Please confirm your password to disable two-factor authentication.">
+            <template #body>
+                <div class="space-y-4">
+                    <UPassword
+                        v-model="disableTwoFactorPassword"
+                        label="Current Password"
+                        placeholder="Confirm your password"
+                        :disabled="loadingTwoFactor"
+                        @keyup.enter="confirmDisableTwoFactor"
+                        class="w-full"
+                    />
+                </div>
+            </template>
+            <template #footer>
+                <div class="flex justify-end gap-2 w-full">
+                    <UButton color="neutral" variant="ghost" @click="showDisableTwoFactorModal = false">Cancel</UButton>
+                    <UButton color="error" @click="confirmDisableTwoFactor" :loading="loadingTwoFactor" :disabled="!disableTwoFactorPassword">
+                        Disable 2FA
                     </UButton>
                 </div>
             </template>
