@@ -136,6 +136,10 @@ export const auth = betterAuth({
   database: new Pool({
     connectionString: process.env.DATABASE_URL || "",
   }),
+  
+  logger: {
+    level: "debug",
+  },
 
   session: {
     expiresIn: parseInt(process.env.BETTER_AUTH_SESSION_EXPIRES_IN || "") || 60 * 60 * 24 * 7,
@@ -144,7 +148,6 @@ export const auth = betterAuth({
       enabled: false,
       maxAge: parseInt(process.env.BETTER_AUTH_COOKIE_MAX_AGE || "") || 5 * 60,
       strategy: "jwt",
-      refreshCache: true,
     }
   },
   
@@ -210,6 +213,10 @@ export const auth = betterAuth({
   // Match our SQL migration table names exactly
   verification: {
     modelName: "verification",
+  },
+  
+  twoFactor: {
+    modelName: "twoFactor", 
   },
 
   // Email Verification Configuration

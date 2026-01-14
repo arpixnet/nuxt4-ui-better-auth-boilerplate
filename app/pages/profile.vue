@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthClient } from '~/lib/auth-client'
+import VueQrcode from '@chenfengyuan/vue-qrcode'
 
 definePageMeta({
     middleware: 'auth',
@@ -630,9 +631,8 @@ const getSessionDeviceName = (userAgent?: string) => {
                 <div v-else-if="twoFactorStep === 'scan-qr' && twoFactorData" class="space-y-6">
                     <div class="space-y-2">
                         <!-- Placeholder for QR functionality - displaying URI text as fallback -->
-                        <div
-                            class="p-4 bg-gray-100 dark:bg-gray-800 rounded text-xs break-all font-mono select-all text-center">
-                            {{ twoFactorData.totpURI }}
+                        <div class="flex justify-center p-4 bg-white rounded-lg">
+                            <VueQrcode :value="twoFactorData.totpURI" :options="{ width: 200, margin: 2 }" />
                         </div>
                         <p class="text-xs text-gray-500 text-center">
                             Secret: <span class="font-mono select-all font-bold">{{ twoFactorData.secret }}</span>
