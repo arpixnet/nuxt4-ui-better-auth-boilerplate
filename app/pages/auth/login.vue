@@ -32,6 +32,8 @@ const formState = ref({
   email: '',
   password: '',
 })
+const requiresTwoFactor = ref(false)
+const twoFactorCode = ref('')
 const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
@@ -88,6 +90,13 @@ const handleLogin = async (event: any) => {
       password: formState.value.password,
       callbackURL: redirectTo.value,
     })
+
+    // Check for 2FA requirement
+    if (response.data && (response.data as any).twoFactor) {
+      requiresTwoFactor.value = true
+      loading.value = false
+      return
+    }
 
     // Check if login was successful
     if (response && !response.error) {
@@ -182,6 +191,32 @@ const handleLogin = async (event: any) => {
     loading.value = false
   }
 }
+
+/**
+ * Handle 2FA Verification
+ */
+const handleTwoFactorVerify = async () => {
+  loading.value = true
+  error.value = null
+
+  try {
+    const response = await authClient.twoFactor.verify({
+      code: twoFactorCode.value,
+      callbackURL: redirectTo.value
+    })
+
+    if (response.data) {
+      success.value = true
+      setTimeout(() => navigateTo(redirectTo.value), 500)
+    } else {
+      throw new Error(response.error?.message || 'Invalid 2FA Code')
+    }
+  } catch (err: any) {
+    error.value = err.message || 'Verification failed'
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
@@ -235,8 +270,39 @@ const handleLogin = async (event: any) => {
             description="Your session has expired. Please sign in again to continue." color="warning" variant="subtle"
             icon="heroicons:exclamation-triangle-20-solid" class="mb-6" />
 
-          <!-- Form -->
-          <UForm :schema="loginSchema" :state="formState" @submit="handleLogin">
+          <!-- 2FA Form -->
+          <div v-if="requiresTwoFactor" class="space-y-4">
+            <div class="text-center mb-6">
+              <div
+                class="mx-auto w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-3">
+                <Icon name="heroicons:shield-check-20-solid" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white">Two-Factor Authentication</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Enter the 6-digit code from your authenticator app
+              </p>
+            </div>
+
+            <div class="mb-4">
+              <UInput v-model="twoFactorCode" type="text" placeholder="000 000" size="lg" autofocus
+                class="text-center font-mono text-lg tracking-widest" :ui="{ base: 'text-center' }"
+                @keyup.enter="handleTwoFactorVerify" />
+            </div>
+
+            <UButton color="primary" variant="solid" size="lg" block :loading="loading" @click="handleTwoFactorVerify"
+              :disabled="loading || twoFactorCode.length < 6">
+              Verify
+            </UButton>
+
+            <div class="text-center mt-4">
+              <UButton variant="link" color="neutral" @click="requiresTwoFactor = false">
+                Back to Login
+              </UButton>
+            </div>
+          </div>
+
+          <!-- Login Form -->
+          <UForm v-else :schema="loginSchema" :state="formState" @submit="handleLogin">
             <!-- Error Alert -->
             <UAlert v-if="error" :description="error" color="error" variant="subtle"
               icon="heroicons:information-circle-20-solid" class="mb-6" />

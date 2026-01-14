@@ -1,8 +1,10 @@
 import { createAuthClient } from "better-auth/vue"
-import { jwtClient } from "better-auth/client/plugins"
+import { jwtClient, twoFactorClient } from "better-auth/client/plugins"
+
+
 
 // Singleton client instance
-let authClientInstance: ReturnType<typeof createAuthClient> | null = null
+let authClientInstance: any = null
 
 /**
  * Better-Auth Client Composable
@@ -30,6 +32,7 @@ export const useAuthClient = () => {
       baseURL: config.public.betterAuth.url,
       plugins: [
         jwtClient(),
+        twoFactorClient(),
       ],
       fetchOptions: {
         // Global error handler for all API calls

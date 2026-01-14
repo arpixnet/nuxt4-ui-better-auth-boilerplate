@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth"
-import { jwt } from "better-auth/plugins"
+import { jwt, twoFactor } from "better-auth/plugins"
 import { Pool } from "pg"
+
+
 
 /**
  * Type definitions for email hooks
@@ -187,6 +189,9 @@ export const auth = betterAuth({
           }
         },
       },
+    }),
+    twoFactor({
+      issuer: process.env.APP_NAME || "Arpix App"
     }),
   ],
 
