@@ -20,27 +20,12 @@ function optionalModule(name: string) {
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  
-  app: {
-    head: {
-      titleTemplate: '%s - ' + (process.env.APP_NAME || 'Arpix App'),
-      title: process.env.APP_NAME || 'Arpix App',
-      meta: [
-        { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'Production ready Nuxt 4 boilerplate with Better-Auth' },
-        { name: 'theme-color', content: '#ffffff' }
-      ],
-      link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-      ]
-    }
-  },
 
   modules: [
     '@nuxt/image',
     '@nuxt/scripts',
     '@nuxt/ui',
+    '@nuxtjs/seo',
     'nuxt-arpix-email-sender',
     optionalModule('@nuxt/content')
   ].filter(Boolean),
@@ -59,7 +44,14 @@ export default defineNuxtConfig({
     }
     // domains: ['example.com']
   },
-  
+
+  site: {
+    url: process.env.BASE_URL || 'http://localhost:3000',
+    name: process.env.APP_NAME || 'Arpix App',
+    description: 'Production ready Nuxt 4 boilerplate with Better-Auth',
+    defaultLocale: 'es',
+  },
+
   // Uncomment to enable content preview (Nuxt Studio)
   // content: {
   //   preview: {
