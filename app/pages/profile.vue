@@ -49,7 +49,7 @@ const showTwoFactorModal = ref(false)
 const twoFactorStep = ref<'confirm-password' | 'scan-qr'>('confirm-password')
 const twoFactorData = ref<{ secret: string, totpURI: string, backupCodes: string[] } | null>(null)
 const twoFactorPassword = ref('')
-const twoFactorVerifyCode = ref('')
+const twoFactorVerifyCode = ref<string[]>([])
 const loadingTwoFactor = ref(false)
 
 // Active Sessions State
@@ -180,7 +180,7 @@ const cancelPasswordChange = () => {
 const initiateTwoFactor = () => {
     twoFactorStep.value = 'confirm-password'
     twoFactorPassword.value = ''
-    twoFactorVerifyCode.value = ''
+    twoFactorVerifyCode.value = []
     twoFactorData.value = null
     showTwoFactorModal.value = true
 }
@@ -213,7 +213,7 @@ const verifyTwoFactor = async () => {
     loadingTwoFactor.value = true
     try {
         const response = await authClient.twoFactor.verifyTotp({
-            code: twoFactorVerifyCode.value,
+            code: twoFactorVerifyCode.value.join(''),
             trustDevice: false
         })
 
@@ -656,21 +656,21 @@ const getSessionDeviceName = (userAgent?: string) => {
 
                 <div v-else-if="twoFactorStep === 'scan-qr' && twoFactorData" class="space-y-6">
                     <div class="space-y-2">
-                        <!-- Placeholder for QR functionality - displaying URI text as fallback -->
                         <div class="flex justify-center p-4 bg-white rounded-lg">
                             <VueQrcode :value="twoFactorData.totpURI" :options="{ width: 200, margin: 2 }" />
                         </div>
-                        <p class="text-xs text-gray-500 text-center">
+                        <!-- <p class="text-xs text-gray-500 text-center">
                             Secret: <span class="font-mono select-all font-bold">{{ twoFactorData.secret }}</span>
-                        </p>
+                        </p> -->
                     </div>
 
-                    <div class="space-y-2">
+                    <div class="space-y-2 flex flex-col items-center">
                         <p class="text-sm text-gray-600 dark:text-gray-300">
                             Enter the 6-digit code from your app to verify.
                         </p>
-                        <UInput v-model="twoFactorVerifyCode" placeholder="000 000" icon="heroicons:qr-code"
-                            class="w-full" />
+                        <UPinInput v-model="twoFactorVerifyCode" :length="6" type="text" otp :autofocus="true"
+                            :disabled="loadingTwoFactor" :color="twoFactorVerifyCode.length === 6 ? 'success' : undefined"
+                            placeholder="•" />
                     </div>
 
                     <div v-if="twoFactorData.backupCodes" class="mt-4">

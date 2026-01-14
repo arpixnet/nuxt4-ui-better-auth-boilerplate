@@ -33,7 +33,7 @@ const formState = ref({
   password: '',
 })
 const requiresTwoFactor = ref(false)
-const twoFactorCode = ref('')
+const twoFactorCode = ref<string[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
@@ -207,7 +207,7 @@ const handleTwoFactorVerify = async () => {
 
   try {
     const response = await authClient.twoFactor.verifyTotp({
-      code: twoFactorCode.value,
+      code: twoFactorCode.value.join(''),
       trustDevice: false
     })
 
@@ -289,10 +289,9 @@ const handleTwoFactorVerify = async () => {
               </p>
             </div>
 
-            <div class="mb-4">
-              <UInput v-model="twoFactorCode" type="text" placeholder="000 000" size="lg" autofocus
-                class="text-center font-mono text-lg tracking-widest" :ui="{ base: 'text-center' }"
-                @keyup.enter="handleTwoFactorVerify" />
+            <div class="mb-4 text-center">
+              <UPinInput v-model="twoFactorCode" :length="6" type="text" otp :autofocus="true" :disabled="loading"
+                placeholder="•" />
             </div>
 
             <UButton color="primary" variant="solid" size="lg" block :loading="loading" @click="handleTwoFactorVerify"
