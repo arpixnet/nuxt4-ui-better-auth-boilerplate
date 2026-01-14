@@ -654,7 +654,7 @@ const getSessionDeviceName = (userAgent?: string) => {
                     />
                 </div>
 
-                <div v-else-if="twoFactorStep === 'scan-qr' && twoFactorData" class="space-y-6">
+                <div v-else-if="twoFactorStep === 'scan-qr' && twoFactorData" class="space-y-4">
                     <div class="space-y-2">
                         <div class="flex justify-center p-4 bg-white rounded-lg">
                             <VueQrcode :value="twoFactorData.totpURI" :options="{ width: 200, margin: 2 }" />
@@ -665,7 +665,7 @@ const getSessionDeviceName = (userAgent?: string) => {
                     </div>
 
                     <div class="space-y-2 flex flex-col items-center">
-                        <p class="text-sm text-gray-600 dark:text-gray-300">
+                        <p class="text-center text-sm text-gray-600 dark:text-gray-300">
                             Enter the 6-digit code from your app to verify.
                         </p>
                         <UPinInput v-model="twoFactorVerifyCode" :length="6" type="text" otp :autofocus="true"
@@ -673,12 +673,12 @@ const getSessionDeviceName = (userAgent?: string) => {
                             placeholder="•" />
                     </div>
 
-                    <div v-if="twoFactorData.backupCodes" class="mt-4">
+                    <!-- <div v-if="twoFactorData.backupCodes" class="mt-4">
                         <p class="text-sm font-semibold mb-2">Backup Codes (Save these!)</p>
                         <div class="grid grid-cols-2 gap-2 text-xs font-mono bg-gray-50 dark:bg-gray-800 p-2 rounded">
                             <div v-for="code in twoFactorData.backupCodes" :key="code">{{ code }}</div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </template>
 
