@@ -59,9 +59,12 @@ const sessions = ref<any[]>([])
 const loadingSessions = ref(false)
 const showSessionsModal = ref(false)
 const revokingSessionId = ref<string | null>(null)
+const showRevokeAllModal = ref(false)
 
 // Delete Account State
 const loadingDelete = ref(false)
+const showDeleteAccountModal = ref(false)
+const deleteAccountPassword = ref('')
 
 // Initialize profile data and check 2FA status
 watch(() => session.value.data?.user, (user) => {
@@ -331,8 +334,10 @@ const revokeSession = async (token: string) => {
 }
 
 const revokeOtherSessions = async () => {
-    if (!confirm('Are you sure you want to log out from all other devices?')) return
+    showRevokeAllModal.value = true
+}
 
+const confirmRevokeAllSessions = async () => {
     try {
         const currentToken = session.value.data?.session.token
         const others = sessions.value.filter(s => s.token !== currentToken)
@@ -345,6 +350,7 @@ const revokeOtherSessions = async () => {
             description: 'All other sessions revoked',
             color: 'success'
         })
+        showRevokeAllModal.value = false
         await fetchSessions()
     } catch (error: any) {
         toast.add({
@@ -357,21 +363,10 @@ const revokeOtherSessions = async () => {
 
 // Delete Account Handler
 const deleteAccount = async () => {
-    if (!confirm('DANGER: Are you sure you want to delete your account? This action CANNOT be undone and all your data will be lost forever.')) return
+    showDeleteAccountModal.value = true
+}
 
-    // Double confirmation
-    const email = session.value.data?.user?.email
-    const confirmation = prompt(`To confirm, please type your email: ${email}`)
-
-    if (confirmation !== email) {
-        toast.add({
-            title: 'Cancelled',
-            description: 'Email verification failed. Account deletion cancelled.',
-            color: 'warning'
-        })
-        return
-    }
-
+const confirmDeleteAccount = async () => {
     loadingDelete.value = true
     try {
         const response = await authClient.deleteUser()
@@ -394,6 +389,7 @@ const deleteAccount = async () => {
         })
     } finally {
         loadingDelete.value = false
+        showDeleteAccountModal.value = false
     }
 }
 
@@ -780,6 +776,53 @@ const getSessionDeviceName = (userAgent?: string) => {
             </template>
             <template #footer>
                 <UButton color="neutral" variant="ghost" @click="showSessionsModal = false">Close</UButton>
+            </template>
+        </UModal>
+
+        <!-- Revoke All Sessions Confirmation Modal -->
+        <UModal v-model:open="showRevokeAllModal" title="Revoke All Other Sessions"
+            description="Are you sure you want to log out from all other devices?">
+            <template #footer>
+                <div class="flex justify-end gap-2 w-full">
+                    <UButton color="neutral" variant="ghost" @click="showRevokeAllModal = false">Cancel</UButton>
+                    <UButton color="error" @click="confirmRevokeAllSessions">Revoke All</UButton>
+                </div>
+            </template>
+        </UModal>
+
+        <!-- Delete Account Confirmation Modal -->
+        <UModal v-model:open="showDeleteAccountModal" title="Delete Account"
+            description="This action cannot be undone. All your data will be permanently deleted.">
+            <template #body>
+                <div class="space-y-4">
+                    <div class="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <p class="text-sm text-red-800 dark:text-red-200 font-medium">
+                            ⚠️ DANGER: This action is irreversible
+                        </p>
+                        <p class="text-xs text-red-600 dark:text-red-400 mt-2">
+                            You will lose access to your account and all associated data forever.
+                        </p>
+                    </div>
+                    <UPassword
+                        v-model="deleteAccountPassword"
+                        label="Confirm with Password"
+                        placeholder="Enter your password to confirm"
+                        :disabled="loadingDelete"
+                        @keyup.enter="confirmDeleteAccount"
+                        class="w-full"
+                    />
+                </div>
+            </template>
+            <template #footer>
+                <div class="flex justify-end gap-2 w-full">
+                    <UButton color="neutral" variant="ghost" @click="showDeleteAccountModal = false">
+                        Cancel
+                    </UButton>
+                    <UButton color="error" @click="confirmDeleteAccount" :loading="loadingDelete"
+                        :disabled="!deleteAccountPassword">
+                        Delete Account
+                    </UButton>
+                </div>
             </template>
         </UModal>
     </div>
