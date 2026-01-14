@@ -42,6 +42,10 @@ const resendLoading = ref(false)
 // Auth client
 const authClient = useAuthClient()
 
+// Check if registration is allowed
+const config = useRuntimeConfig()
+const allowRegistration = computed(() => config.public.allowRegistration)
+
 // Get redirect from query params or use default
 const route = useRoute()
 const redirectTo = computed(() => {
@@ -351,8 +355,8 @@ const handleTwoFactorVerify = async () => {
             </UButton>
           </UForm>
 
-          <!-- Register Link -->
-          <div class="text-center mt-4">
+          <!-- Register Link (only shown if registration is allowed) -->
+          <div v-if="allowRegistration" class="text-center mt-4">
             <span class="text-sm text-gray-500 dark:text-gray-400">
               Don't have an account yet?
             </span>

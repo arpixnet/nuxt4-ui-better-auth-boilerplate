@@ -15,6 +15,15 @@ interface EmailHookUser {
 }
 
 /**
+ * Type definitions for sign up hook
+ */
+interface SignUpHookParams {
+  email: string
+  password: string
+  name?: string
+}
+
+/**
  * Convert SNAKE_CASE to camelCase
  *
  * Examples:
@@ -109,6 +118,16 @@ const buildSocialProviders = () => {
   // Return all providers without validation
   // Better-Auth will handle validation and throw errors if something is missing
   return providersMap
+}
+
+/**
+ * Check if registration is allowed
+ * 
+ * This function checks the ALLOW_REGISTRATION environment variable
+ * to determine if new user registration is permitted.
+ */
+const isRegistrationAllowed = (): boolean => {
+  return process.env.ALLOW_REGISTRATION !== "false"
 }
 
 /**
@@ -223,6 +242,12 @@ export const auth = betterAuth({
   emailVerification: {
     sendVerificationEmail: async ({ user, url, token }: { user: EmailHookUser, url: string, token: string }) => {
       try {
+        // Check if registration is allowed
+        if (!isRegistrationAllowed()) {
+          console.error('[Better-Auth Hook] Registration attempt when disabled')
+          throw new Error('Registration is currently disabled')
+        }
+
         console.log('[Better-Auth Hook] sendVerificationEmail called for:', user.email)
         console.log('[Better-Auth Hook] Verification URL:', url)
         console.log('[Better-Auth Hook] Token:', token)
@@ -263,6 +288,12 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
+    signUp: async ({ email, password, name }: SignUpHookParams) => {
+      // Check if registration is allowed before processing
+      if (!isRegistrationAllowed()) {
+        throw new Error('Registration is currently disabled')
+      }
+    },
     sendResetPassword: async ({ user, url }: { user: EmailHookUser, url: string }) => {
       try {
         console.log('[Better-Auth Hook] sendResetPassword called for:', user.email)

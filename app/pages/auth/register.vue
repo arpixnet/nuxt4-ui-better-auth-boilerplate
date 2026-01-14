@@ -4,6 +4,11 @@ import { navigateTo } from '#app'
 import { useRuntimeConfig } from '#app'
 import { registerSchema } from '~/schemas/auth'
 
+// Apply middleware to check if registration is allowed
+definePageMeta({
+  middleware: ['register-allowed']
+})
+
 // Auth configuration
 const { config: authPageConfig, getDecorativePanel, getGradientStyle } = useAuthConfig()
 const panelConfig = getDecorativePanel('register')
