@@ -95,13 +95,9 @@ const goBackToLogin = () => {
       </div>
 
       <!-- Card -->
-      <UCard>
-        <!-- Icon -->
-        <div class="flex justify-center mb-6">
-          <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center">
-            <Icon name="heroicons:envelope" class="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
-          </div>
-        </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 sm:p-8">
+        <!-- Avatar Circle -->
+        <AuthAvatar icon="heroicons:envelope-16-solid" align="center" class="mb-5" />
 
         <!-- Header -->
         <div class="text-center mb-6">
@@ -169,7 +165,7 @@ const goBackToLogin = () => {
         >
           ← Back to Login
         </UButton>
-      </UCard>
+      </div>
     </div>
   </div>
 </template>

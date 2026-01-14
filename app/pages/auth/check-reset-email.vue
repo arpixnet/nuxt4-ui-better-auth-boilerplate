@@ -37,17 +37,7 @@ const email = computed(() => route.query.email as string || 'your email')
       <!-- Card -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 sm:p-8">
         <!-- Avatar Circle -->
-        <div class="flex justify-center mb-5">
-          <div class="relative">
-            <!-- Outer circle border -->
-            <div class="w-20 h-20 rounded-full border border-green-200/60 dark:border-green-700/60 flex items-center justify-center bg-green-50/50 dark:bg-green-900/50 backdrop-blur-sm">
-              <!-- Inner circle with icon -->
-              <div class="w-14 h-14 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center shadow-md shadow-green-200/50 dark:shadow-green-900/50">
-                <Icon name="heroicons:check-circle-20-solid" class="w-6 h-6 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-          </div>
-        </div>
+        <AuthAvatar icon="heroicons:check-circle-16-solid" align="center" class="mb-5" />
 
         <!-- Header -->
         <div class="text-center mb-6">

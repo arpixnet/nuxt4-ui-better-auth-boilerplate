@@ -116,15 +116,7 @@ const handleResendEmail = async () => {
       <!-- Card -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 sm:p-8">
         <!-- Avatar Circle -->
-        <div class="flex justify-center mb-5">
-          <div class="relative">
-            <div class="w-20 h-20 rounded-full border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-              <div class="w-14 h-14 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center shadow-md shadow-gray-200/50 dark:shadow-gray-900/50">
-                <Icon name="heroicons:envelope-20-solid" class="w-6 h-6 text-amber-500 dark:text-amber-400" />
-              </div>
-            </div>
-          </div>
-        </div>
+        <AuthAvatar icon="heroicons:envelope-16-solid" align="center" class="mb-5" />
 
         <!-- Header -->
         <div class="text-center mb-6">

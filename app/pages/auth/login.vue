@@ -246,20 +246,8 @@ const handleTwoFactorVerify = async () => {
         </div>
 
         <div>
-          <!-- Avatar Circle with Double Border -->
-          <div class="flex justify-start mb-5">
-            <div class="relative">
-              <!-- Outer circle border -->
-              <div
-                class="w-20 h-20 rounded-full border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-                <!-- Inner circle with icon -->
-                <div
-                  class="w-14 h-14 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-md shadow-gray-200/50 dark:shadow-gray-900/50">
-                  <Icon name="heroicons:user-20-solid" class="w-6 h-6 text-gray-400 dark:text-gray-500" />
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Avatar Circle -->
+          <AuthAvatar icon="heroicons:user-solid" class="mb-5" />
 
           <!-- Header -->
           <div class="mb-4">
