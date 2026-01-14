@@ -4,3 +4,8 @@
 @theme {
   --font-sans: 'Poppins', Impact, sans-serif;
 }
+
+/* Add cursor-pointer to all Nuxt UI buttons */
+button[data-slot="base"] {
+  cursor: pointer;
+}
