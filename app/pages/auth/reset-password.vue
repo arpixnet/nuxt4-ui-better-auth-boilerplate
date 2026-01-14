@@ -169,7 +169,7 @@ const handleResetPassword = async (event: Event) => {
           />
           <div class="mt-4 text-center">
             <div class="inline-flex items-center justify-center">
-              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-200 dark:border-gray-700 border-t-2 border-green-600 dark:border-green-400"></div>
+              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-t-2 border-green-600 dark:border-green-400"></div>
               <span class="ml-3 text-sm text-gray-600 dark:text-gray-400">Redirecting...</span>
             </div>
           </div>
