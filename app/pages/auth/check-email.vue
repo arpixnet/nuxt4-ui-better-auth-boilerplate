@@ -13,7 +13,7 @@ const authPageConfig = authConfig
 
 // Route and session data
 const route = useRoute()
-const session = useAuthSession()
+const authSession = useAuthSession()
 
 // Email from URL query parameter takes priority over session email
 const userEmail = computed(() => {
@@ -21,10 +21,10 @@ const userEmail = computed(() => {
   if (emailFromUrl) {
     return decodeURIComponent(emailFromUrl)
   }
-  return session.session?.value?.user?.email || ''
+  return authSession.session.value.data?.user?.email || ''
 })
 
-const userName = computed(() => session.session?.value?.user?.name || userEmail.value.split('@')[0] || 'User')
+const userName = computed(() => authSession.session.value.data?.user?.name || userEmail.value.split('@')[0] || 'User')
 
 // Form state
 const loading = ref(false)
@@ -162,7 +162,7 @@ const handleResendEmail = async () => {
         <!-- Info Box -->
         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
           <div class="flex items-start gap-3">
-            <Icon name="heroicons:information-circle-20-solid" class="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <Icon name="heroicons:information-circle-20-solid" class="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
             <div class="flex-1">
               <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">
                 What's next?
