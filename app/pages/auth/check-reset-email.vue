@@ -75,15 +75,15 @@ const email = computed(() => route.query.email as string || 'your email')
           </h3>
           <ul class="space-y-2 text-sm text-blue-800 dark:text-blue-200">
             <li class="flex items-start">
-              <Icon name="heroicons:check-circle-20-solid" class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+              <Icon name="heroicons:check-circle-20-solid" class="w-4 h-4 mr-2 mt-0.5 shrink-0 text-blue-600 dark:text-blue-400" />
               <span>Click the link in the email to reset your password</span>
             </li>
             <li class="flex items-start">
-              <Icon name="heroicons:clock-20-solid" class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+              <Icon name="heroicons:clock-20-solid" class="w-4 h-4 mr-2 mt-0.5 shrink-0 text-blue-600 dark:text-blue-400" />
               <span>The link expires in 1 hour for security</span>
             </li>
             <li class="flex items-start">
-              <Icon name="heroicons:shield-check-20-solid" class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+              <Icon name="heroicons:shield-check-20-solid" class="w-4 h-4 mr-2 mt-0.5 shrink-0 text-blue-600 dark:text-blue-400" />
               <span>Keep your new password secure</span>
             </li>
           </ul>
