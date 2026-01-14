@@ -708,7 +708,7 @@ const getSessionDeviceName = (userAgent?: string) => {
                                         <UBadge v-if="sess.isCurrent" color="success" variant="subtle" size="xs">Current
                                         </UBadge>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1 truncate max-w-[200px]"
+                                    <p class="text-xs text-gray-500 mt-1 truncate max-w-50"
                                         :title="sess.userAgent">
                                         {{ sess.userAgent }}
                                     </p>
