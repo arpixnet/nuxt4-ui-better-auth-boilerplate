@@ -91,15 +91,22 @@ const handleLogin = async (event: any) => {
       callbackURL: redirectTo.value,
     })
 
+    console.log('[Login] Response from signIn.email:', response)
+    console.log('[Login] Response data:', response.data)
+    console.log('[Login] Response error:', response.error)
+    console.log('[Login] twoFactorRedirect in response:', "twoFactorRedirect" in response)
+    console.log('[Login] twoFactorRedirect in response.data:', "twoFactorRedirect" in response.data)
+
     // Check for 2FA requirement
-    if (response.data && (response.data as any).twoFactor) {
+    if (response.data?.twoFactorRedirect) {
+      console.log('[Login] 2FA required, showing 2FA form')
       requiresTwoFactor.value = true
       loading.value = false
       return
     }
 
-    // Check if login was successful
-    if (response && !response.error) {
+    // Check if login was successful (only if no 2FA required)
+    if (response && !response.error && !response.data?.twoFactorRedirect) {
       success.value = true
 
       // Redirect after successful login
@@ -200,9 +207,9 @@ const handleTwoFactorVerify = async () => {
   error.value = null
 
   try {
-    const response = await authClient.twoFactor.verify({
+    const response = await authClient.twoFactor.verifyTotp({
       code: twoFactorCode.value,
-      callbackURL: redirectTo.value
+      trustDevice: false
     })
 
     if (response.data) {

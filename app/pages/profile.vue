@@ -196,8 +196,9 @@ const enableTwoFactor = async () => {
 const verifyTwoFactor = async () => {
     loadingTwoFactor.value = true
     try {
-        const response = await authClient.twoFactor.verify({
-            code: twoFactorVerifyCode.value
+        const response = await authClient.twoFactor.verifyTotp({
+            code: twoFactorVerifyCode.value,
+            trustDevice: false
         })
 
         if (response.data) {
