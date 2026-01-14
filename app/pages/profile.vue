@@ -30,6 +30,19 @@ const passwordForm = ref({
     confirmPassword: ''
 })
 
+// Password validation
+const passwordsMatch = computed(() => {
+    if (!passwordForm.value.newPassword || !passwordForm.value.confirmPassword) return true
+    return passwordForm.value.newPassword === passwordForm.value.confirmPassword
+})
+
+const confirmPasswordError = computed(() => {
+    if (passwordForm.value.confirmPassword && !passwordsMatch.value) {
+        return 'Passwords do not match'
+    }
+    return null
+})
+
 // 2FA State
 const twoFactorEnabled = ref(false)
 const showTwoFactorModal = ref(false)
@@ -512,29 +525,32 @@ const getSessionDeviceName = (userAgent?: string) => {
                     </div>
 
                     <div v-else class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                Current Password
-                            </label>
-                            <UInput v-model="passwordForm.currentPassword" type="password"
-                                placeholder="Enter current password" size="lg" />
-                        </div>
+                        <UPassword
+                            v-model="passwordForm.currentPassword"
+                            label="Current Password"
+                            placeholder="Enter current password"
+                            :disabled="loadingPassword"
+                            class="mb-4"
+                        />
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                New Password
-                            </label>
-                            <UInput v-model="passwordForm.newPassword" type="password"
-                                placeholder="Enter new password (min 8 characters)" size="lg" />
-                        </div>
+                        <UPassword
+                            v-model="passwordForm.newPassword"
+                            label="New Password"
+                            placeholder="Enter new password"
+                            :disabled="loadingPassword"
+                            show-validation
+                            class="mb-4"
+                        />
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                Confirm New Password
-                            </label>
-                            <UInput v-model="passwordForm.confirmPassword" type="password"
-                                placeholder="Confirm new password" size="lg" />
-                        </div>
+                        <UPassword
+                            v-model="passwordForm.confirmPassword"
+                            label="Confirm New Password"
+                            placeholder="Confirm new password"
+                            :disabled="loadingPassword"
+                            :error="!!(passwordForm.confirmPassword && !passwordsMatch)"
+                            :error-message="confirmPasswordError"
+                            class="mb-4"
+                        />
 
                         <div class="flex gap-3 pt-4">
                             <UButton @click="changePassword" :loading="loadingPassword" color="primary">
@@ -628,8 +644,14 @@ const getSessionDeviceName = (userAgent?: string) => {
 
             <template #body>
                 <div v-if="twoFactorStep === 'confirm-password'" class="space-y-4">
-                    <UInput v-model="twoFactorPassword" type="password" placeholder="Current Password"
-                        @keyup.enter="enableTwoFactor" class="w-full" />
+                    <UPassword
+                        v-model="twoFactorPassword"
+                        label="Current Password"
+                        placeholder="Confirm your password"
+                        :disabled="loadingTwoFactor"
+                        @keyup.enter="enableTwoFactor"
+                        class="w-full"
+                    />
                 </div>
 
                 <div v-else-if="twoFactorStep === 'scan-qr' && twoFactorData" class="space-y-6">

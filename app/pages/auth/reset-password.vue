@@ -17,7 +17,6 @@ const formState = ref({
 const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
-const showPassword = ref(false)
 
 // Validate form in real-time
 const isPasswordValid = computed(() => {
@@ -28,6 +27,13 @@ const isPasswordValid = computed(() => {
 const passwordsMatch = computed(() => {
   if (!formState.value.password || !formState.value.confirmPassword) return true
   return formState.value.password === formState.value.confirmPassword
+})
+
+const confirmPasswordError = computed(() => {
+  if (formState.value.confirmPassword && !passwordsMatch.value) {
+    return 'Passwords do not match'
+  }
+  return null
 })
 
 const isFormValid = computed(() => {
@@ -188,62 +194,26 @@ const handleResetPassword = async (event: Event) => {
             />
 
             <!-- Password Input -->
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                New password
-              </label>
-            <UInput
+            <UPassword
               v-model="formState.password"
-              :type="showPassword ? 'text' : 'password'"
+              label="New password"
               placeholder="Enter new password"
-              size="lg"
               :disabled="loading || success"
-              :color="formState.password && !isPasswordValid ? 'error' : undefined"
-              class="w-full"
-              :ui="{ trailing: 'pe-1' }"
-            >
-              <template #leading>
-                <Icon name="heroicons:lock-closed-20-solid" class="w-4 h-4 text-gray-400 dark:text-gray-500" />
-              </template>
-              <template #trailing>
-                <UButton
-                  color="neutral"
-                  variant="link"
-                  size="sm"
-                  :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                  :aria-label="showPassword ? 'Hide password' : 'Show password'"
-                  :aria-pressed="showPassword"
-                  @click="showPassword = !showPassword"
-                />
-              </template>
-            </UInput>
-            <p v-if="formState.password && !isPasswordValid" class="text-red-500 text-xs mt-1.5">
-              Password must be at least 8 characters
-            </p>
-          </div>
+              :error="!!(formState.password && !isPasswordValid)"
+              show-validation
+              class="mb-4"
+            />
 
           <!-- Confirm Password Input -->
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Confirm new password
-            </label>
-            <UInput
+            <UPassword
               v-model="formState.confirmPassword"
-              type="password"
+              label="Confirm new password"
               placeholder="Confirm new password"
-              size="lg"
               :disabled="loading || success"
-              :color="formState.confirmPassword && !passwordsMatch ? 'error' : undefined"
-              class="w-full"
-            >
-              <template #leading>
-                <Icon name="heroicons:lock-closed-20-solid" class="w-4 h-4 text-gray-400 dark:text-gray-500" />
-              </template>
-            </UInput>
-            <p v-if="formState.confirmPassword && !passwordsMatch" class="text-red-500 text-xs mt-1.5">
-              Passwords do not match
-            </p>
-          </div>
+              :error="!!(formState.confirmPassword && !passwordsMatch)"
+              :error-message="confirmPasswordError"
+              class="mb-4"
+            />
 
             <!-- Submit Button -->
             <UButton
