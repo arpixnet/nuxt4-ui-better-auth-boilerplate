@@ -196,13 +196,14 @@ const handleForgotPassword = async (event: Event) => {
           </UButton>
 
           <!-- Back to Login -->
-          <div class="text-center">
-            <ULink
+          <div class="text-center mt-4">
+            <UButton
               to="/auth/login"
-              class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              variant="link"
+              color="neutral"
             >
-              ← Back to sign in
-            </ULink>
+              ← Back to Sign In
+            </UButton>
           </div>
         </form>
       </div>

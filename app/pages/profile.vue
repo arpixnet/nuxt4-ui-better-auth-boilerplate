@@ -629,7 +629,7 @@ const getSessionDeviceName = (userAgent?: string) => {
 
                 <!-- Back to Dashboard -->
                 <div class="flex justify-center pt-4">
-                    <UButton to="/dashboard" color="neutral" variant="ghost">
+                    <UButton to="/dashboard" variant="link" color="neutral">
                         ← Back to Dashboard
                     </UButton>
                 </div>

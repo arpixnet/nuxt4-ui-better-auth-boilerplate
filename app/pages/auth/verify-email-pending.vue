@@ -163,13 +163,11 @@ const goBackToLogin = () => {
 
         <!-- Back to Login -->
         <UButton
+          variant="link"
           color="neutral"
-          variant="ghost"
-          size="lg"
-          block
           @click="goBackToLogin"
         >
-          Back to Login
+          ← Back to Login
         </UButton>
       </UCard>
     </div>

@@ -91,15 +91,13 @@ const email = computed(() => route.query.email as string || 'your email')
 
         <!-- Buttons -->
         <div class="space-y-3">
-          <ULink
+          <UButton
             to="/auth/login"
-            class="flex items-center justify-center w-full text-center bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-lg shadow-md shadow-gray-200/50 dark:shadow-gray-900/50 transition-all duration-200"
+            variant="link"
+            color="neutral"
           >
-            <span class="flex items-center justify-center gap-2">
-              Back to Sign In
-              <Icon name="heroicons:arrow-right-20-solid" class="w-4 h-4" />
-            </span>
-          </ULink>
+            ← Back to Sign In
+          </UButton>
 
           <ULink
             to="/auth/forgot-password"

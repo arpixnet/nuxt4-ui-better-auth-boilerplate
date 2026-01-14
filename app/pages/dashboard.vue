@@ -65,8 +65,8 @@ watchEffect(() => {
       </div>
     </template>
 
-    <NuxtLink to="/" class="text-blue-600 hover:underline">
-      Back to Home
-    </NuxtLink>
+    <UButton to="/" variant="link" color="neutral">
+      ← Back to Home
+    </UButton>
   </div>
 </template>

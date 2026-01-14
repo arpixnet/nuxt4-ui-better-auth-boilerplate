@@ -301,7 +301,7 @@ const handleTwoFactorVerify = async () => {
 
             <div class="text-center mt-4">
               <UButton variant="link" color="neutral" @click="requiresTwoFactor = false">
-                Back to Login
+                ← Back to Login
               </UButton>
             </div>
           </div>
