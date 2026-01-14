@@ -93,8 +93,8 @@ const handleLogin = async (event: any) => {
     console.log('[Login] Response from signIn.email:', response)
     console.log('[Login] Response data:', response.data)
     console.log('[Login] Response error:', response.error)
-    console.log('[Login] twoFactorRedirect in response:', "twoFactorRedirect" in response)
-    console.log('[Login] twoFactorRedirect in response.data:', "twoFactorRedirect" in response.data)
+    console.log('[Login] twoFactorRedirect in response:', response?.data?.twoFactorRedirect ? 'present' : 'not present')
+    console.log('[Login] twoFactorRedirect in response.data:', "twoFactorRedirect" in (response?.data || {}))
 
     // Check for 2FA requirement
     if (response.data?.twoFactorRedirect) {
