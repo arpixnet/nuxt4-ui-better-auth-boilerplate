@@ -7,7 +7,7 @@ definePageMeta({
     requiresAuth: true
 })
 
-const { session, pending } = useAuthSession()
+const { session, pending, refresh } = useAuthSession()
 const authClient = useAuthClient()
 const toast = useToast()
 
@@ -68,6 +68,9 @@ const updateProfile = async () => {
         })
 
         if (error) throw error
+
+        // Refresh session to reflect updated user data
+        await refresh()
 
         toast.add({
             title: 'Success',
@@ -425,7 +428,7 @@ const getSessionDeviceName = (userAgent?: string) => {
 
                     <div v-if="!isEditingProfile" class="space-y-4">
                         <div>
-                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Name</label>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Username</label>
                             <p class="mt-1 text-base text-gray-900 dark:text-white">
                                 {{ session.data.user.name || 'Not set' }}
                             </p>
@@ -463,7 +466,7 @@ const getSessionDeviceName = (userAgent?: string) => {
                     <div v-else class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                Name
+                                Username
                             </label>
                             <UInput v-model="profileForm.name" type="text" placeholder="Enter your name" size="lg" />
                         </div>
