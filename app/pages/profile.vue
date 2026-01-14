@@ -38,6 +38,15 @@ const twoFactorPassword = ref('')
 const twoFactorVerifyCode = ref('')
 const loadingTwoFactor = ref(false)
 
+// Active Sessions State
+const sessions = ref<any[]>([])
+const loadingSessions = ref(false)
+const showSessionsModal = ref(false)
+const revokingSessionId = ref<string | null>(null)
+
+// Delete Account State
+const loadingDelete = ref(false)
+
 // Initialize profile data and check 2FA status
 watch(() => session.value.data?.user, (user) => {
     if (user) {
@@ -246,6 +255,136 @@ const disableTwoFactor = async () => {
         loadingTwoFactor.value = false
     }
 }
+
+
+// Active Sessions Handlers
+const openSessionsModal = async () => {
+    showSessionsModal.value = true
+    await fetchSessions()
+}
+
+const fetchSessions = async () => {
+    loadingSessions.value = true
+    try {
+        const response = await authClient.listSessions()
+        if (response.data) {
+            sessions.value = response.data
+        }
+    } catch (error: any) {
+        toast.add({
+            title: 'Error',
+            description: 'Failed to load sessions',
+            color: 'error'
+        })
+    } finally {
+        loadingSessions.value = false
+    }
+}
+
+const revokeSession = async (token: string) => {
+    revokingSessionId.value = token
+    try {
+        const response = await authClient.revokeSession({
+            token // Pass the token of the session to revoke
+        })
+
+        if (response.error) throw response.error
+
+        toast.add({
+            title: 'Success',
+            description: 'Session revoked successfully',
+            color: 'success'
+        })
+
+        // Refresh list
+        await fetchSessions()
+    } catch (error: any) {
+        toast.add({
+            title: 'Error',
+            description: error.message || 'Failed to revoke session',
+            color: 'error'
+        })
+    } finally {
+        revokingSessionId.value = null
+    }
+}
+
+const revokeOtherSessions = async () => {
+    if (!confirm('Are you sure you want to log out from all other devices?')) return
+
+    try {
+        const currentToken = session.value.data?.session.token
+        const others = sessions.value.filter(s => s.token !== currentToken)
+
+        const promises = others.map(s => authClient.revokeSession({ token: s.token }))
+        await Promise.all(promises)
+
+        toast.add({
+            title: 'Success',
+            description: 'All other sessions revoked',
+            color: 'success'
+        })
+        await fetchSessions()
+    } catch (error: any) {
+        toast.add({
+            title: 'Error',
+            description: 'Failed to revoke sessions',
+            color: 'error'
+        })
+    }
+}
+
+// Delete Account Handler
+const deleteAccount = async () => {
+    if (!confirm('DANGER: Are you sure you want to delete your account? This action CANNOT be undone and all your data will be lost forever.')) return
+
+    // Double confirmation
+    const email = session.value.data?.user?.email
+    const confirmation = prompt(`To confirm, please type your email: ${email}`)
+
+    if (confirmation !== email) {
+        toast.add({
+            title: 'Cancelled',
+            description: 'Email verification failed. Account deletion cancelled.',
+            color: 'warning'
+        })
+        return
+    }
+
+    loadingDelete.value = true
+    try {
+        const response = await authClient.deleteUser()
+
+        if (response.error) throw response.error
+
+        toast.add({
+            title: 'Account Deleted',
+            description: 'Your account has been successfully deleted. Goodbye.',
+            color: 'success'
+        })
+
+        // Redirect to home/login
+        window.location.href = '/'
+    } catch (error: any) {
+        toast.add({
+            title: 'Error',
+            description: error.message || 'Failed to delete account',
+            color: 'error'
+        })
+    } finally {
+        loadingDelete.value = false
+    }
+}
+
+const getSessionDeviceName = (userAgent?: string) => {
+    if (!userAgent) return 'Unknown Device'
+    if (userAgent.includes('Mac')) return 'Mac OS'
+    if (userAgent.includes('Windows')) return 'Windows'
+    if (userAgent.includes('Android')) return 'Android'
+    if (userAgent.includes('iPhone')) return 'iPhone'
+    if (userAgent.includes('Linux')) return 'Linux'
+    return 'Device'
+}
 </script>
 
 <template>
@@ -437,7 +576,7 @@ const disableTwoFactor = async () => {
                                     Manage devices where you're currently signed in
                                 </p>
                             </div>
-                            <UButton color="neutral" variant="soft" size="sm" disabled>
+                            <UButton color="neutral" variant="soft" size="sm" @click="openSessionsModal">
                                 View Sessions
                             </UButton>
                         </div>
@@ -459,7 +598,8 @@ const disableTwoFactor = async () => {
                                     Permanently delete your account and all data
                                 </p>
                             </div>
-                            <UButton color="error" variant="soft" size="sm" disabled>
+                            <UButton color="error" variant="soft" size="sm" @click="deleteAccount"
+                                :loading="loadingDelete">
                                 Delete Account
                             </UButton>
                         </div>
@@ -530,6 +670,62 @@ const disableTwoFactor = async () => {
                         Verify & Activate
                     </UButton>
                 </div>
+            </template>
+        </UModal>
+
+        <!-- Active Sessions Modal -->
+        <UModal v-model:open="showSessionsModal" title="Active Sessions"
+            description="Manage devices where you are currently signed in.">
+            <template #body>
+                <div class="space-y-4">
+                    <UButton v-if="sessions.length > 1" color="error" variant="soft" size="xs" class="mb-2"
+                        @click="revokeOtherSessions">
+                        Revoke All Other Sessions
+                    </UButton>
+
+                    <div v-if="sessions.length === 0 && !loadingSessions" class="text-center py-4 text-gray-500">
+                        No active sessions found.
+                    </div>
+
+                    <div v-else class="space-y-3">
+                        <div v-for="sess in sessions" :key="sess.id"
+                            class="flex items-start justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                            <div class="flex gap-3">
+                                <div class="mt-1">
+                                    <UIcon
+                                        :name="sess.userAgent?.includes('Mobile') ? 'heroicons:device-phone-mobile' : 'heroicons:computer-desktop'"
+                                        class="w-5 h-5 text-gray-400" />
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">
+                                            {{ getSessionDeviceName(sess.userAgent) }}
+                                        </span>
+                                        <UBadge v-if="sess.isCurrent" color="success" variant="subtle" size="xs">Current
+                                        </UBadge>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1 truncate max-w-[200px]"
+                                        :title="sess.userAgent">
+                                        {{ sess.userAgent }}
+                                    </p>
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        IP: {{ sess.ipAddress || 'Unknown' }}
+                                    </p>
+                                    <p class="text-xs text-gray-400">
+                                        Active: {{ new Date(sess.createdAt).toLocaleDateString() }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <UButton v-if="!sess.isCurrent" color="neutral" variant="ghost" icon="heroicons:trash"
+                                size="xs" :loading="revokingSessionId === sess.token"
+                                @click="revokeSession(sess.token)" />
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <template #footer>
+                <UButton color="neutral" variant="ghost" @click="showSessionsModal = false">Close</UButton>
             </template>
         </UModal>
     </div>

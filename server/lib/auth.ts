@@ -141,11 +141,17 @@ export const auth = betterAuth({
     expiresIn: parseInt(process.env.BETTER_AUTH_SESSION_EXPIRES_IN || "") || 60 * 60 * 24 * 7,
     updateAge: parseInt(process.env.BETTER_AUTH_SESSION_UPDATE_AGE || "") || 60 * 60 * 24,
     cookieCache: {
-      enabled: true,
+      enabled: false,
       maxAge: parseInt(process.env.BETTER_AUTH_COOKIE_MAX_AGE || "") || 5 * 60,
       strategy: "jwt",
       refreshCache: true,
     }
+  },
+  
+  user: {
+    deleteUser: {
+      enabled: true,
+    },
   },
 
   plugins: [
