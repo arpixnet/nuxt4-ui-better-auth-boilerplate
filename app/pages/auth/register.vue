@@ -3,6 +3,7 @@ import { useAuthClient } from '~/lib/auth-client'
 import { navigateTo } from '#app'
 import { useRuntimeConfig } from '#app'
 import { registerSchema } from '~/schemas/auth'
+import { useI18n } from '#imports'
 
 // Apply middleware to check if registration is allowed
 definePageMeta({
@@ -11,6 +12,7 @@ definePageMeta({
 
 // Auth configuration
 const { config: authPageConfig, getDecorativePanel, getGradientStyle } = useAuthConfig()
+const { t } = useI18n()
 const panelConfig = getDecorativePanel('register')
 
 // Computed style for gradient background
@@ -106,20 +108,20 @@ const handleRegister = async (event: any) => {
       }, 500)
     } else {
       // Better-Auth returned an error
-      throw new Error(response?.error?.message || 'Registration failed')
+      throw new Error(response?.error?.message || t('auth.register.errorGeneric'))
     }
   } catch (err: any) {
     console.error('Registration error:', err)
     
     // Handle different types of errors
     if (err.message?.includes('email') || err.message?.includes('already')) {
-      error.value = 'Email already in use'
+      error.value = t('auth.register.errorEmailExists')
     } else if (err.message?.includes('password')) {
-      error.value = 'Password requirements not met'
+      error.value = t('auth.register.errorPassword')
     } else if (err.message?.includes('network') || err.code === 'NETWORK_ERROR') {
-      error.value = 'Network error. Please check your connection.'
+      error.value = t('auth.register.errorNetwork')
     } else {
-      error.value = err.message || 'An error occurred. Please try again.'
+      error.value = err.message || t('auth.register.errorGeneric')
     }
   } finally {
     loading.value = false
@@ -132,8 +134,8 @@ const handleRegister = async (event: any) => {
     <!-- Left Side - Form -->
     <div class="w-full lg:w-1/2 h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 overflow-y-auto">
       <div class="w-full max-w-md h-full flex flex-col justify-between">
-        <!-- Logo/Brand -->
-        <div class="mb-6">
+        <!-- Logo/Brand with Language Selector -->
+        <div class="mb-6 flex items-center justify-between">
           <NuxtLink to="/">
             <img
               v-if="authPageConfig.logo.imageUrl"
@@ -148,9 +150,10 @@ const handleRegister = async (event: any) => {
                 `text-${authPageConfig.logo.size}`
               ]"
             >
-              {{ authPageConfig.logo.text }}
+              {{ t('common.appName') }}
             </h2>
           </NuxtLink>
+          <LanguageSelector />
         </div>
 
         <div>
@@ -160,10 +163,10 @@ const handleRegister = async (event: any) => {
           <!-- Header -->
           <div class="mb-4">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-              Create Account
+              {{ t('auth.register.title') }}
             </h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-              {{ authPageConfig.formSubtitle.register }}
+              {{ t('auth.register.subtitle') }}
             </p>
           </div>
 
@@ -198,7 +201,7 @@ const handleRegister = async (event: any) => {
             <!-- Email Input -->
             <div class="mb-3">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Email address
+                {{ t('auth.register.email') }}
               </label>
               <UInput
                 v-model="formState.email"
@@ -222,7 +225,7 @@ const handleRegister = async (event: any) => {
             <!-- Password Input -->
             <UPassword
               v-model="formState.password"
-              label="Password"
+              :label="t('auth.register.password')"
               placeholder="Enter Password"
               :disabled="loading"
               :error="!!(formState.password && !isPasswordValid)"
@@ -242,23 +245,23 @@ const handleRegister = async (event: any) => {
               class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold shadow-md shadow-gray-200/50 dark:shadow-gray-900/50 transition-all duration-200 cursor-pointer"
             >
               <span v-if="!loading" class="flex items-center justify-center gap-2">
-                Create Account
+                {{ t('auth.register.createAccount') }}
                 <Icon name="heroicons:arrow-right-20-solid" class="w-4 h-4" />
               </span>
-              <span v-else>Creating account...</span>
+              <span v-else>{{ t('auth.register.creatingAccount') }}</span>
             </UButton>
           </UForm>
 
           <!-- Login Link -->
           <div class="text-center mt-4">
             <span class="text-sm text-gray-500 dark:text-gray-400">
-              Already have an account?
+              {{ t('auth.register.hasAccount') }}
             </span>
             <ULink
               to="/auth/login"
               class="text-sm font-semibold text-gray-900 dark:text-white hover:underline ml-1"
             >
-              Sign in
+              {{ t('auth.register.signIn') }}
             </ULink>
           </div>
         </div>
@@ -266,10 +269,10 @@ const handleRegister = async (event: any) => {
         <!-- Footer -->
         <div class="mt-4">
           <p class="text-xs text-gray-400 dark:text-gray-500">
-            Your data is protected with industry-grade encryption
+            {{ t('common.footer.encryption') }}
           </p>
           <p class="text-xs text-gray-400 dark:text-gray-500">
-            © {{ new Date().getFullYear() }} {{ authPageConfig.logo.text }}. All rights reserved.
+            © {{ new Date().getFullYear() }} {{ t('common.appName') }}. {{ t('common.footer.copyright') }}
           </p>
         </div>
       </div>
@@ -289,8 +292,8 @@ const handleRegister = async (event: any) => {
       <div v-if="panelConfig.backgroundImage" class="absolute inset-0 bg-black/40"></div>
 
       <div class="text-center text-white relative z-10">
-        <h2 class="text-4xl font-bold mb-3">{{ panelConfig.title }}</h2>
-        <p class="text-lg opacity-90">{{ panelConfig.subtitle }}</p>
+        <h2 class="text-4xl font-bold mb-3">{{ t('auth.register.panelTitle') }}</h2>
+        <p class="text-lg opacity-90">{{ t('auth.register.panelSubtitle') }}</p>
       </div>
     </div>
   </div>

@@ -1,21 +1,20 @@
 /**
  * Authentication Pages Configuration
  * 
- * This file contains all customizable settings for login and register pages.
- * Modify these values to personalize your authentication experience.
+ * This file contains technical settings for login and register pages.
+ * All text content is managed through i18n (en.json, es.json).
+ * 
+ * Modify these values to personalize the visual appearance.
  */
 
 export interface AuthPageConfig {
   logo: {
-    text: string
-    size: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
     imageUrl?: string
     imageAlt?: string
+    size: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   }
   decorativePanel: {
     login: {
-      title: string
-      subtitle: string
       gradient: {
         light: {
           from: string
@@ -31,8 +30,6 @@ export interface AuthPageConfig {
       backgroundImage?: string
     }
     register: {
-      title: string
-      subtitle: string
       gradient: {
         light: {
           from: string
@@ -48,27 +45,16 @@ export interface AuthPageConfig {
       backgroundImage?: string
     }
   }
-  formSubtitle: {
-    login: string
-    register: string
-  }
 }
 
 export const authConfig: AuthPageConfig = {
   logo: {
-    text: 'Arpix Solutions',
     size: '2xl',
     // imageUrl: '/logo.svg', // Uncomment and set path to use an image logo
     // imageAlt: 'Company Logo',
   },
-  formSubtitle: {
-    login: 'Log in to continue your application journey',
-    register: 'Join us to get started with your application',
-  },
   decorativePanel: {
     login: {
-      title: 'Welcome to Arpix Solutions',
-      subtitle: 'Your trusted partner for innovative solutions',
       gradient: {
         light: {
           from: 'black',
@@ -84,8 +70,6 @@ export const authConfig: AuthPageConfig = {
       // backgroundImage: '/images/login-bg.jpg', // Optional background image
     },
     register: {
-      title: 'Join Arpix Solutions Today',
-      subtitle: 'Start your journey with us today',
       gradient: {
         light: {
           from: 'black',

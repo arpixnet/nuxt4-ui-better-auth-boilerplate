@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { useAuthClient } from '~/lib/auth-client'
 import VueQrcode from '@chenfengyuan/vue-qrcode'
+import { useI18n } from '#imports'
 
 definePageMeta({
     middleware: 'auth',
     requiresAuth: true
 })
+
+const { t } = useI18n()
 
 const { session, pending, refresh } = useAuthSession()
 const authClient = useAuthClient()
@@ -38,7 +41,7 @@ const passwordsMatch = computed(() => {
 
 const confirmPasswordError = computed(() => {
     if (passwordForm.value.confirmPassword && !passwordsMatch.value) {
-        return 'Passwords do not match'
+        return t('profile.validation.passwordNotMatch')
     }
     return null
 })
@@ -91,16 +94,16 @@ const updateProfile = async () => {
         await refresh()
 
         toast.add({
-            title: 'Success',
-            description: 'Profile updated successfully',
+            title: t('profile.toasts.success'),
+            description: t('profile.toasts.profileUpdated'),
             color: 'success'
         })
 
         isEditingProfile.value = false
     } catch (error: any) {
         toast.add({
-            title: 'Error',
-            description: error.message || 'Failed to update profile',
+            title: t('profile.toasts.error'),
+            description: error.message || t('profile.errors.updateProfile'),
             color: 'error'
         })
     } finally {
@@ -112,8 +115,8 @@ const updateProfile = async () => {
 const changePassword = async () => {
     if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
         toast.add({
-            title: 'Error',
-            description: 'Passwords do not match',
+            title: t('profile.toasts.error'),
+            description: t('profile.validation.passwordNotMatch'),
             color: 'error'
         })
         return
@@ -121,7 +124,7 @@ const changePassword = async () => {
 
     if (passwordForm.value.newPassword.length < 8) {
         toast.add({
-            title: 'Error',
+            title: t('profile.toasts.error'),
             description: 'Password must be at least 8 characters',
             color: 'error'
         })
@@ -140,8 +143,8 @@ const changePassword = async () => {
         if (error) throw error
 
         toast.add({
-            title: 'Success',
-            description: 'Password changed successfully',
+            title: t('profile.toasts.success'),
+            description: t('profile.toasts.passwordChanged'),
             color: 'success'
         })
 
@@ -153,8 +156,8 @@ const changePassword = async () => {
         }
     } catch (error: any) {
         toast.add({
-            title: 'Error',
-            description: error.message || 'Failed to change password',
+            title: t('profile.toasts.error'),
+            description: error.message || t('profile.errors.changePassword'),
             color: 'error'
         })
     } finally {
@@ -205,8 +208,8 @@ const enableTwoFactor = async () => {
         }
     } catch (error: any) {
         toast.add({
-            title: 'Error',
-            description: error.message || 'Incorrect password',
+            title: t('profile.toasts.error'),
+            description: error.message || t('profile.errors.incorrectPassword'),
             color: 'error'
         })
     } finally {
@@ -226,8 +229,8 @@ const verifyTwoFactor = async () => {
             twoFactorEnabled.value = true
             showTwoFactorModal.value = false
             toast.add({
-                title: 'Success',
-                description: 'Two-Factor Authentication enabled successfully!',
+                title: t('profile.toasts.success'),
+                description: t('profile.toasts.twoFactorEnabled'),
                 color: 'success'
             })
             // Ideally show backup codes here again or confusing user?
@@ -237,8 +240,8 @@ const verifyTwoFactor = async () => {
         }
     } catch (error: any) {
         toast.add({
-            title: 'Error',
-            description: error.message || 'Verification failed',
+            title: t('profile.toasts.error'),
+            description: error.message || t('profile.errors.invalidCode'),
             color: 'error'
         })
     } finally {
@@ -265,14 +268,14 @@ const confirmDisableTwoFactor = async () => {
         twoFactorEnabled.value = false
         showDisableTwoFactorModal.value = false
         toast.add({
-            title: 'Success',
-            description: 'Two-Factor Authentication disabled',
+            title: t('profile.toasts.success'),
+            description: t('profile.toasts.twoFactorDisabled'),
             color: 'success'
         })
     } catch (error: any) {
         toast.add({
-            title: 'Error',
-            description: error.message || 'Failed to disable 2FA',
+            title: t('profile.toasts.error'),
+            description: error.message || t('profile.errors.disable2FA'),
             color: 'error'
         })
     } finally {
@@ -296,8 +299,8 @@ const fetchSessions = async () => {
         }
     } catch (error: any) {
         toast.add({
-            title: 'Error',
-            description: 'Failed to load sessions',
+            title: t('profile.toasts.error'),
+            description: t('profile.errors.loadSessions'),
             color: 'error'
         })
     } finally {
@@ -315,8 +318,8 @@ const revokeSession = async (token: string) => {
         if (response.error) throw response.error
 
         toast.add({
-            title: 'Success',
-            description: 'Session revoked successfully',
+            title: t('profile.toasts.success'),
+            description: t('profile.toasts.sessionRevoked'),
             color: 'success'
         })
 
@@ -324,8 +327,8 @@ const revokeSession = async (token: string) => {
         await fetchSessions()
     } catch (error: any) {
         toast.add({
-            title: 'Error',
-            description: error.message || 'Failed to revoke session',
+            title: t('profile.toasts.error'),
+            description: error.message || t('profile.errors.revokeSession'),
             color: 'error'
         })
     } finally {
@@ -346,16 +349,16 @@ const confirmRevokeAllSessions = async () => {
         await Promise.all(promises)
 
         toast.add({
-            title: 'Success',
-            description: 'All other sessions revoked',
+            title: t('profile.toasts.success'),
+            description: t('profile.toasts.allSessionsRevoked'),
             color: 'success'
         })
         showRevokeAllModal.value = false
         await fetchSessions()
     } catch (error: any) {
         toast.add({
-            title: 'Error',
-            description: 'Failed to revoke sessions',
+            title: t('profile.toasts.error'),
+            description: t('profile.errors.revokeAllSessions'),
             color: 'error'
         })
     }
@@ -374,8 +377,8 @@ const confirmDeleteAccount = async () => {
         if (response.error) throw response.error
 
         toast.add({
-            title: 'Account Deleted',
-            description: 'Your account has been successfully deleted. Goodbye.',
+            title: t('profile.toasts.success'),
+            description: t('profile.toasts.accountDeleted'),
             color: 'success'
         })
 
@@ -383,8 +386,8 @@ const confirmDeleteAccount = async () => {
         window.location.href = '/'
     } catch (error: any) {
         toast.add({
-            title: 'Error',
-            description: error.message || 'Failed to delete account',
+            title: t('profile.toasts.error'),
+            description: error.message || t('profile.errors.deleteAccount'),
             color: 'error'
         })
     } finally {
@@ -394,13 +397,13 @@ const confirmDeleteAccount = async () => {
 }
 
 const getSessionDeviceName = (userAgent?: string) => {
-    if (!userAgent) return 'Unknown Device'
-    if (userAgent.includes('Mac')) return 'Mac OS'
-    if (userAgent.includes('Windows')) return 'Windows'
-    if (userAgent.includes('Android')) return 'Android'
-    if (userAgent.includes('iPhone')) return 'iPhone'
-    if (userAgent.includes('Linux')) return 'Linux'
-    return 'Device'
+    if (!userAgent) return t('profile.deviceNames.unknown')
+    if (userAgent.includes('Mac')) return t('profile.deviceNames.macOS')
+    if (userAgent.includes('Windows')) return t('profile.deviceNames.windows')
+    if (userAgent.includes('Android')) return t('profile.deviceNames.android')
+    if (userAgent.includes('iPhone')) return t('profile.deviceNames.iphone')
+    if (userAgent.includes('Linux')) return t('profile.deviceNames.linux')
+    return t('profile.deviceNames.device')
 }
 </script>
 
@@ -409,9 +412,9 @@ const getSessionDeviceName = (userAgent?: string) => {
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header -->
             <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Profile Settings</h1>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ t('profile.title') }}</h1>
                 <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    Manage your account settings and preferences
+                    {{ t('profile.subtitle') }}
                 </p>
             </div>
 
@@ -420,7 +423,7 @@ const getSessionDeviceName = (userAgent?: string) => {
                 <div class="flex flex-col items-center gap-4">
                     <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin">
                     </div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Loading profile...</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">{{ t('profile.loading') }}</p>
                 </div>
             </div>
 
@@ -430,40 +433,40 @@ const getSessionDeviceName = (userAgent?: string) => {
                 <UCard>
                     <template #header>
                         <div class="flex items-center justify-between">
-                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Profile Information</h2>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ t('profile.profileInfo') }}</h2>
                             <UButton v-if="!isEditingProfile" @click="isEditingProfile = true" color="primary"
                                 variant="soft" size="sm">
-                                Edit Profile
+                                {{ t('profile.editProfile') }}
                             </UButton>
                         </div>
                     </template>
 
                     <div v-if="!isEditingProfile" class="space-y-4">
                         <div>
-                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Username</label>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('profile.username') }}</label>
                             <p class="mt-1 text-base text-gray-900 dark:text-white">
-                                {{ session.data.user.name || 'Not set' }}
+                                {{ session.data.user.name || t('profile.notSet') }}
                             </p>
                         </div>
 
                         <div>
-                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</label>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('profile.email') }}</label>
                             <p class="mt-1 text-base text-gray-900 dark:text-white">
                                 {{ session.data.user.email }}
                             </p>
                         </div>
 
                         <div>
-                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Email Verified</label>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('profile.emailVerified') }}</label>
                             <div class="mt-1 flex items-center gap-2">
                                 <UBadge :color="session.data.user.emailVerified ? 'success' : 'warning'">
-                                    {{ session.data.user.emailVerified ? 'Verified' : 'Not Verified' }}
+                                    {{ session.data.user.emailVerified ? t('profile.verified') : t('profile.notVerified') }}
                                 </UBadge>
                             </div>
                         </div>
 
                         <div>
-                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Member Since</label>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('profile.memberSince') }}</label>
                             <p class="mt-1 text-base text-gray-900 dark:text-white">
                                 {{ new Date(session.data.user.createdAt).toLocaleDateString('en-US', {
                                     year: 'numeric',
@@ -478,28 +481,28 @@ const getSessionDeviceName = (userAgent?: string) => {
                     <div v-else class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                Username
+                                {{ t('profile.username') }}
                             </label>
                             <UInput v-model="profileForm.name" type="text" placeholder="Enter your name" size="lg" />
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                Email
+                                {{ t('profile.email') }}
                             </label>
                             <UInput v-model="profileForm.email" type="email" placeholder="Enter your email" size="lg"
                                 disabled />
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Email cannot be changed currently
+                                {{ t('profile.emailNotChangeable') }}
                             </p>
                         </div>
 
                         <div class="flex gap-3 pt-4">
                             <UButton @click="updateProfile" :loading="loadingProfile" color="primary">
-                                Save Changes
+                                {{ t('profile.saveChanges') }}
                             </UButton>
                             <UButton @click="cancelEdit" color="neutral" variant="soft">
-                                Cancel
+                                {{ t('profile.cancel') }}
                             </UButton>
                         </div>
                     </div>
@@ -509,24 +512,24 @@ const getSessionDeviceName = (userAgent?: string) => {
                 <UCard>
                     <template #header>
                         <div class="flex items-center justify-between">
-                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Change Password</h2>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ t('profile.changePassword') }}</h2>
                             <UButton v-if="!isChangingPassword" @click="isChangingPassword = true" color="primary"
                                 variant="soft" size="sm">
-                                Change Password
+                                {{ t('profile.changePassword') }}
                             </UButton>
                         </div>
                     </template>
 
                     <div v-if="!isChangingPassword">
                         <p class="text-sm text-gray-600 dark:text-gray-400">
-                            Keep your account secure by using a strong password.
+                            {{ t('profile.passwordDescription') }}
                         </p>
                     </div>
 
                     <div v-else class="space-y-4">
                         <UPassword
                             v-model="passwordForm.currentPassword"
-                            label="Current Password"
+                            :label="t('profile.currentPassword')"
                             placeholder="Enter current password"
                             :disabled="loadingPassword"
                             class="mb-4"
@@ -534,7 +537,7 @@ const getSessionDeviceName = (userAgent?: string) => {
 
                         <UPassword
                             v-model="passwordForm.newPassword"
-                            label="New Password"
+                            :label="t('profile.newPassword')"
                             placeholder="Enter new password"
                             :disabled="loadingPassword"
                             show-validation
@@ -543,7 +546,7 @@ const getSessionDeviceName = (userAgent?: string) => {
 
                         <UPassword
                             v-model="passwordForm.confirmPassword"
-                            label="Confirm New Password"
+                            :label="t('profile.confirmPassword')"
                             placeholder="Confirm new password"
                             :disabled="loadingPassword"
                             :error="!!(passwordForm.confirmPassword && !passwordsMatch)"
@@ -553,10 +556,10 @@ const getSessionDeviceName = (userAgent?: string) => {
 
                         <div class="flex gap-3 pt-4">
                             <UButton @click="changePassword" :loading="loadingPassword" color="primary">
-                                Update Password
+                                {{ t('profile.updatePassword') }}
                             </UButton>
                             <UButton @click="cancelPasswordChange" color="neutral" variant="soft">
-                                Cancel
+                                {{ t('profile.cancel') }}
                             </UButton>
                         </div>
                     </div>
@@ -565,39 +568,39 @@ const getSessionDeviceName = (userAgent?: string) => {
                 <!-- Security Card -->
                 <UCard>
                     <template #header>
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Security</h2>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ t('profile.security') }}</h2>
                     </template>
 
                     <div class="space-y-4">
                         <div
                             class="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
                             <div>
-                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">Two-Factor Authentication
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">{{ t('profile.twoFactorAuth') }}
                                 </h3>
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    Add an extra layer of security to your account
+                                    {{ t('profile.twoFactorDescription') }}
                                 </p>
                             </div>
                             <div class="flex items-center gap-3">
-                                <UBadge v-if="twoFactorEnabled" color="success" variant="subtle">Enabled</UBadge>
+                                <UBadge v-if="twoFactorEnabled" color="success" variant="subtle">{{ t('profile.enabled') }}</UBadge>
                                 <UButton :color="twoFactorEnabled ? 'error' : 'primary'"
                                     :variant="twoFactorEnabled ? 'soft' : 'solid'" size="sm"
                                     @click="twoFactorEnabled ? initiateDisableTwoFactor() : initiateTwoFactor()"
                                     :loading="loadingTwoFactor">
-                                    {{ twoFactorEnabled ? 'Disable' : 'Enable 2FA' }}
+                                    {{ twoFactorEnabled ? t('profile.disable') : t('profile.enable') }}
                                 </UButton>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-between py-3">
                             <div>
-                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">Active Sessions</h3>
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">{{ t('profile.activeSessions') }}</h3>
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    Manage devices where you're currently signed in
+                                    {{ t('profile.sessionsDescription') }}
                                 </p>
                             </div>
                             <UButton color="neutral" variant="soft" size="sm" @click="openSessionsModal">
-                                View Sessions
+                                {{ t('profile.viewSessions') }}
                             </UButton>
                         </div>
                     </div>
@@ -606,21 +609,21 @@ const getSessionDeviceName = (userAgent?: string) => {
                 <!-- Danger Zone -->
                 <UCard>
                     <template #header>
-                        <h2 class="text-xl font-semibold text-red-600 dark:text-red-400">Danger Zone</h2>
+                        <h2 class="text-xl font-semibold text-red-600 dark:text-red-400">{{ t('profile.dangerZone') }}</h2>
                     </template>
 
                     <div class="space-y-4">
                         <div
                             class="flex items-center justify-between py-3 border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-950/20">
                             <div>
-                                <h3 class="text-sm font-medium text-red-900 dark:text-red-100">Delete Account</h3>
+                                <h3 class="text-sm font-medium text-red-900 dark:text-red-100">{{ t('profile.deleteAccount') }}</h3>
                                 <p class="text-sm text-red-600 dark:text-red-400 mt-1">
-                                    Permanently delete your account and all data
+                                    {{ t('profile.deleteDescription') }}
                                 </p>
                             </div>
                             <UButton color="error" variant="soft" size="sm" @click="deleteAccount"
                                 :loading="loadingDelete">
-                                Delete Account
+                                {{ t('profile.deleteAccountButton') }}
                             </UButton>
                         </div>
                     </div>
@@ -629,23 +632,22 @@ const getSessionDeviceName = (userAgent?: string) => {
                 <!-- Back to Dashboard -->
                 <div class="flex justify-center pt-4">
                     <UButton to="/dashboard" variant="link" color="neutral">
-                        ← Back to Dashboard
+                        ← {{ t('profile.backToDashboard') }}
                     </UButton>
                 </div>
             </div>
         </div>
 
         <!-- 2FA Setup Modal -->
-        <!-- 2FA Setup Modal -->
         <UModal v-model:open="showTwoFactorModal"
-            :title="twoFactorStep === 'confirm-password' ? 'Setup Two-Factor Authentication' : 'Scan QR Code'"
-            :description="twoFactorStep === 'confirm-password' ? 'Please confirm your password to set up two-factor authentication.' : 'Scan the QR code with your authenticator app.'">
+            :title="twoFactorStep === 'confirm-password' ? t('profile.modals.twoFactor.confirmPasswordTitle') : t('profile.modals.twoFactor.scanQrTitle')"
+            :description="twoFactorStep === 'confirm-password' ? t('profile.modals.twoFactor.confirmPasswordDesc') : t('profile.modals.twoFactor.scanQrDesc')">
 
             <template #body>
                 <div v-if="twoFactorStep === 'confirm-password'" class="space-y-4">
                     <UPassword
                         v-model="twoFactorPassword"
-                        label="Current Password"
+                        :label="t('profile.modals.twoFactor.confirmPassword')"
                         placeholder="Confirm your password"
                         :disabled="loadingTwoFactor"
                         @keyup.enter="enableTwoFactor"
@@ -658,54 +660,44 @@ const getSessionDeviceName = (userAgent?: string) => {
                         <div class="flex justify-center p-4 bg-white rounded-lg">
                             <VueQrcode :value="twoFactorData.totpURI" :options="{ width: 200, margin: 2 }" />
                         </div>
-                        <!-- <p class="text-xs text-gray-500 text-center">
-                            Secret: <span class="font-mono select-all font-bold">{{ twoFactorData.secret }}</span>
-                        </p> -->
                     </div>
 
                     <div class="space-y-2 flex flex-col items-center">
                         <p class="text-center text-sm text-gray-600 dark:text-gray-300">
-                            Enter the 6-digit code from your app to verify.
+                            {{ t('profile.modals.twoFactor.enterCode') }}
                         </p>
                         <UPinInput v-model="twoFactorVerifyCode" :length="6" type="text" otp :autofocus="true"
                             :disabled="loadingTwoFactor" :color="twoFactorVerifyCode.length === 6 ? 'success' : undefined"
                             placeholder="•" />
                     </div>
-
-                    <!-- <div v-if="twoFactorData.backupCodes" class="mt-4">
-                        <p class="text-sm font-semibold mb-2">Backup Codes (Save these!)</p>
-                        <div class="grid grid-cols-2 gap-2 text-xs font-mono bg-gray-50 dark:bg-gray-800 p-2 rounded">
-                            <div v-for="code in twoFactorData.backupCodes" :key="code">{{ code }}</div>
-                        </div>
-                    </div> -->
                 </div>
             </template>
 
             <template #footer>
                 <div class="flex justify-end gap-2 w-full">
-                    <UButton color="neutral" variant="ghost" @click="showTwoFactorModal = false">Cancel</UButton>
+                    <UButton color="neutral" variant="ghost" @click="showTwoFactorModal = false">{{ t('profile.cancel') }}</UButton>
 
                     <UButton v-if="twoFactorStep === 'confirm-password'" color="primary" @click="enableTwoFactor"
                         :loading="loadingTwoFactor" :disabled="!twoFactorPassword">
-                        Continue
+                        {{ t('profile.modals.twoFactor.continue') }}
                     </UButton>
 
                     <UButton v-else color="primary" @click="verifyTwoFactor" :loading="loadingTwoFactor"
                         :disabled="!twoFactorVerifyCode || twoFactorVerifyCode.length < 6">
-                        Verify & Activate
+                        {{ t('profile.modals.twoFactor.verifyAndActivate') }}
                     </UButton>
                 </div>
             </template>
         </UModal>
 
         <!-- Disable 2FA Modal -->
-        <UModal v-model:open="showDisableTwoFactorModal" title="Disable Two-Factor Authentication"
-            description="Please confirm your password to disable two-factor authentication.">
+        <UModal v-model:open="showDisableTwoFactorModal" :title="t('profile.modals.disableTwoFactor.title')"
+            :description="t('profile.modals.disableTwoFactor.description')">
             <template #body>
                 <div class="space-y-4">
                     <UPassword
                         v-model="disableTwoFactorPassword"
-                        label="Current Password"
+                        :label="t('profile.modals.disableTwoFactor.confirmPassword')"
                         placeholder="Confirm your password"
                         :disabled="loadingTwoFactor"
                         @keyup.enter="confirmDisableTwoFactor"
@@ -715,26 +707,26 @@ const getSessionDeviceName = (userAgent?: string) => {
             </template>
             <template #footer>
                 <div class="flex justify-end gap-2 w-full">
-                    <UButton color="neutral" variant="ghost" @click="showDisableTwoFactorModal = false">Cancel</UButton>
+                    <UButton color="neutral" variant="ghost" @click="showDisableTwoFactorModal = false">{{ t('profile.cancel') }}</UButton>
                     <UButton color="error" @click="confirmDisableTwoFactor" :loading="loadingTwoFactor" :disabled="!disableTwoFactorPassword">
-                        Disable 2FA
+                        {{ t('profile.modals.disableTwoFactor.disable2FA') }}
                     </UButton>
                 </div>
             </template>
         </UModal>
 
         <!-- Active Sessions Modal -->
-        <UModal v-model:open="showSessionsModal" title="Active Sessions"
-            description="Manage devices where you are currently signed in.">
+        <UModal v-model:open="showSessionsModal" :title="t('profile.modals.sessions.title')"
+            :description="t('profile.modals.sessions.description')">
             <template #body>
                 <div class="space-y-4">
                     <UButton v-if="sessions.length > 1" color="error" variant="soft" size="xs" class="mb-2"
                         @click="revokeOtherSessions">
-                        Revoke All Other Sessions
+                        {{ t('profile.modals.sessions.revokeAll') }}
                     </UButton>
 
                     <div v-if="sessions.length === 0 && !loadingSessions" class="text-center py-4 text-gray-500">
-                        No active sessions found.
+                        {{ t('profile.modals.sessions.noSessions') }}
                     </div>
 
                     <div v-else class="space-y-3">
@@ -751,7 +743,7 @@ const getSessionDeviceName = (userAgent?: string) => {
                                         <span class="text-sm font-medium text-gray-900 dark:text-white">
                                             {{ getSessionDeviceName(sess.userAgent) }}
                                         </span>
-                                        <UBadge v-if="sess.isCurrent" color="success" variant="subtle" size="xs">Current
+                                        <UBadge v-if="sess.isCurrent" color="success" variant="subtle" size="xs">{{ t('profile.modals.sessions.current') }}
                                         </UBadge>
                                     </div>
                                     <p class="text-xs text-gray-500 mt-1 truncate max-w-50"
@@ -775,38 +767,38 @@ const getSessionDeviceName = (userAgent?: string) => {
                 </div>
             </template>
             <template #footer>
-                <UButton color="neutral" variant="ghost" @click="showSessionsModal = false">Close</UButton>
+                <UButton color="neutral" variant="ghost" @click="showSessionsModal = false">{{ t('profile.modals.sessions.close') }}</UButton>
             </template>
         </UModal>
 
         <!-- Revoke All Sessions Confirmation Modal -->
-        <UModal v-model:open="showRevokeAllModal" title="Revoke All Other Sessions"
-            description="Are you sure you want to log out from all other devices?">
+        <UModal v-model:open="showRevokeAllModal" :title="t('profile.modals.sessions.revokeAllConfirm')"
+            :description="t('profile.modals.sessions.revokeAllConfirmDesc')">
             <template #footer>
                 <div class="flex justify-end gap-2 w-full">
-                    <UButton color="neutral" variant="ghost" @click="showRevokeAllModal = false">Cancel</UButton>
-                    <UButton color="error" @click="confirmRevokeAllSessions">Revoke All</UButton>
+                    <UButton color="neutral" variant="ghost" @click="showRevokeAllModal = false">{{ t('profile.cancel') }}</UButton>
+                    <UButton color="error" @click="confirmRevokeAllSessions">{{ t('profile.modals.sessions.revokeAllConfirm') }}</UButton>
                 </div>
             </template>
         </UModal>
 
         <!-- Delete Account Confirmation Modal -->
-        <UModal v-model:open="showDeleteAccountModal" title="Delete Account"
-            description="This action cannot be undone. All your data will be permanently deleted.">
+        <UModal v-model:open="showDeleteAccountModal" :title="t('profile.modals.deleteAccount.title')"
+            :description="t('profile.modals.deleteAccount.description')">
             <template #body>
                 <div class="space-y-4">
                     <div class="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
                         <p class="text-sm text-red-800 dark:text-red-200 font-medium">
-                            ⚠️ DANGER: This action is irreversible
+                            ⚠️ {{ t('profile.modals.deleteAccount.danger') }}
                         </p>
                         <p class="text-xs text-red-600 dark:text-red-400 mt-2">
-                            You will lose access to your account and all associated data forever.
+                            {{ t('profile.modals.deleteAccount.dangerDesc') }}
                         </p>
                     </div>
                     <UPassword
                         v-model="deleteAccountPassword"
-                        label="Confirm with Password"
-                        placeholder="Enter your password to confirm"
+                        :label="t('profile.modals.deleteAccount.confirmPassword')"
+                        :placeholder="t('profile.modals.deleteAccount.enterPassword')"
                         :disabled="loadingDelete"
                         @keyup.enter="confirmDeleteAccount"
                         class="w-full"
@@ -816,11 +808,11 @@ const getSessionDeviceName = (userAgent?: string) => {
             <template #footer>
                 <div class="flex justify-end gap-2 w-full">
                     <UButton color="neutral" variant="ghost" @click="showDeleteAccountModal = false">
-                        Cancel
+                        {{ t('profile.cancel') }}
                     </UButton>
                     <UButton color="error" @click="confirmDeleteAccount" :loading="loadingDelete"
                         :disabled="!deleteAccountPassword">
-                        Delete Account
+                        {{ t('profile.modals.deleteAccount.delete') }}
                     </UButton>
                 </div>
             </template>

@@ -3,9 +3,11 @@ import { useAuthClient } from '~/lib/auth-client'
 import { navigateTo } from '#app'
 import { loginSchema } from '~/schemas/auth'
 import { useEmailRateLimit } from '~/composables/useEmailRateLimit'
+import { useI18n } from '#imports'
 
 // Auth configuration
 const { config: authPageConfig, getDecorativePanel, getGradientStyle } = useAuthConfig()
+const { t } = useI18n()
 const panelConfig = getDecorativePanel('login')
 
 // Rate limiting for email verification
@@ -123,14 +125,14 @@ const handleLogin = async (event: any) => {
       if (errorMessage.toLowerCase().includes('email') &&
         (errorMessage.toLowerCase().includes('verify') ||
           errorMessage.toLowerCase().includes('verification'))) {
-        // Email verification required - redirect to verify-email-pending page
-        console.log('[Login] Email verification required, redirecting...')
-        navigateTo(`/auth/verify-email-pending?email=${encodeURIComponent(formState.value.email)}`)
-        return
-      }
+      // Email verification required - redirect to verify-email-pending page
+      console.log('[Login] Email verification required, redirecting...')
+      navigateTo(`/auth/verify-email-pending?email=${encodeURIComponent(formState.value.email)}`)
+      return
+    }
 
-      // Other error - show error message
-      throw new Error(errorMessage || 'Invalid email or password')
+    // Other error - show error message
+    throw new Error(errorMessage || t('auth.login.errorInvalid'))
     }
   } catch (err: any) {
     console.error('[Login] Login error:', err)
@@ -191,11 +193,11 @@ const handleLogin = async (event: any) => {
 
     // Handle different types of errors
     if (err.message?.includes('email') || err.message?.includes('password')) {
-      error.value = 'Invalid email or password'
+      error.value = t('auth.login.errorInvalid')
     } else if (err.message?.includes('network') || err.code === 'NETWORK_ERROR') {
-      error.value = 'Network error. Please check your connection.'
+      error.value = t('auth.login.errorNetwork')
     } else {
-      error.value = err.message || 'An error occurred. Please try again.'
+      error.value = err.message || t('auth.login.errorGeneric')
     }
   } finally {
     loading.value = false
@@ -219,7 +221,7 @@ const handleTwoFactorVerify = async () => {
       success.value = true
       setTimeout(() => navigateTo(redirectTo.value), 500)
     } else {
-      throw new Error(response.error?.message || 'Invalid 2FA Code')
+      throw new Error(response.error?.message || t('auth.login.errorInvalidCode'))
     }
   } catch (err: any) {
     error.value = err.message || 'Verification failed'
@@ -235,8 +237,8 @@ const handleTwoFactorVerify = async () => {
     <div
       class="w-full lg:w-1/2 h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 overflow-y-auto">
       <div class="w-full max-w-md h-full flex flex-col justify-between">
-        <!-- Logo/Brand -->
-        <div class="mb-6">
+        <!-- Logo/Brand with Language Selector -->
+        <div class="mb-6 flex items-center justify-between">
           <NuxtLink to="/">
             <img v-if="authPageConfig.logo.imageUrl" :src="authPageConfig.logo.imageUrl"
               :alt="authPageConfig.logo.imageAlt || 'Logo'" class="h-10 w-auto" />
@@ -244,9 +246,10 @@ const handleTwoFactorVerify = async () => {
               'font-bold text-gray-900 dark:text-white tracking-tight',
               `text-${authPageConfig.logo.size}`
             ]">
-              {{ authPageConfig.logo.text }}
+              {{ t('common.appName') }}
             </h2>
           </NuxtLink>
+          <LanguageSelector />
         </div>
 
         <div>
@@ -256,16 +259,16 @@ const handleTwoFactorVerify = async () => {
           <!-- Header -->
           <div class="mb-4">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-              Welcome Back
+              {{ t('auth.login.title') }}
             </h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-              {{ authPageConfig.formSubtitle.login }}
+              {{ t('auth.login.subtitle') }}
             </p>
           </div>
 
           <!-- Session Expired Warning -->
-          <UAlert v-if="isSessionExpired" title="Session Expired"
-            description="Your session has expired. Please sign in again to continue." color="warning" variant="subtle"
+          <UAlert v-if="isSessionExpired" :title="t('auth.login.sessionExpired')"
+            :description="t('auth.login.sessionExpiredMessage')" color="warning" variant="subtle"
             icon="heroicons:exclamation-triangle-20-solid" class="mb-6" />
 
           <!-- 2FA Form -->
@@ -275,9 +278,9 @@ const handleTwoFactorVerify = async () => {
                 class="mx-auto w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-3">
                 <Icon name="heroicons:shield-check-20-solid" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 class="text-lg font-medium text-gray-900 dark:text-white">Two-Factor Authentication</h3>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ t('auth.login.twoFactor.title') }}</h3>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Enter the 6-digit code from your authenticator app
+                {{ t('auth.login.twoFactor.description') }}
               </p>
             </div>
 
@@ -288,12 +291,12 @@ const handleTwoFactorVerify = async () => {
 
             <UButton color="primary" variant="solid" size="lg" block :loading="loading" @click="handleTwoFactorVerify"
               :disabled="loading || twoFactorCode.length < 6">
-              Verify
+              {{ t('auth.login.twoFactor.verify') }}
             </UButton>
 
             <div class="text-center mt-4">
               <UButton variant="link" color="neutral" @click="requiresTwoFactor = false">
-                ← Back to Login
+                ← {{ t('auth.login.twoFactor.backToLogin') }}
               </UButton>
             </div>
           </div>
@@ -311,7 +314,7 @@ const handleTwoFactorVerify = async () => {
             <!-- Email Input -->
             <div class="mb-3">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Email address
+                {{ t('auth.login.email') }}
               </label>
               <UInput v-model="formState.email" type="email" placeholder="Enter email address" size="lg"
                 :disabled="loading" autofocus :color="formState.email && !isEmailValid ? 'error' : undefined"
@@ -328,7 +331,7 @@ const handleTwoFactorVerify = async () => {
             <!-- Password Input -->
             <UPassword
               v-model="formState.password"
-              label="Password"
+              :label="t('auth.login.password')"
               placeholder="Enter Password"
               :disabled="loading"
               :error="!!(formState.password && !isPasswordValid)"
@@ -339,7 +342,7 @@ const handleTwoFactorVerify = async () => {
             <div class="mb-3 text-right">
               <ULink to="/auth/forgot-password"
                 class="text-sm text-gray-900 dark:text-white font-medium hover:underline">
-                Forgot Password?
+                {{ t('auth.login.forgotPassword') }}
               </ULink>
             </div>
 
@@ -348,20 +351,20 @@ const handleTwoFactorVerify = async () => {
               :disabled="loading || !isFormValid"
               class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold shadow-md shadow-gray-200/50 dark:shadow-gray-900/50 transition-all duration-200 cursor-pointer">
               <span v-if="!loading" class="flex items-center justify-center gap-2">
-                Sign In
+                {{ t('auth.login.signIn') }}
                 <Icon name="heroicons:arrow-right-20-solid" class="w-4 h-4" />
               </span>
-              <span v-else>Signing in...</span>
+              <span v-else>{{ t('auth.login.signingIn') }}</span>
             </UButton>
           </UForm>
 
           <!-- Register Link (only shown if registration is allowed) -->
           <div v-if="allowRegistration" class="text-center mt-4">
             <span class="text-sm text-gray-500 dark:text-gray-400">
-              Don't have an account yet?
+              {{ t('auth.login.noAccount') }}
             </span>
             <ULink to="/auth/register" class="text-sm font-semibold text-gray-900 dark:text-white hover:underline ml-1">
-              Create an account
+              {{ t('auth.login.createAccount') }}
             </ULink>
           </div>
         </div>
@@ -369,10 +372,10 @@ const handleTwoFactorVerify = async () => {
         <!-- Footer -->
         <div class="mt-4">
           <p class="text-xs text-gray-400 dark:text-gray-500">
-            Your data is protected with industry-grade encryption
+            {{ t('common.footer.encryption') }}
           </p>
           <p class="text-xs text-gray-400 dark:text-gray-500">
-            © {{ new Date().getFullYear() }} {{ authPageConfig.logo.text }}. All rights reserved.
+            © {{ new Date().getFullYear() }} {{ t('common.appName') }}. {{ t('common.footer.copyright') }}
           </p>
         </div>
       </div>
@@ -389,8 +392,8 @@ const handleTwoFactorVerify = async () => {
       <div v-if="panelConfig.backgroundImage" class="absolute inset-0 bg-black/40"></div>
 
       <div class="text-center text-white relative z-10">
-        <h2 class="text-4xl font-bold mb-3">{{ panelConfig.title }}</h2>
-        <p class="text-lg opacity-90">{{ panelConfig.subtitle }}</p>
+        <h2 class="text-4xl font-bold mb-3">{{ t('auth.login.panelTitle') }}</h2>
+        <p class="text-lg opacity-90">{{ t('auth.login.panelSubtitle') }}</p>
       </div>
     </div>
   </div>

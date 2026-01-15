@@ -1,0 +1,231 @@
+{
+  "common": {
+    "appName": "Arpix Solutions",
+    "changeLanguage": "Change Language",
+    "footer": {
+      "encryption": "Your data is protected with industry-grade encryption",
+      "copyright": "All rights reserved"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Log in to continue your application journey",
+      "panelTitle": "Welcome to Arpix Solutions",
+      "panelSubtitle": "Your trusted partner for innovative solutions",
+      "email": "Email address",
+      "password": "Password",
+      "forgotPassword": "Forgot Password?",
+      "signIn": "Sign In",
+      "signingIn": "Signing in...",
+      "noAccount": "Don't have an account yet?",
+      "createAccount": "Create an account",
+      "sessionExpired": "Session Expired",
+      "sessionExpiredMessage": "Your session has expired. Please sign in again to continue.",
+      "twoFactor": {
+        "title": "Two-Factor Authentication",
+        "description": "Enter the 6-digit code from your authenticator app",
+        "verify": "Verify",
+        "backToLogin": "Back to Login"
+      },
+      "errorInvalid": "Invalid email or password",
+      "errorNetwork": "Network error. Please check your connection.",
+      "errorGeneric": "An error occurred. Please try again.",
+      "errorInvalidCode": "Invalid 2FA Code"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join us to get started with your application",
+      "panelTitle": "Join Arpix Solutions Today",
+      "panelSubtitle": "Start your journey with us today",
+      "email": "Email address",
+      "password": "Password",
+      "createAccount": "Create Account",
+      "creatingAccount": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "errorEmailExists": "Email already in use",
+      "errorPassword": "Password requirements not met",
+      "errorNetwork": "Network error. Please check your connection.",
+      "errorGeneric": "An error occurred. Please try again."
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "subtitle": "We'll send you a link to reset your password",
+      "panelTitle": "Password Recovery",
+      "panelSubtitle": "Secure password recovery for your account",
+      "email": "Email address",
+      "sendResetLink": "Send Reset Link",
+      "sending": "Sending...",
+      "backToLogin": "Back to Login"
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "subtitle": "Create a new password for your account",
+      "panelTitle": "Password Reset",
+      "panelSubtitle": "Secure your account with a new password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "resetPassword": "Reset Password",
+      "resetting": "Resetting...",
+      "backToLogin": "Back to Login"
+    },
+    "checkEmail": {
+      "title": "Check Your Email",
+      "subtitle": "We've sent a verification link to your email address",
+      "email": "Email address",
+      "resend": "Resend Verification Email",
+      "resending": "Resending...",
+      "didNotReceive": "Didn't receive the email?",
+      "checkSpam": "Check your spam folder if you don't see it in your inbox.",
+      "backToLogin": "Back to Login",
+      "backToRegister": "Back to Register"
+    },
+    "checkResetEmail": {
+      "title": "Check Your Email",
+      "subtitle": "We've sent a password reset link to your email address",
+      "email": "Email address",
+      "resend": "Resend Reset Link",
+      "resending": "Resending...",
+      "didNotReceive": "Didn't receive the email?",
+      "checkSpam": "Check your spam folder if you don't see it in your inbox.",
+      "backToLogin": "Back to Login"
+    },
+    "verifyEmailPending": {
+      "title": "Verify Your Email",
+      "subtitle": "Please verify your email address to continue",
+      "message": "We've sent a verification link to",
+      "didNotReceive": "Didn't receive the email?",
+      "resend": "Resend Verification Email",
+      "resending": "Resending...",
+      "checkSpam": "Check your spam folder if you don't see it in your inbox.",
+      "backToLogin": "Back to Login",
+      "backToRegister": "Back to Register"
+    }
+  },
+  "verifyEmail": {
+    "loading": "Verifying your email...",
+    "success": {
+      "title": "Email Verified!",
+      "message": "Your email has been successfully verified. Redirecting to login...",
+      "goToLogin": "Go to Login"
+    },
+    "error": {
+      "title": "Verification Failed",
+      "invalidToken": "Invalid or expired verification link. Please request a new verification email.",
+      "resend": "Resend Verification Email",
+      "backToLogin": "Back to Login"
+    }
+  },
+  "profile": {
+    "title": "Profile Settings",
+    "subtitle": "Manage your account settings and preferences",
+    "loading": "Loading profile...",
+    "profileInfo": "Profile Information",
+    "editProfile": "Edit Profile",
+    "username": "Username",
+    "email": "Email",
+    "emailVerified": "Email Verified",
+    "verified": "Verified",
+    "notVerified": "Not Verified",
+    "notSet": "Not set",
+    "memberSince": "Member Since",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "emailNotChangeable": "Email cannot be changed currently",
+    "changePassword": "Change Password",
+    "passwordDescription": "Keep your account secure by using a strong password.",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "updatePassword": "Update Password",
+    "security": "Security",
+    "twoFactorAuth": "Two-Factor Authentication",
+    "twoFactorDescription": "Add an extra layer of security to your account",
+    "enable": "Enable 2FA",
+    "disable": "Disable 2FA",
+    "enabled": "Enabled",
+    "activeSessions": "Active Sessions",
+    "sessionsDescription": "Manage devices where you're currently signed in",
+    "viewSessions": "View Sessions",
+    "dangerZone": "Danger Zone",
+    "deleteAccount": "Delete Account",
+    "deleteDescription": "Permanently delete your account and all data",
+    "deleteAccountButton": "Delete Account",
+    "backToDashboard": "Back to Dashboard",
+    "modals": {
+      "twoFactor": {
+        "confirmPasswordTitle": "Setup Two-Factor Authentication",
+        "confirmPasswordDesc": "Please confirm your password to set up two-factor authentication.",
+        "scanQrTitle": "Scan QR Code",
+        "scanQrDesc": "Scan the QR code with your authenticator app.",
+        "confirmPassword": "Current Password",
+        "enterCode": "Enter the 6-digit code from your app to verify.",
+        "continue": "Continue",
+        "verifyAndActivate": "Verify & Activate"
+      },
+      "disableTwoFactor": {
+        "title": "Disable Two-Factor Authentication",
+        "description": "Please confirm your password to disable two-factor authentication.",
+        "confirmPassword": "Current Password",
+        "disable2FA": "Disable 2FA"
+      },
+      "sessions": {
+        "title": "Active Sessions",
+        "description": "Manage devices where you are currently signed in.",
+        "revokeAll": "Revoke All Other Sessions",
+        "noSessions": "No active sessions found.",
+        "current": "Current",
+        "close": "Close",
+        "revokeAllConfirm": "Revoke All Other Sessions",
+        "revokeAllConfirmDesc": "Are you sure you want to log out from all other devices?"
+      },
+      "deleteAccount": {
+        "title": "Delete Account",
+        "description": "This action cannot be undone. All your data will be permanently deleted.",
+        "danger": "DANGER: This action is irreversible",
+        "dangerDesc": "You will lose access to your account and all associated data forever.",
+        "confirmPassword": "Confirm with Password",
+        "enterPassword": "Enter your password to confirm",
+        "cancel": "Cancel",
+        "delete": "Delete Account"
+      }
+    },
+    "deviceNames": {
+      "unknown": "Unknown Device",
+      "macOS": "Mac OS",
+      "windows": "Windows",
+      "android": "Android",
+      "iphone": "iPhone",
+      "linux": "Linux",
+      "device": "Device"
+    },
+    "validation": {
+      "passwordMatch": "Passwords match",
+      "passwordNotMatch": "Passwords do not match"
+    },
+    "toasts": {
+      "profileUpdated": "Profile updated successfully",
+      "passwordChanged": "Password changed successfully",
+      "twoFactorEnabled": "Two-Factor Authentication enabled successfully!",
+      "twoFactorDisabled": "Two-Factor Authentication disabled",
+      "sessionRevoked": "Session revoked successfully",
+      "allSessionsRevoked": "All other sessions revoked",
+      "accountDeleted": "Your account has been successfully deleted. Goodbye.",
+      "error": "Error",
+      "success": "Success"
+    },
+    "errors": {
+      "updateProfile": "Failed to update profile",
+      "changePassword": "Failed to change password",
+      "incorrectPassword": "Incorrect password",
+      "invalidCode": "Invalid code",
+      "verificationFailed": "Verification failed",
+      "disable2FA": "Failed to disable 2FA",
+      "loadSessions": "Failed to load sessions",
+      "revokeSession": "Failed to revoke session",
+      "revokeAllSessions": "Failed to revoke sessions",
+      "deleteAccount": "Failed to delete account"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
@@ -12,15 +13,15 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const success = ref(false)
 
-/**
- * Process email verification
- */
-const processVerification = async () => {
-  if (!token.value) {
-    error.value = 'No verification token provided'
-    loading.value = false
-    return
-  }
+  /**
+   * Process email verification
+   */
+  const processVerification = async () => {
+    if (!token.value) {
+      error.value = t('verifyEmail.error.invalidToken')
+      loading.value = false
+      return
+    }
 
   try {
     console.log('[Verify-Email] Processing token:', token.value)
@@ -56,12 +57,12 @@ const processVerification = async () => {
           router.push('/auth/login')
         }, 1000)
       } else {
-        error.value = 'Invalid or expired verification link. Please request a new verification email.'
+        error.value = t('verifyEmail.error.invalidToken')
       }
     }
   } catch (err: any) {
     console.error('[Verify-Email] Error:', err)
-    error.value = err.message || 'An error occurred. Please try again.'
+    error.value = err.message || t('verifyEmail.error.invalidToken')
   } finally {
     loading.value = false
   }
@@ -89,13 +90,14 @@ onMounted(() => {
 <template>
   <div class="h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
     <div class="w-full max-w-md">
-      <!-- Logo/Brand -->
-      <div class="mb-6 text-center">
+      <!-- Logo/Brand with Language Selector -->
+      <div class="mb-6 flex items-center justify-between">
         <NuxtLink to="/">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {{ $config.public.appName }}
+            {{ t('common.appName') }}
           </h2>
         </NuxtLink>
+        <LanguageSelector />
       </div>
 
       <!-- Card -->
@@ -106,7 +108,7 @@ onMounted(() => {
             <div class="w-16 h-16 rounded-full border-4 border-gray-200 dark:border-gray-700 border-t-blue-500 animate-spin"></div>
           </div>
           <p class="text-gray-600 dark:text-gray-400">
-            Verifying your email...
+            {{ t('verifyEmail.loading') }}
           </p>
         </div>
 
@@ -118,10 +120,10 @@ onMounted(() => {
             </div>
           </div>
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Email Verified!
+            {{ t('verifyEmail.success.title') }}
           </h1>
           <p class="text-gray-600 dark:text-gray-400 mb-6">
-            Your email has been successfully verified. Redirecting to login...
+            {{ t('verifyEmail.success.message') }}
           </p>
           <UButton
             color="primary"
@@ -131,7 +133,7 @@ onMounted(() => {
             @click="goBackToLogin"
             class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold"
           >
-            Go to Login
+            {{ t('verifyEmail.success.goToLogin') }}
           </UButton>
         </div>
 
@@ -143,7 +145,7 @@ onMounted(() => {
             </div>
           </div>
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Verification Failed
+            {{ t('verifyEmail.error.title') }}
           </h1>
           <UAlert
             v-if="error"
@@ -162,7 +164,7 @@ onMounted(() => {
               @click="goToCheckEmail"
               class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold"
             >
-              Resend Verification Email
+              {{ t('verifyEmail.error.resend') }}
             </UButton>
             <UButton
               color="neutral"
@@ -172,7 +174,7 @@ onMounted(() => {
               @click="goBackToLogin"
               class="w-full"
             >
-              Back to Login
+              {{ t('verifyEmail.error.backToLogin') }}
             </UButton>
           </div>
         </div>
@@ -181,7 +183,7 @@ onMounted(() => {
       <!-- Footer -->
       <div class="mt-4 text-center">
         <p class="text-xs text-gray-400 dark:text-gray-500">
-          © {{ new Date().getFullYear() }} {{ $config.public.appName }}. All rights reserved.
+          © {{ new Date().getFullYear() }} {{ t('common.appName') }}. {{ t('common.footer.copyright') }}
         </p>
       </div>
     </div>

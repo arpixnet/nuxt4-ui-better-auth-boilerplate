@@ -60,6 +60,23 @@ export default defineNuxtConfig({
   //   }
   // },
 
+  i18n: {
+    baseUrl: process.env.BASE_URL || 'http://localhost:3000',
+    locales: [
+      { code: 'es', language: 'es-ES', file: 'es.json', flag: '🇪🇸', name: 'Español', shortName: 'ES' },
+      { code: 'en', language: 'en-US', file: 'en.json', flag: '🇬🇧', name: 'English', shortName: 'EN' }
+    ],
+    defaultLocale: 'en',
+    strategy: 'prefix_and_default',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'arpix_i18n_lang',
+      redirectOn: 'root',
+      alwaysRedirect: true,
+      cookieCrossOrigin: process.env.NODE_ENV === 'production'
+    }
+  },
+
   arpixEmailSender: {
     transport: 'smtp',
     defaultFrom: process.env.EMAIL_FROM || '"Example Test" <info@ebppublicidad.com>',
