@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from '#imports'
+
+const { t } = useI18n()
+
 interface Props {
   modelValue: string
   label?: string
@@ -15,7 +19,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   label: 'Password',
-  placeholder: 'Enter Password',
+  placeholder: undefined,
   size: 'lg',
   disabled: false,
   color: undefined,
@@ -39,11 +43,14 @@ const inputType = computed(() => (show.value ? 'text' : 'password'))
 // Computed for aria-pressed (ensure boolean type)
 const ariaPressed = computed(() => show.value)
 
+// Computed for placeholder
+const computedPlaceholder = computed(() => props.placeholder || t('common.password.placeholder'))
+
 // Computed for validation message
 const validationMessage = computed(() => {
   if (props.errorMessage) return props.errorMessage
   if (props.showValidation && props.modelValue && props.modelValue.length < 8) {
-    return 'Password must be at least 8 characters'
+    return t('validation.passwordMinLength')
   }
   return null
 })
@@ -84,7 +91,7 @@ defineExpose({
       :ref="inputRef"
       :model-value="modelValue"
       :type="inputType"
-      :placeholder="placeholder"
+      :placeholder="computedPlaceholder"
       :size="size"
       :disabled="disabled"
       :color="inputColor"
@@ -103,7 +110,7 @@ defineExpose({
           variant="link"
           size="sm"
           :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-          :aria-label="show ? 'Hide password' : 'Show password'"
+          :aria-label="show ? t('common.password.hidePassword') : t('common.password.showPassword')"
           :aria-pressed="ariaPressed"
           @click="show = !show"
         />
@@ -113,7 +120,7 @@ defineExpose({
       {{ validationMessage }}
     </p>
     <p v-else-if="showValidation && !modelValue" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-      Must be at least 8 characters
+      {{ t('common.password.hint') }}
     </p>
   </div>
 </template>

@@ -147,7 +147,7 @@ const handleLogin = async (event: any) => {
       const email = formState.value.email
 
       // Show error message to user
-      error.value = 'Email not verified. Sending verification email...'
+      error.value = t('auth.verifyEmailPending.checkYourEmail')
 
       try {
         // Check rate limit before sending
@@ -155,7 +155,7 @@ const handleLogin = async (event: any) => {
         const rateLimit = checkRateLimit(email)
 
         if (!rateLimit.allowed) {
-          error.value = `Too many requests. Please try again later.`
+          error.value = t('auth.checkEmail.rateLimit', { remaining: rateLimit.remaining })
           resendLoading.value = false
           return
         }
@@ -169,16 +169,16 @@ const handleLogin = async (event: any) => {
         if (result.error) {
           console.error('[Login] Failed to send verification email:', result.error.message)
           // Still redirect even if email sending fails
-          error.value = 'Email not verified. Redirecting...'
+          error.value = t('auth.verifyEmailPending.checkYourEmail')
         } else {
           console.log('[Login] Verification email sent successfully to:', email)
           recordRequest(email)
-          error.value = 'Verification email sent! Redirecting...'
+          error.value = t('auth.checkEmail.success')
         }
       } catch (resendError) {
         console.error('[Login] Error sending verification email:', resendError)
         // Continue with redirect even if email sending fails
-        error.value = 'Email not verified. Redirecting...'
+        error.value = t('auth.verifyEmailPending.checkYourEmail')
       } finally {
         resendLoading.value = false
       }
@@ -224,7 +224,7 @@ const handleTwoFactorVerify = async () => {
       throw new Error(response.error?.message || t('auth.login.errorInvalidCode'))
     }
   } catch (err: any) {
-    error.value = err.message || 'Verification failed'
+    error.value = err.message || t('auth.verifyEmailPending.errorGeneric')
   } finally {
     loading.value = false
   }
@@ -238,7 +238,7 @@ const handleTwoFactorVerify = async () => {
       class="w-full lg:w-1/2 h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 overflow-y-auto">
       <div class="w-full max-w-md h-full flex flex-col justify-between">
         <!-- Logo/Brand with Language Selector -->
-        <div class="mb-6 flex items-center justify-between">
+        <div class="mb-6 flex items-center justify-start">
           <NuxtLink to="/">
             <img v-if="authPageConfig.logo.imageUrl" :src="authPageConfig.logo.imageUrl"
               :alt="authPageConfig.logo.imageAlt || 'Logo'" class="h-10 w-auto" />
@@ -249,7 +249,6 @@ const handleTwoFactorVerify = async () => {
               {{ t('common.appName') }}
             </h2>
           </NuxtLink>
-          <LanguageSelector />
         </div>
 
         <div>
@@ -286,7 +285,7 @@ const handleTwoFactorVerify = async () => {
 
             <div class="mb-4 text-center">
               <UPinInput v-model="twoFactorCode" :length="6" type="text" otp :autofocus="true" :disabled="loading"
-                placeholder="•" />
+                :placeholder="t('auth.login.twoFactor.otpPlaceholder')" />
             </div>
 
             <UButton color="primary" variant="solid" size="lg" block :loading="loading" @click="handleTwoFactorVerify"
@@ -308,7 +307,7 @@ const handleTwoFactorVerify = async () => {
               icon="heroicons:information-circle-20-solid" class="mb-6" />
 
             <!-- Success Alert -->
-            <UAlert v-if="success" description="Login successful! Redirecting..." color="success" variant="subtle"
+            <UAlert v-if="success" :description="t('auth.login.success')" color="success" variant="subtle"
               icon="heroicons:check-circle-20-solid" class="mb-6" />
 
             <!-- Email Input -->
@@ -316,7 +315,7 @@ const handleTwoFactorVerify = async () => {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 {{ t('auth.login.email') }}
               </label>
-              <UInput v-model="formState.email" type="email" placeholder="Enter email address" size="lg"
+              <UInput v-model="formState.email" type="email" :placeholder="t('auth.login.emailPlaceholder')" size="lg"
                 :disabled="loading" autofocus :color="formState.email && !isEmailValid ? 'error' : undefined"
                 class="w-full">
                 <template #leading>
@@ -324,7 +323,7 @@ const handleTwoFactorVerify = async () => {
                 </template>
               </UInput>
               <p v-if="formState.email && !isEmailValid" class="text-red-500 text-xs mt-1.5">
-                Please enter a valid email address
+                {{ t('validation.emailInvalid') }}
               </p>
             </div>
 
@@ -332,7 +331,7 @@ const handleTwoFactorVerify = async () => {
             <UPassword
               v-model="formState.password"
               :label="t('auth.login.password')"
-              placeholder="Enter Password"
+              :placeholder="t('auth.login.passwordPlaceholder')"
               :disabled="loading"
               :error="!!(formState.password && !isPasswordValid)"
               show-validation

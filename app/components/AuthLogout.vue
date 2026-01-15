@@ -2,9 +2,11 @@
 import { useAuthClient } from '~/lib/auth-client'
 import { navigateTo } from '#app'
 import { useAuthSession } from '~/composables/useAuthSession'
+import { useI18n } from '#imports'
 
 const authClient = useAuthClient()
 const { session, refresh } = useAuthSession()
+const { t } = useI18n()
 
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -54,7 +56,7 @@ const handleLogout = async () => {
     navigateTo('/auth/login')
   } catch (err) {
     console.error('Logout error:', err)
-    error.value = 'Failed to sign out. Please try again.'
+    error.value = t('common.logout.error')
   } finally {
     loading.value = false
   }
@@ -81,12 +83,12 @@ const handleLogout = async () => {
         <div class="flex items-center gap-3">
           <UAvatar
             :src="user.image || undefined"
-            :alt="user.name || 'User'"
+            :alt="user.name || t('common.user')"
             size="md"
           />
           <div>
             <p class="font-medium text-gray-900 dark:text-gray-100">
-              {{ user.name || 'User' }}
+              {{ user.name || t('common.user') }}
             </p>
             <p class="text-sm text-gray-500 dark:text-gray-400">
               {{ user.email }}
@@ -103,7 +105,7 @@ const handleLogout = async () => {
           variant="soft"
           @click="handleLogout"
         >
-          Sign out
+          {{ t('common.logout.button') }}
         </UButton>
       </div>
     </div>

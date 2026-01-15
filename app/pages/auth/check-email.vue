@@ -2,14 +2,13 @@
 import { useAuthClient } from '~/lib/auth-client'
 import { useAuthSession } from '~/composables/useAuthSession'
 import { useRoute } from '#app'
-import { authConfig } from '~/config/auth.config'
-import { useEmailRateLimit } from '~/composables/useEmailRateLimit'
+import { useI18n } from 'vue-i18n'
+
+// i18n
+const { t, locale } = useI18n()
 
 // Rate limiting for email verification
 const { checkRateLimit, recordRequest } = useEmailRateLimit()
-
-// Auth configuration
-const authPageConfig = authConfig
 
 // Route and session data
 const route = useRoute()
@@ -50,7 +49,7 @@ const handleResendEmail = async () => {
     const rateLimit = checkRateLimit(emailToSend)
 
     if (!rateLimit.allowed) {
-      error.value = `Too many requests. Please try again later. (${rateLimit.remaining} remaining)`
+      error.value = t('auth.checkEmail.rateLimit', { remaining: rateLimit.remaining })
       loading.value = false
       return
     }
@@ -66,7 +65,7 @@ const handleResendEmail = async () => {
     console.log('[Check-Email] Send verification response:', result)
 
     if (result.error) {
-      throw new Error(result.error.message || 'Failed to send verification email')
+      throw new Error(result.error.message || t('auth.checkEmail.errorGeneric'))
     }
 
     // Record successful request for rate limiting
@@ -76,7 +75,7 @@ const handleResendEmail = async () => {
     console.log('[Check-Email] Verification email sent successfully')
   } catch (err: any) {
     console.error('[Check-Email] Resend verification error:', err)
-    error.value = err.message || 'An error occurred. Please try again.'
+    error.value = err.message || t('auth.checkEmail.errorGeneric')
   } finally {
     loading.value = false
     // Reset success message after 5 seconds
@@ -95,20 +94,8 @@ const handleResendEmail = async () => {
       <!-- Logo/Brand -->
       <div class="mb-6 text-center">
         <NuxtLink to="/">
-          <img
-            v-if="authPageConfig.logo.imageUrl"
-            :src="authPageConfig.logo.imageUrl"
-            :alt="authPageConfig.logo.imageAlt || 'Logo'"
-            class="h-10 mx-auto"
-          />
-          <h2
-            v-else
-            :class="[
-              'font-bold text-gray-900 dark:text-white tracking-tight',
-              `text-${authPageConfig.logo.size}`
-            ]"
-          >
-            {{ authPageConfig.logo.text }}
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+            {{ t('common.appName') }}
           </h2>
         </NuxtLink>
       </div>
@@ -121,10 +108,10 @@ const handleResendEmail = async () => {
         <!-- Header -->
         <div class="text-center mb-6">
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-            Check Your Email
+            {{ t('auth.checkEmail.title') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            We've sent a verification email to:
+            {{ t('auth.checkEmail.subtitle') }}
           </p>
           <p class="text-lg font-semibold text-gray-900 dark:text-white">
             {{ userEmail }}
@@ -144,7 +131,7 @@ const handleResendEmail = async () => {
         <!-- Success Alert -->
         <UAlert
           v-if="success"
-          description="Verification email sent! Please check your inbox."
+          :description="t('auth.checkEmail.success')"
           color="success"
           variant="subtle"
           icon="heroicons:check-circle-20-solid"
@@ -157,20 +144,20 @@ const handleResendEmail = async () => {
             <Icon name="heroicons:information-circle-20-solid" class="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
             <div class="flex-1">
               <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                What's next?
+                {{ t('auth.checkEmail.whatsNext') }}
               </h3>
               <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
                 <li class="flex items-start gap-2">
                   <span class="text-blue-500 font-bold">1.</span>
-                  <span>Check your email inbox (and spam folder)</span>
+                  <span>{{ t('auth.checkEmail.step1') }}</span>
                 </li>
                 <li class="flex items-start gap-2">
                   <span class="text-blue-500 font-bold">2.</span>
-                  <span>Click verification link in email</span>
+                  <span>{{ t('auth.checkEmail.step2') }}</span>
                 </li>
                 <li class="flex items-start gap-2">
                   <span class="text-blue-500 font-bold">3.</span>
-                  <span>Come back to sign in</span>
+                  <span>{{ t('auth.checkEmail.step3') }}</span>
                 </li>
               </ul>
             </div>
@@ -189,22 +176,22 @@ const handleResendEmail = async () => {
           class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold shadow-md shadow-gray-200/50 dark:shadow-gray-900/50 transition-all duration-200 cursor-pointer mb-4"
         >
           <span v-if="!loading" class="flex items-center justify-center gap-2">
-            Resend Verification Email
+            {{ t('auth.checkEmail.resendVerificationEmail') }}
             <Icon name="heroicons:arrow-path-20-solid" class="w-4 h-4" />
           </span>
-          <span v-else>Sending...</span>
+          <span v-else>{{ t('auth.checkEmail.sending') }}</span>
         </UButton>
 
         <!-- Links -->
         <div class="text-center space-y-2">
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            Already verified?
+            {{ t('auth.checkEmail.alreadyVerified') }}
           </p>
           <ULink
             to="/auth/login"
             class="text-sm font-semibold text-gray-900 dark:text-white hover:underline"
           >
-            Sign in to your account
+            {{ t('auth.checkEmail.signIn') }}
           </ULink>
         </div>
       </div>
@@ -212,10 +199,10 @@ const handleResendEmail = async () => {
       <!-- Footer -->
       <div class="mt-4 text-center">
         <p class="text-xs text-gray-400 dark:text-gray-500">
-          Email verification powered by {{ authPageConfig.logo.text }}
+          {{ t('auth.checkEmail.footer', { appName: t('common.appName') }) }}
         </p>
         <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-          © {{ new Date().getFullYear() }} {{ authPageConfig.logo.text }}. All rights reserved.
+          © {{ new Date().getFullYear() }} {{ t('common.appName') }}. {{ t('common.footer.copyright') }}
         </p>
       </div>
     </div>

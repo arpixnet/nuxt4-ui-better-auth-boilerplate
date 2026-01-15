@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { authConfig } from '~/config/auth.config'
+import { useI18n } from 'vue-i18n'
 
-// Auth configuration
-const authPageConfig = authConfig
+// i18n
+const { t } = useI18n()
 
 // Form state
 const formState = ref({
@@ -59,7 +59,7 @@ const handleForgotPassword = async (event: Event) => {
           navigateTo(`/auth/check-reset-email?email=${encodeURIComponent(formState.value.email)}`)
         }, 1000)
       } else {
-        throw new Error(data.message || 'Failed to send reset email')
+        throw new Error(data.message || t('auth.forgotPassword.errorGeneric'))
       }
     } else {
       // Handle rate limiting error
@@ -67,13 +67,14 @@ const handleForgotPassword = async (event: Event) => {
         const resetIn = data.data?.resetAt
           ? Math.ceil((data.data.resetAt * 1000 - Date.now()) / 1000 / 60)
           : 60
-        throw new Error(`Too many requests. Please try again in ${resetIn} minute${resetIn !== 1 ? 's' : ''}.`)
+        const key = resetIn === 1 ? 'auth.forgotPassword.rateLimit' : 'auth.forgotPassword.rateLimit_plural'
+        throw new Error(t(key, { resetIn }))
       }
-      throw new Error(data.message || 'Failed to send reset email')
+      throw new Error(data.message || t('auth.forgotPassword.errorGeneric'))
     }
   } catch (err: any) {
     console.error('[Forgot-Password] ❌ Error:', err)
-    error.value = err.message || 'An error occurred. Please try again.'
+    error.value = err.message || t('auth.forgotPassword.errorGeneric')
     // Show error for 3 seconds then clear it
     setTimeout(() => {
       error.value = null
@@ -90,20 +91,8 @@ const handleForgotPassword = async (event: Event) => {
       <!-- Logo/Brand -->
       <div class="mb-6 text-center">
         <NuxtLink to="/">
-          <img
-            v-if="authPageConfig.logo.imageUrl"
-            :src="authPageConfig.logo.imageUrl"
-            :alt="authPageConfig.logo.imageAlt || 'Logo'"
-            class="h-10 mx-auto"
-          />
-          <h2
-            v-else
-            :class="[
-              'font-bold text-gray-900 dark:text-white tracking-tight',
-              `text-${authPageConfig.logo.size}`
-            ]"
-          >
-            {{ authPageConfig.logo.text }}
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+            {{ t('common.appName') }}
           </h2>
         </NuxtLink>
       </div>
@@ -116,10 +105,10 @@ const handleForgotPassword = async (event: Event) => {
         <!-- Header -->
         <div class="text-center mb-6">
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-            Forgot Password?
+            {{ t('auth.forgotPassword.title') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            Enter your email address and we'll send you a link to reset your password.
+            {{ t('auth.forgotPassword.subtitle') }}
           </p>
         </div>
 
@@ -136,7 +125,7 @@ const handleForgotPassword = async (event: Event) => {
         <!-- Success Alert -->
         <UAlert
           v-if="success"
-          description="If an account exists with this email, we've sent a password reset link."
+          :description="t('auth.forgotPassword.success')"
           color="success"
           variant="subtle"
           icon="heroicons:check-circle-20-solid"
@@ -148,12 +137,12 @@ const handleForgotPassword = async (event: Event) => {
           <!-- Email Input -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Email address
+              {{ t('auth.forgotPassword.email') }}
             </label>
             <UInput
               v-model="formState.email"
               type="email"
-              placeholder="Enter your email address"
+              :placeholder="t('auth.forgotPassword.emailPlaceholder')"
               size="lg"
               :disabled="loading || success"
               autofocus
@@ -165,7 +154,7 @@ const handleForgotPassword = async (event: Event) => {
               </template>
             </UInput>
             <p v-if="formState.email && !isEmailValid" class="text-red-500 text-xs mt-1.5">
-              Please enter a valid email address
+              {{ t('auth.forgotPassword.errorInvalidEmail') }}
             </p>
           </div>
 
@@ -181,10 +170,10 @@ const handleForgotPassword = async (event: Event) => {
             class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold shadow-md shadow-gray-200/50 dark:shadow-gray-900/50 transition-all duration-200 cursor-pointer mb-4"
           >
             <span v-if="!loading" class="flex items-center justify-center gap-2">
-              Send Reset Link
+              {{ t('auth.forgotPassword.sendResetLink') }}
               <Icon name="heroicons:arrow-right-20-solid" class="w-4 h-4" />
             </span>
-            <span v-else>Sending...</span>
+            <span v-else>{{ t('auth.forgotPassword.sending') }}</span>
           </UButton>
 
           <!-- Back to Login -->
@@ -194,7 +183,7 @@ const handleForgotPassword = async (event: Event) => {
               variant="link"
               color="neutral"
             >
-              ← Back to Sign In
+              {{ t('auth.forgotPassword.backToLogin') }}
             </UButton>
           </div>
         </form>
@@ -203,10 +192,10 @@ const handleForgotPassword = async (event: Event) => {
       <!-- Footer -->
       <div class="mt-4 text-center">
         <p class="text-xs text-gray-400 dark:text-gray-500">
-          Secure password reset powered by {{ authPageConfig.logo.text }}
+          {{ t('auth.forgotPassword.footer', { appName: t('common.appName') }) }}
         </p>
         <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-          © {{ new Date().getFullYear() }} {{ authPageConfig.logo.text }}. All rights reserved.
+          © {{ new Date().getFullYear() }} {{ t('common.appName') }}. {{ t('common.footer.copyright') }}
         </p>
       </div>
     </div>

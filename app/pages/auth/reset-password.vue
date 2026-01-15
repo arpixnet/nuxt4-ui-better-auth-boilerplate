@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { navigateTo, useRoute } from '#app'
-import { authConfig } from '~/config/auth.config'
+import { useI18n } from 'vue-i18n'
 
-// Auth configuration
-const authPageConfig = authConfig
+// i18n
+const { t } = useI18n()
 
 // Route and token
 const route = useRoute()
@@ -31,7 +31,7 @@ const passwordsMatch = computed(() => {
 
 const confirmPasswordError = computed(() => {
   if (formState.value.confirmPassword && !passwordsMatch.value) {
-    return 'Passwords do not match'
+    return t('auth.resetPassword.passwordsDoNotMatch')
   }
   return null
 })
@@ -62,7 +62,7 @@ const handleResetPassword = async (event: Event) => {
   console.log('[Reset-Password] Submitting password reset')
 
   if (!token.value) {
-    error.value = 'Invalid or expired reset token. Please request a new password reset.'
+    error.value = t('auth.resetPassword.errorInvalidToken')
     loading.value = false
     return
   }
@@ -90,14 +90,14 @@ const handleResetPassword = async (event: Event) => {
           navigateTo('/auth/login')
         }, 2000)
       } else {
-        throw new Error(data.message || 'Failed to reset password')
+        throw new Error(data.message || t('auth.resetPassword.errorGeneric'))
       }
     } else {
-      throw new Error(data.message || 'Failed to reset password')
+      throw new Error(data.message || t('auth.resetPassword.errorGeneric'))
     }
   } catch (err: any) {
     console.error('[Reset-Password] ❌ Error:', err)
-    error.value = err.message || 'An error occurred. Please try again.'
+    error.value = err.message || t('auth.resetPassword.errorGeneric')
     // Show error for 5 seconds then clear it
     setTimeout(() => {
       error.value = null
@@ -114,20 +114,8 @@ const handleResetPassword = async (event: Event) => {
       <!-- Logo/Brand -->
       <div class="mb-6 text-center">
         <NuxtLink to="/">
-          <img
-            v-if="authPageConfig.logo.imageUrl"
-            :src="authPageConfig.logo.imageUrl"
-            :alt="authPageConfig.logo.imageAlt || 'Logo'"
-            class="h-10 mx-auto"
-          />
-          <h2
-            v-else
-            :class="[
-              'font-bold text-gray-900 dark:text-white tracking-tight',
-              `text-${authPageConfig.logo.size}`
-            ]"
-          >
-            {{ authPageConfig.logo.text }}
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+            {{ t('common.appName') }}
           </h2>
         </NuxtLink>
       </div>
@@ -140,10 +128,10 @@ const handleResetPassword = async (event: Event) => {
         <!-- Header -->
         <div class="text-center mb-6">
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-            Reset Your Password
+            {{ t('auth.resetPassword.title') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            Enter your new password below
+            {{ t('auth.resetPassword.subtitle') }}
           </p>
         </div>
 
@@ -160,7 +148,7 @@ const handleResetPassword = async (event: Event) => {
         <!-- Success Alert - More prominent -->
         <div v-if="success" class="mb-6">
           <UAlert
-            description="Password reset successfully! Redirecting to login..."
+            :description="t('auth.resetPassword.success')"
             color="success"
             variant="subtle"
             icon="heroicons:check-circle-20-solid"
@@ -168,7 +156,7 @@ const handleResetPassword = async (event: Event) => {
           <div class="mt-4 text-center">
             <div class="inline-flex items-center justify-center">
               <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-t-2 border-green-600 dark:border-green-400"></div>
-              <span class="ml-3 text-sm text-gray-600 dark:text-gray-400">Redirecting...</span>
+              <span class="ml-3 text-sm text-gray-600 dark:text-gray-400">{{ t('auth.resetPassword.resetting') }}</span>
             </div>
           </div>
         </div>
@@ -178,7 +166,7 @@ const handleResetPassword = async (event: Event) => {
             <!-- Token Validation Alert -->
             <UAlert
               v-if="!isTokenValid && token"
-              description="Invalid or expired reset link. Please request a new password reset."
+              :description="t('auth.resetPassword.errorInvalidToken')"
               color="error"
               variant="subtle"
               icon="heroicons:exclamation-triangle-20-solid"
@@ -188,8 +176,8 @@ const handleResetPassword = async (event: Event) => {
             <!-- Password Input -->
             <UPassword
               v-model="formState.password"
-              label="New password"
-              placeholder="Enter new password"
+              :label="t('auth.resetPassword.newPassword')"
+              :placeholder="t('auth.resetPassword.newPasswordPlaceholder')"
               :disabled="loading || success"
               :error="!!(formState.password && !isPasswordValid)"
               show-validation
@@ -199,8 +187,8 @@ const handleResetPassword = async (event: Event) => {
           <!-- Confirm Password Input -->
             <UPassword
               v-model="formState.confirmPassword"
-              label="Confirm new password"
-              placeholder="Confirm new password"
+              :label="t('auth.resetPassword.confirmPassword')"
+              :placeholder="t('auth.resetPassword.confirmPasswordPlaceholder')"
               :disabled="loading || success"
               :error="!!(formState.confirmPassword && !passwordsMatch)"
               :error-message="confirmPasswordError"
@@ -219,10 +207,10 @@ const handleResetPassword = async (event: Event) => {
               class="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold shadow-md shadow-gray-200/50 dark:shadow-gray-900/50 transition-all duration-200 cursor-pointer mb-4"
             >
             <span v-if="!loading" class="flex items-center justify-center gap-2">
-              Reset Password
+              {{ t('auth.resetPassword.resetPassword') }}
               <Icon name="heroicons:check-20-solid" class="w-4 h-4" />
             </span>
-            <span v-else>Resetting...</span>
+            <span v-else>{{ t('auth.resetPassword.resetting') }}</span>
           </UButton>
 
           <!-- Back to Login -->
@@ -232,7 +220,7 @@ const handleResetPassword = async (event: Event) => {
               variant="link"
               color="neutral"
             >
-              ← Back to Sign In
+              {{ t('auth.resetPassword.backToLogin') }}
             </UButton>
           </div>
         </form>
@@ -241,10 +229,10 @@ const handleResetPassword = async (event: Event) => {
       <!-- Footer -->
       <div class="mt-4 text-center">
         <p class="text-xs text-gray-400 dark:text-gray-500">
-          Secure password reset powered by {{ authPageConfig.logo.text }}
+          {{ t('auth.resetPassword.footer', { appName: t('common.appName') }) }}
         </p>
         <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-          © {{ new Date().getFullYear() }} {{ authPageConfig.logo.text }}. All rights reserved.
+          © {{ new Date().getFullYear() }} {{ t('common.appName') }}. {{ t('common.footer.copyright') }}
         </p>
       </div>
     </div>

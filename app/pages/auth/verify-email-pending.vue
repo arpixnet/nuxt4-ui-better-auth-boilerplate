@@ -3,6 +3,10 @@ import { useRoute, useRouter } from '#app'
 import { useRuntimeConfig } from '#app'
 import { useAuthClient } from '~/lib/auth-client'
 import { useEmailRateLimit } from '~/composables/useEmailRateLimit'
+import { useI18n } from 'vue-i18n'
+
+// i18n
+const { t } = useI18n()
 
 // Auth client and rate limiting
 const authClient = useAuthClient()
@@ -42,7 +46,7 @@ const handleResendEmail = async () => {
     const rateLimit = checkRateLimit(emailToSend)
 
     if (!rateLimit.allowed) {
-      error.value = `Too many requests. Please try again later. (${rateLimit.remaining} remaining)`
+      error.value = t('auth.verifyEmailPending.rateLimit', { remaining: rateLimit.remaining })
       loading.value = false
       return
     }
@@ -58,7 +62,7 @@ const handleResendEmail = async () => {
     console.log('[Verify-Email-Pending] Send verification response:', result)
 
     if (result.error) {
-      throw new Error(result.error.message || 'Failed to send verification email')
+      throw new Error(result.error.message || t('auth.verifyEmailPending.errorGeneric'))
     }
 
     // Record successful request for rate limiting
@@ -68,7 +72,7 @@ const handleResendEmail = async () => {
     console.log('[Verify-Email-Pending] Verification email sent successfully')
   } catch (err: any) {
     console.error('[Verify-Email-Pending] Error:', err)
-    error.value = err.message || 'Failed to resend verification email. Please try again.'
+    error.value = err.message || t('auth.verifyEmailPending.errorGeneric')
   } finally {
     loading.value = false
   }
@@ -89,7 +93,7 @@ const goBackToLogin = () => {
       <div class="mb-6 text-center">
         <NuxtLink to="/">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {{ config.public.appName }}
+            {{ t('common.appName') }}
           </h2>
         </NuxtLink>
       </div>
@@ -102,10 +106,10 @@ const goBackToLogin = () => {
         <!-- Header -->
         <div class="text-center mb-6">
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-            Email Verification Required
+            {{ t('auth.verifyEmailPending.title') }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            Please verify your email address to continue
+            {{ t('auth.verifyEmailPending.subtitle') }}
           </p>
           <p class="text-lg font-semibold text-gray-900 dark:text-white">
             {{ userEmail }}
@@ -125,7 +129,7 @@ const goBackToLogin = () => {
         <!-- Success Alert -->
         <UAlert
           v-if="success"
-          description="Verification email sent! Please check your inbox."
+          :description="t('auth.verifyEmailPending.success')"
           color="success"
           variant="subtle"
           icon="heroicons:check-circle-20-solid"
@@ -135,10 +139,10 @@ const goBackToLogin = () => {
         <!-- Instructions -->
         <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
           <p class="text-sm text-blue-800 dark:text-blue-200 mb-2">
-            📧 <strong>Check your email</strong>
+            {{ t('auth.verifyEmailPending.checkYourEmail') }}
           </p>
           <p class="text-sm text-blue-700 dark:text-blue-300">
-            We've sent a verification link to your email address. Click the link to verify your account and sign in.
+            {{ t('auth.verifyEmailPending.instructions') }}
           </p>
         </div>
 
@@ -153,8 +157,8 @@ const goBackToLogin = () => {
           @click="handleResendEmail"
           class="mb-4"
         >
-          <span v-if="!loading">Resend Verification Email</span>
-          <span v-else>Sending...</span>
+          <span v-if="!loading">{{ t('auth.verifyEmailPending.resendVerificationEmail') }}</span>
+          <span v-else>{{ t('auth.verifyEmailPending.sending') }}</span>
         </UButton>
 
         <!-- Back to Login -->
@@ -163,7 +167,7 @@ const goBackToLogin = () => {
           color="neutral"
           @click="goBackToLogin"
         >
-          ← Back to Login
+          {{ t('auth.verifyEmailPending.backToLogin') }}
         </UButton>
       </div>
     </div>
