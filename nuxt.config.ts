@@ -27,6 +27,7 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxtjs/seo',
     'nuxt-arpix-email-sender',
+    '@nuxtjs/i18n',
     optionalModule('@nuxt/content')
   ].filter(Boolean),
 
