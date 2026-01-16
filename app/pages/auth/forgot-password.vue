@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'blank'
+})
+
 import { useI18n } from 'vue-i18n'
 
 // i18n

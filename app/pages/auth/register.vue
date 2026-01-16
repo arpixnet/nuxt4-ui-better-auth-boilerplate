@@ -1,14 +1,14 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'blank',
+  middleware: ['register-allowed']
+})
+
 import { useAuthClient } from '~/lib/auth-client'
 import { navigateTo } from '#app'
 import { useRuntimeConfig } from '#app'
 import { registerSchema } from '~/schemas/auth'
 import { useI18n } from '#imports'
-
-// Apply middleware to check if registration is allowed
-definePageMeta({
-  middleware: ['register-allowed']
-})
 
 // Auth configuration
 const { config: authPageConfig, getDecorativePanel, getGradientStyle } = useAuthConfig()

@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'blank'
+})
+
 import { useRoute, useRouter } from '#app'
 import { useRuntimeConfig } from '#app'
 import { useAuthClient } from '~/lib/auth-client'

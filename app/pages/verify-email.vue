@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'blank'
+})
+
 import { onMounted } from 'vue'
 
 const { t } = useI18n()

@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'blank'
+})
+
 import { useAuthClient } from '~/lib/auth-client'
 import { navigateTo } from '#app'
 import { loginSchema } from '~/schemas/auth'
