@@ -34,9 +34,6 @@ watchEffect(() => {
     <template v-else>
       <!-- Usuario autenticado -->
       <div v-if="session.data?.user" class="flex flex-col gap-4">
-        <!-- Logout Component -->
-        <AuthLogout />
-
         <!-- Dashboard Content -->
         <div class="mb-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
           <h2 class="text-xl font-bold mb-4">Welcome to Your Dashboard</h2>
@@ -64,9 +61,5 @@ watchEffect(() => {
         </div>
       </div>
     </template>
-
-    <UButton to="/" variant="link" color="neutral">
-      ← Back to Home
-    </UButton>
   </div>
 </template>

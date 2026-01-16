@@ -5,6 +5,7 @@
     "user": "Usuario",
     "logout": {
       "button": "Cerrar Sesión",
+      "loggingOut": "Cerrando sesión...",
       "error": "Fallo al cerrar sesión. Por favor intenta nuevamente."
     },
     "password": {
@@ -16,7 +17,44 @@
     "footer": {
       "encryption": "Sus datos están protegidos con encriptación de grado industrial",
       "copyright": "Todos los derechos reservados"
-    }
+    },
+    "home": "Inicio",
+    "dashboard": "Panel de Control",
+    "profile": "Perfil",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse"
+  },
+  "header": {
+    "title": "Arpix Solutions",
+    "profile": "Ir al Perfil",
+    "goToProfile": "Ir al Perfil",
+    "logo": "Logo"
+  },
+  "footer": {
+    "product": "Producto",
+    "company": "Compañía",
+    "resources": "Recursos",
+    "features": "Características",
+    "pricing": "Precios",
+    "api": "API",
+    "about": "Nosotros",
+    "blog": "Blog",
+    "careers": "Empleos",
+    "docs": "Documentación",
+    "support": "Soporte",
+    "status": "Estado",
+    "terms": "Términos de Servicio",
+    "privacy": "Política de Privacidad"
+  },
+  "jwt": {
+    "title": "Token JWT",
+    "showToken": "Mostrar Token",
+    "hideToken": "Ocultar Token",
+    "loading": "Cargando...",
+    "noToken": "No hay token JWT disponible",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "sessionInfo": "Token JWT"
   },
   "validation": {
     "emailRequired": "El correo es requerido",

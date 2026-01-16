@@ -5,6 +5,7 @@
     "user": "User",
     "logout": {
       "button": "Sign out",
+      "loggingOut": "Signing out...",
       "error": "Failed to sign out. Please try again."
     },
     "password": {
@@ -16,7 +17,44 @@
     "footer": {
       "encryption": "Your data is protected with industry-grade encryption",
       "copyright": "All rights reserved"
-    }
+    },
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "login": "Sign In",
+    "register": "Sign Up"
+  },
+  "header": {
+    "title": "Arpix Solutions",
+    "profile": "Go to Profile",
+    "goToProfile": "Go to Profile",
+    "logo": "Logo"
+  },
+  "footer": {
+    "product": "Product",
+    "company": "Company",
+    "resources": "Resources",
+    "features": "Features",
+    "pricing": "Pricing",
+    "api": "API",
+    "about": "About",
+    "blog": "Blog",
+    "careers": "Careers",
+    "docs": "Documentation",
+    "support": "Support",
+    "status": "Status",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
+  },
+  "jwt": {
+    "title": "JWT Token",
+    "showToken": "Show Token",
+    "hideToken": "Hide Token",
+    "loading": "Loading...",
+    "noToken": "No JWT token available",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "sessionInfo": "JWT Token"
   },
   "validation": {
     "emailRequired": "Email is required",

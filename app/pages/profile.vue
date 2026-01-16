@@ -628,13 +628,6 @@ const getSessionDeviceName = (userAgent?: string) => {
                         </div>
                     </div>
                 </UCard>
-
-                <!-- Back to Dashboard -->
-                <div class="flex justify-center pt-4">
-                    <UButton to="/dashboard" variant="link" color="neutral">
-                        ← {{ t('profile.backToDashboard') }}
-                    </UButton>
-                </div>
             </div>
         </div>
 

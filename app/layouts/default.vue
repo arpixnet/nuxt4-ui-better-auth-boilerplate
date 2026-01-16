@@ -1,11 +1,14 @@
 <script setup lang="ts">
-
 </script>
 
 <template>
+  <UApp>
     <div>
-        <UMain>
-            <slot />
-        </UMain>
+      <LayoutAppHeader />
+      <UMain>
+        <slot />
+      </UMain>
+      <LayoutAppFooter />
     </div>
+  </UApp>
 </template>
