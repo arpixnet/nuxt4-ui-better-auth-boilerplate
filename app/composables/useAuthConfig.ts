@@ -33,15 +33,7 @@ export const useAuthConfig = () => {
       
       return `from-${gradient.from} via-${gradient.via} to-${gradient.to}`
     },
-    
-  /**
-   * Get form subtitle configuration for a specific page
-   * @param page - 'login' or 'register'
-   */
-  getFormSubtitle: (page: 'login' | 'register') => {
-    return authConfig.formSubtitle[page]
-  },
-  
+
   /**
    * Get gradient background style for Tailwind 4
    * Uses inline styles instead of dynamic Tailwind classes
@@ -81,4 +73,3 @@ export const useAuthConfig = () => {
   },
 }
 }
-

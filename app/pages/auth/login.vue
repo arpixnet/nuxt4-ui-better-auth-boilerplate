@@ -98,7 +98,7 @@ const handleLogin = async (event: any) => {
       email: formState.value.email,
       password: formState.value.password,
       callbackURL: redirectTo.value,
-    })
+    }) as any
 
     console.log('[Login] Response from signIn.email:', response)
     console.log('[Login] Response data:', response.data)
@@ -216,7 +216,7 @@ const handleTwoFactorVerify = async () => {
   error.value = null
 
   try {
-    const response = await authClient.twoFactor.verifyTotp({
+    const response = await (authClient as any).twoFactor.verifyTotp({
       code: twoFactorCode.value.join(''),
       trustDevice: false
     })
