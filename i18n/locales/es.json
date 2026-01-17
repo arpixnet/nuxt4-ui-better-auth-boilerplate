@@ -2,6 +2,12 @@
   "common": {
     "appName": "Arpix Solutions",
     "changeLanguage": "Cambiar Idioma",
+    "changeTheme": "Cambiar Tema",
+    "theme": {
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema"
+    },
     "user": "Usuario",
     "logout": {
       "button": "Cerrar Sesión",

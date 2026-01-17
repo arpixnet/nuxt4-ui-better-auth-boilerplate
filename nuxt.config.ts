@@ -17,9 +17,24 @@ function optionalModule(name: string) {
   }
 }
 
+// Determine theme mode from environment variable
+const themeMode = process.env.THEME_MODE || 'toggle'
+
+// Configure color mode preference based on THEME_MODE
+const colorModePreference = themeMode === 'light' 
+  ? 'light' 
+  : themeMode === 'dark' 
+    ? 'dark' 
+    : 'system'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  colorMode: {
+    preference: colorModePreference,
+    fallback: 'light',
+    classSuffix: ''
+  },
 
   modules: [
     '@nuxt/image',
@@ -103,6 +118,7 @@ export default defineNuxtConfig({
     public: {
       appName: process.env.APP_NAME || "Arpix Solutions",
       allowRegistration: process.env.ALLOW_REGISTRATION !== "false",
+      themeMode: themeMode as 'light' | 'dark' | 'toggle',
       betterAuth: {
         url: process.env.BETTER_AUTH_URL || "http://localhost:3000",
         emailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",

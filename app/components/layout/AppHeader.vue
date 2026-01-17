@@ -61,8 +61,9 @@ const navItems = computed<NavigationMenuItem[]>(() => {
     <!-- Navegación principal (centro - desktop) -->
     <UNavigationMenu :items="navItems" />
 
-    <!-- Derecha: LanguageSelector + Auth -->
+    <!-- Derecha: ThemeSelector + LanguageSelector + Auth -->
     <template #right>
+      <LayoutThemeSelector />
       <LayoutLanguageSelector />
       <LayoutAuthUser />
     </template>
