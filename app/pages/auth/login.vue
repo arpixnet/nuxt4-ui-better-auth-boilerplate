@@ -263,7 +263,7 @@ const handleTwoFactorVerify = async () => {
       class="w-full lg:w-1/2 h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 overflow-y-auto">
       <div class="w-full max-w-md h-full flex flex-col justify-between">
         <!-- Logo/Brand with Language Selector -->
-        <div class="mb-6 flex items-center justify-start">
+        <div class="mb-6 flex items-center justify-between">
           <NuxtLink to="/">
             <img v-if="authPageConfig.logo.imageUrl" :src="authPageConfig.logo.imageUrl"
               :alt="authPageConfig.logo.imageAlt || 'Logo'" class="h-10 w-auto" />
@@ -274,6 +274,7 @@ const handleTwoFactorVerify = async () => {
               {{ t('common.appName') }}
             </h2>
           </NuxtLink>
+          <LayoutLanguageSelector />
         </div>
 
         <div>
