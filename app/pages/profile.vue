@@ -196,7 +196,7 @@ const initiateTwoFactor = () => {
 const enableTwoFactor = async () => {
     loadingTwoFactor.value = true
     try {
-        const response = await authClient.twoFactor.enable({
+        const response = await (authClient as any).twoFactor.enable({
             password: twoFactorPassword.value
         })
 
@@ -220,7 +220,7 @@ const enableTwoFactor = async () => {
 const verifyTwoFactor = async () => {
     loadingTwoFactor.value = true
     try {
-        const response = await authClient.twoFactor.verifyTotp({
+        const response = await (authClient as any).twoFactor.verifyTotp({
             code: twoFactorVerifyCode.value.join(''),
             trustDevice: false
         })
@@ -257,7 +257,7 @@ const initiateDisableTwoFactor = () => {
 const confirmDisableTwoFactor = async () => {
     loadingTwoFactor.value = true
     try {
-        const response = await authClient.twoFactor.disable({
+        const response = await (authClient as any).twoFactor.disable({
             password: disableTwoFactorPassword.value
         })
 
