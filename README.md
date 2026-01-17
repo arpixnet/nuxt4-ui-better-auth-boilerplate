@@ -1,214 +1,225 @@
-# Nuxt 4 + @nuxt/ui Boilerplate
+# Nuxt 4 + @nuxt/ui + Better-Auth Boilerplate
 
-A modern, production-ready boilerplate for building web applications with Nuxt 4 and @nuxt/ui. This template provides a solid foundation with essential modules, optimized configuration, and best practices for rapid development.
+[![Nuxt 4](https://img.shields.io/badge/Nuxt-4.0-00DC82?logo=nuxt.js)](https://nuxt.com)
+[![Vue](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+A modern, production-ready boilerplate for building web applications with **Nuxt 4**, **@nuxt/ui**, and **Better-Auth**. This template provides a solid foundation with essential modules, optimized configuration, authentication system, and best practices for rapid development.
+
+## Quick Start
+
+```bash
+# Create a new project
+npx nuxi init my-project -t github:arpixnet/nuxt4-nuxt-ui-better-auth-boilerplate
+cd my-project
+
+# Install dependencies
+pnpm install
+
+# Copy environment file and configure
+cp .env.example .env
+
+# Start development server
+pnpm dev
+```
 
 ## Features
 
-- ⚡ **Nuxt 4** - The latest version of the Vue.js framework
-- 🎨 **@nuxt/ui** - Beautiful and accessible UI components built on Tailwind CSS
-- 🖼️ **@nuxt/image** - Optimized image handling with automatic format conversion
-- 📝 **@nuxt/content** - Optional content management system (easily addable)
-- 🚀 **@nuxt/scripts** - Third-party script optimization
-- 🎯 **TypeScript** - Full TypeScript support out of the box
-- 📱 **Responsive Design** - Mobile-first approach with Tailwind CSS
-- ⚙️ **Optimized Configuration** - Production-ready settings and performance optimizations
-- 🔐 **Better-Auth Integration** - Complete authentication system with email verification
-- 📧 **Email System** - Beautiful email templates with nuxt-arpix-email-sender
-- 🔧 **Development Tools** - Nuxt DevTools enabled for better DX
+| Category | Features |
+|----------|----------|
+| **Core** | [Nuxt 4](https://nuxt.com) with App Router, Vue 3 Composition API, TypeScript |
+| **UI** | [@nuxt/ui](https://ui.nuxt.com) components, Tailwind CSS, Dark/Light mode |
+| **Auth** | [Better-Auth](https://better-auth.com) with email/password, social login, JWT, 2FA |
+| **Email** | Transactional emails with Handlebars templates, Gmail OAuth2 support |
+| **i18n** | Multi-language support (Spanish/English) with [@nuxtjs/i18n](https://i18n.nuxtjs.org) |
+| **Database** | PostgreSQL support with migrations, SQLite fallback |
+| **SEO** | [@nuxtjs/seo](https://nuxtseo.com/) for meta tags and sitemaps |
+| **Testing** | Vitest for unit tests, Playwright for E2E |
 
-## Authentication System
+---
 
-This boilerplate includes a complete authentication system powered by **Better-Auth** with integrated email functionality using **nuxt-arpix-email-sender**.
+## Table of Contents
 
-### Features
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Authentication](#authentication)
+- [Internationalization](#internationalization)
+- [Components](#components)
+- [Middlewares](#middlewares)
+- [Composables](#composables)
+- [API Endpoints](#api-endpoints)
+- [Project Structure](#project-structure)
+- [Development](#development)
+- [Production](#production)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
 
-- ✅ **Email & Password Authentication** - Secure user registration and login
-- ✅ **Email Verification** - Optional email verification for new users
-- ✅ **Password Reset** - Complete forgot password flow with email recovery
-- ✅ **Welcome Emails** - Automatic welcome emails on registration
-- ✅ **Beautiful Email Templates** - Professional HTML email templates
-- ✅ **OAuth2 Social Login** - Support for multiple social providers
-- ✅ **JWT Sessions** - Token-based authentication with Hasura integration
-- ✅ **Password Strength** - Minimum 8 characters requirement
-- ✅ **Real-time Validation** - Form validation with helpful error messages
-- ✅ **Responsive Auth Pages** - Mobile-friendly authentication UI
+---
 
-### Configuration
+## Installation
 
-#### Email Setup (Required for Email Features)
+### Method 1: Using nuxi (Recommended)
 
-The email system uses **nuxt-arpix-email-sender** module. Configure it in `nuxt.config.ts`:
-
-**Gmail OAuth2 (Recommended for Production):**
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing one
-3. Enable Gmail API
-4. Create OAuth 2.0 credentials
-5. Add `http://localhost:3000` as authorized redirect URI (development)
-6. Generate refresh token using OAuth 2.0 playground
-
-```typescript
-// nuxt.config.ts
-arpixEmailSender: {
-  transport: 'smtp',
-  defaultFrom: '"Your App" <your-email@gmail.com>',
-  smtp: {
-    service: 'gmail',
-    auth: {
-      type: 'OAuth2',
-      user: 'your-email@gmail.com',
-      clientId: process.env.GMAIL_CLIENT_ID,
-      clientSecret: process.env.GMAIL_CLIENT_SECRET,
-      refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-    }
-  },
-  templates: {
-    dir: 'server/emails/templates',
-  },
-}
+```bash
+npx nuxi init my-project -t github:arpixnet/nuxt4-nuxt-ui-better-auth-boilerplate
+cd my-project
 ```
 
-**Gmail App Password (Development Only):**
+### Method 2: Git Clone
 
-1. Enable 2-factor authentication on your Google account
-2. Generate an App Password: https://myaccount.google.com/apppasswords
-3. Use the 16-character password
-
-```typescript
-// nuxt.config.ts
-arpixEmailSender: {
-  transport: 'smtp',
-  defaultFrom: '"Your App" <your-email@gmail.com>',
-  smtp: {
-    service: 'gmail',
-    auth: {
-      user: 'your-email@gmail.com',
-      pass: process.env.GMAIL_APP_PASSWORD,
-    }
-  },
-  templates: {
-    dir: 'server/emails/templates',
-  },
-}
+```bash
+git clone https://github.com/arpixnet/nuxt4-nuxt-ui-better-auth-boilerplate.git my-project
+cd my-project
+rm -rf .git
+git init
 ```
 
-#### Better-Auth Configuration
+### Install Dependencies
 
-Better-Auth is configured in `server/lib/auth.ts` with the following options:
+Choose your preferred package manager:
 
-```typescript
-export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
-  secret: process.env.BETTER_AUTH_SECRET,
-  
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
-  
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
-    sendVerificationEmail: async ({ user, url }) => {
-      // Sends welcome/verification email via nuxt-arpix-email-sender
-    },
-    sendResetPasswordEmail: async ({ user, url }) => {
-      // Sends password reset email via nuxt-arpix-email-sender
-    },
-  },
-  
-  // Social providers are automatically configured from environment variables
-  socialProviders: buildSocialProviders(),
-})
+```bash
+# pnpm (Recommended)
+pnpm install
+
+# npm
+npm install
+
+# yarn
+yarn install
 ```
 
-#### Environment Variables
+### Environment Setup
 
-Create a `.env` file based on `.env.example`:
+Copy the example environment file and configure it:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your configuration. See [Configuration](#configuration) for details.
+
+---
+
+## Configuration
+
+### Required Environment Variables
 
 ```bash
 # Application
 APP_NAME=Your App Name
 
-# Better-Auth
-BETTER_AUTH_SECRET=your-secret-key
+# Better-Auth (Generate with: openssl rand -base64 32)
+BETTER_AUTH_SECRET=your-secret-key-minimum-32-characters
 BETTER_AUTH_URL=http://localhost:3000
 BETTER_AUTH_EMAIL_VERIFICATION=true
-BETTER_AUTH_DEFAULT_REDIRECT=/
 
 # Database
 DATABASE_URL=postgres://user:password@localhost:5432/your-db
 
-# Email (Gmail OAuth2)
+# Email (see Email Configuration below)
+EMAIL_USER=your-email@gmail.com
+EMAIL_FROM="Your App <noreply@example.com>"
+GMAIL_CLIENT_ID=your-client-id
+GMAIL_CLIENT_SECRET=your-client-secret
+GMAIL_REFRESH_TOKEN=your-refresh-token
+```
+
+### Optional Environment Variables
+
+```bash
+# Registration Control
+ALLOW_REGISTRATION=true
+
+# Session & JWT
+BETTER_AUTH_SESSION_EXPIRES_IN=604800        # 7 days in seconds
+BETTER_AUTH_SESSION_UPDATE_AGE=86400         # 1 day in seconds
+BETTER_AUTH_COOKIE_MAX_AGE=300               # 5 minutes in seconds
+BETTER_AUTH_JWT_EXPIRATION_TIME=7d           # JWT expiration
+
+# Hasura Integration
+BETTER_AUTH_WITH_HASURA=false
+
+# Redis (Rate Limiting)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+```
+
+### Email Configuration
+
+The boilerplate uses **nuxt-arpix-email-sender** for transactional emails.
+
+#### Gmail OAuth2 (Recommended for Production)
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a project and enable Gmail API
+3. Create OAuth 2.0 credentials
+4. Add your redirect URI (e.g., `http://localhost:3000` for dev)
+5. Generate a refresh token using the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/)
+
+```bash
 EMAIL_USER=your-email@gmail.com
 GMAIL_CLIENT_ID=your-client-id
 GMAIL_CLIENT_SECRET=your-client-secret
 GMAIL_REFRESH_TOKEN=your-refresh-token
 ```
 
-### Email Templates
+#### Gmail App Password (Development Only)
 
-The system includes three professionally designed email templates:
+1. Enable 2-factor authentication
+2. Generate an App Password at [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+3. Use the 16-character password
 
-#### 1. Welcome Email (`welcome.hbs`)
-- Sent automatically on user registration
-- Includes verification link if email verification is enabled
-- Shows login link if verification is not required
-- Responsive design with brand colors
+```bash
+# For App Password, modify nuxt.config.ts to use 'pass' instead of OAuth2
+```
 
-#### 2. Verification Email (`verify-again.hbs`)
-- Used for resending verification emails
-- Clear call-to-action with verification button
-- Includes helpful instructions
-- Professional security messaging
+### Social Providers
 
-#### 3. Password Reset Email (`reset-password.hbs`)
-- Sent when user requests password reset
-- Includes temporary reset link (1-hour expiration)
-- Shows request details (IP, date) for security
-- Warns about unauthorized requests
+Social login is **100% dynamic** - no code changes needed! Just add environment variables:
 
-**Customizing Templates:**
+```bash
+# Convention: SOCIAL_PROVIDER_{PROVIDER}_{FIELD_NAME}
+SOCIAL_PROVIDER_GOOGLE_CLIENT_ID=your-client-id
+SOCIAL_PROVIDER_GOOGLE_CLIENT_SECRET=your-client-secret
 
-Edit templates in `server/emails/templates/`:
-- All templates use Handlebars syntax
-- Variables available: `userName`, `userEmail`, `verificationLink`, `resetLink`, `loginUrl`, `appName`
-- Fully responsive HTML/CSS included
-- Easy to customize colors and branding
+# Any OAuth 2.0 provider works automatically!
+SOCIAL_PROVIDER_GITHUB_CLIENT_ID=xxx
+SOCIAL_PROVIDER_GITHUB_CLIENT_SECRET=xxx
+SOCIAL_PROVIDER_DISCORD_CLIENT_ID=xxx
+SOCIAL_PROVIDER_DISCORD_CLIENT_SECRET=xxx
+```
+
+See [Better-Auth Documentation](./doc/BETTER_AUTH.md#social-providers-100-dynamic) for more details.
+
+---
+
+## Authentication
+
+This boilerplate includes a complete authentication system powered by **Better-Auth**.
+
+### Features
+
+| Feature | Description |
+|---------|-------------|
+| Email/Password | Secure credential authentication with hashing |
+| Email Verification | Optional email verification for new users |
+| Password Reset | Complete forgot password flow |
+| Social Login | OAuth 2.0 for multiple providers (100% dynamic) |
+| JWT Sessions | Token-based authentication with Hasura support |
+| 2FA | Two-factor authentication support |
+| Rate Limiting | Email rate limiting with Redis fallback |
 
 ### Authentication Pages
 
-The system includes the following pages:
-
-#### Login (`/auth/login`)
-- Email and password authentication
-- Forgot password link
-- Social login buttons (when configured)
-- Remember me functionality
-- Error handling with helpful messages
-
-#### Register (`/auth/register`)
-- Email and password registration
-- Real-time form validation
-- Automatic email verification (if enabled)
-- Redirects to verify-email page after registration
-
-#### Verify Email (`/auth/verify-email`)
-- Shows verification status
-- Option to resend verification email
-- Clear instructions for user
-- Already verified link
-
-#### Forgot Password (`/auth/forgot-password`)
-- Request password reset
-- Email input with validation
-- Success message (doesn't reveal if email exists)
-
-#### Reset Password (`/auth/reset-password`)
-- New password form
-- Password confirmation
-- Token-based validation
-- Auto-redirect to login after success
+| Page | Route | Description |
+|------|-------|-------------|
+| Login | `/auth/login` | Email/password and social login |
+| Register | `/auth/register` | New user registration |
+| Verify Email | `/auth/verify-email` | Email verification status |
+| Forgot Password | `/auth/forgot-password` | Password reset request |
+| Reset Password | `/auth/reset-password` | Set new password with token |
 
 ### Usage Examples
 
@@ -219,7 +230,7 @@ import { useAuthClient } from '~/lib/auth-client'
 
 const authClient = useAuthClient()
 
-const response = await authClient.signUp.email({
+await authClient.signUp.email({
   email: 'user@example.com',
   password: 'password123',
   name: 'John Doe',
@@ -230,26 +241,10 @@ const response = await authClient.signUp.email({
 #### Login User
 
 ```typescript
-const response = await authClient.signIn.email({
+await authClient.signIn.email({
   email: 'user@example.com',
   password: 'password123',
-  callbackURL: '/',
-})
-```
-
-#### Reset Password
-
-```typescript
-// Request reset
-await authClient.resetPassword({
-  email: 'user@example.com',
-  redirectTo: '/auth/reset-password',
-})
-
-// Update password with token from email
-await authClient.resetPassword({
-  newPassword: 'newpassword123',
-  token: 'reset-token-from-email',
+  callbackURL: '/dashboard',
 })
 ```
 
@@ -258,318 +253,559 @@ await authClient.resetPassword({
 ```typescript
 import { useAuthSession } from '~/composables/useAuthSession'
 
-const session = useAuthSession()
+const { session, pending, isExpired } = useAuthSession()
 
 // Access user data
-console.log(session.session?.value?.user)
+console.log(session.value?.data?.user)
 
 // Check if authenticated
-console.log(session.session?.value !== null)
+console.log(session.value?.data !== null)
+```
 
-// Logout
+### Documentation
+
+For detailed authentication documentation, see:
+
+- [Better-Auth Complete Guide](./doc/BETTER_AUTH.md) - Server configuration, JWT, social providers, database schema
+- [Auth Pages Configuration](./doc/AUTH_CONFIG.md) - Customize login/register pages, logos, colors, gradients
+
+---
+
+## Internationalization
+
+The boilerplate includes multi-language support using [@nuxtjs/i18n](https://i18n.nuxtjs.org/).
+
+### Supported Languages
+
+| Code | Language | Flag | File |
+|------|----------|------|------|
+| `es` | Español | 🇪🇸 | `i18n/locales/es.json` |
+| `en` | English | 🇬🇧 | `i18n/locales/en.json` |
+
+### Configuration
+
+The i18n module is configured in `nuxt.config.ts`:
+
+```typescript
+i18n: {
+  baseUrl: process.env.BASE_URL || 'http://localhost:3000',
+  defaultLocale: 'en',
+  strategy: 'no_prefix',  // No URL prefix, uses cookie instead
+  detectBrowserLanguage: {
+    useCookie: true,
+    cookieKey: 'i18n_redirected',
+    redirectOn: 'root',
+  }
+}
+```
+
+### Adding a New Language
+
+1. Create a new locale file in `i18n/locales/`:
+
+```json
+// i18n/locales/fr.json
+{
+  "welcome": "Bienvenue",
+  "login": "Connexion"
+}
+```
+
+2. Add the locale to `nuxt.config.ts`:
+
+```typescript
+i18n: {
+  locales: [
+    { code: 'es', language: 'es-ES', file: 'es.json', flag: '🇪🇸', name: 'Español' },
+    { code: 'en', language: 'en-US', file: 'en.json', flag: '🇬🇧', name: 'English' },
+    { code: 'fr', language: 'fr-FR', file: 'fr.json', flag: '🇫🇷', name: 'Français' },
+  ],
+}
+```
+
+### Usage in Components
+
+```vue
+<template>
+  <h1>{{ $t('welcome') }}</h1>
+  <p>{{ $t('auth.login.subtitle') }}</p>
+</template>
+
+<script setup>
+// Get current locale
+const { locale, setLocale } = useI18n()
+
+// Change language
+const changeLanguage = (lang: string) => {
+  setLocale(lang)
+}
+</script>
+```
+
+For detailed i18n documentation, see [Internationalization Guide](./doc/I18N.md).
+
+---
+
+## Components
+
+The boilerplate includes several reusable components.
+
+### Layout Components
+
+| Component | Location | Description |
+|-----------|----------|-------------|
+| `AppHeader` | `app/components/layout/AppHeader.vue` | Site header with navigation |
+| `AppFooter` | `app/components/layout/AppFooter.vue` | Site footer |
+| `AuthUser` | `app/components/layout/AuthUser.vue` | Authenticated user menu |
+| `LanguageSelector` | `app/components/layout/languageSelector.vue` | Language switcher dropdown |
+
+### Auth Components
+
+| Component | Location | Description |
+|-----------|----------|-------------|
+| `AuthAvatar` | `app/components/AuthAvatar.vue` | User avatar with fallback |
+| `AuthLogout` | `app/components/AuthLogout.vue` | Logout button |
+| `UPassword` | `app/components/UPassword.vue` | Password input with toggle visibility |
+
+### Layouts
+
+| Layout | File | Description |
+|--------|------|-------------|
+| `default` | `app/layouts/default.vue` | Main layout with header and footer |
+| `blank` | `app/layouts/blank.vue` | Minimal layout for auth pages |
+
+For customizing auth page appearance (logos, colors, gradients), see [Auth Pages Configuration](./doc/AUTH_CONFIG.md).
+
+For complete component reference, see [Components Documentation](./doc/COMPONENTS.md).
+
+---
+
+## Middlewares
+
+### Route Middlewares
+
+#### `auth.ts`
+
+Protects routes that require authentication.
+
+```typescript
+// app/middleware/auth.ts
+export default defineNuxtRouteMiddleware((to) => {
+  // Redirect to login if not authenticated
+})
+```
+
+Usage in pages:
+
+```vue
+<script setup>
+// Run middleware for this page
+definePageMeta({
+  middleware: 'auth'
+})
+</script>
+```
+
+#### `register-allowed.ts`
+
+Controls access to registration page based on `ALLOW_REGISTRATION` environment variable.
+
+```typescript
+// Returns 404 if registration is disabled
+definePageMeta({
+  middleware: 'register-allowed'
+})
+```
+
+### Server Middleware
+
+Server-side middleware can be added in `server/middleware/` for global request handling.
+
+For complete middleware documentation, see [Middlewares Guide](./doc/MIDDLEWARES.md).
+
+---
+
+## Composables
+
+### Authentication Composables
+
+#### `useAuthClient` (app/lib/auth-client.ts)
+
+Singleton Better-Auth client instance.
+
+```typescript
+const authClient = useAuthClient()
+
+// Available methods
+await authClient.signIn.email({ email, password, callbackURL })
+await authClient.signIn.social({ provider, callbackURL })
 await authClient.signOut()
+await authClient.getSession()
+await authClient.getJWT()
 ```
 
-### Social Login Configuration
+**Important:** Must be called from within a Vue component's `<script setup>`, a Nuxt plugin, or another composable.
 
-Social providers are 100% dynamic and configured via environment variables:
+#### `useAuthSession` (app/composables/useAuthSession.ts)
 
-```bash
-# Google
-SOCIAL_PROVIDER_GOOGLE_CLIENT_ID=your-client-id
-SOCIAL_PROVIDER_GOOGLE_CLIENT_SECRET=your-client-secret
+Reactive session management with auto-redirect on expiration.
 
-# GitHub
-SOCIAL_PROVIDER_GITHUB_CLIENT_ID=your-client-id
-SOCIAL_PROVIDER_GITHUB_CLIENT_SECRET=your-client-secret
+```typescript
+const { session, pending, error, refresh, isExpired } = useAuthSession()
 
-# Apple
-SOCIAL_PROVIDER_APPLE_CLIENT_ID=your-client-id
-SOCIAL_PROVIDER_APPLE_CLIENT_SECRET=your-client-secret
+// session: Ref<AuthSession> - Session data
+// pending: Ref<boolean> - Loading state
+// error: Ref<Error | null> - Error if any
+// refresh: () => Promise<void> - Reload session
+// isExpired: ComputedRef<boolean> - Session expiration status
 ```
 
-**Any OAuth 2.0 provider works automatically!**
+#### `useAuthConfig` (app/composables/useAuthConfig.ts)
 
-Just add the environment variables following the convention:
-`SOCIAL_PROVIDER_{PROVIDER}_{FIELD}`
+Access authentication page configuration (logos, colors, etc.).
 
-Example: `SOCIAL_PROVIDER_PAYPAL_CLIENT_ID` → paypal.clientId
+```typescript
+const { config, getLogo, getDecorativePanel, getGradientStyle } = useAuthConfig()
 
-### Security Features
+// Get panel configuration for a page
+const panelConfig = getDecorativePanel('login')
 
-- 🔒 **Password Requirements** - Minimum 8 characters
-- 🔒 **Email Verification** - Prevents fake accounts
-- 🔒 **Token-based Reset** - Time-limited password reset tokens
-- 🔒 **Secure Sessions** - JWT-based authentication
-- 🔒 **Hasura Integration** - JWT claims for GraphQL
-- 🔒 **Rate Limiting** - Email sending rate limits
-- 🔒 **Environment Variables** - Sensitive data in `.env` only
-- 🔒 **SQL Injection Protection** - Parameterized queries via Better-Auth
-
-## Installation Instructions
-
-### Method 1: Using nuxi (Recommended)
-
-Create a new project using this template:
-
-```bash
-npx nuxi init my-project -t github:arpixnet/nuxt4-nuxt-ui-boilerplate
-cd my-project
+// Get gradient styles
+const gradientStyle = getGradientStyle('login', 'dark')
 ```
 
-### Method 2: Git Clone
+See [Auth Configuration Documentation](./doc/AUTH_CONFIG.md) for full customization guide.
 
-```bash
-git clone https://github.com/arpixnet/nuxt4-nuxt-ui-boilerplate.git my-project
-cd my-project
-rm -rf .git
-git init
+### Utility Composables
+
+#### `useEmailRateLimit` (app/composables/useEmailRateLimit.ts)
+
+Rate limiting for email operations with Redis fallback.
+
+```typescript
+const { isAllowed, checkLimit, resetLimit } = useEmailRateLimit()
+
+// Check if email can be sent
+if (await checkLimit('user@example.com')) {
+  // Send email
+}
 ```
 
-### Install Dependencies
+#### `useSessionMonitor` (app/composables/useSessionMonitor.ts)
 
-Choose your preferred package manager:
+Monitors session expiration and handles auto-logout.
 
-#### Using pnpm (Recommended)
-```bash
-pnpm install
+```typescript
+useSessionMonitor({
+  // Auto-redirect to login on expiration
+  onExpired: () => router.push('/auth/login')
+})
 ```
 
-#### Using npm
-```bash
-npm install
+For complete composables reference, see [Composables Documentation](./doc/COMPOSABLES.md).
+
+---
+
+## API Endpoints
+
+### Better-Auth Endpoints
+
+All authentication endpoints are under `/api/auth/`:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/sign-up/email` | Register new user |
+| POST | `/api/auth/sign-in/email` | Login with email/password |
+| POST | `/api/auth/sign-in/social` | Social login |
+| POST | `/api/auth/sign-out` | Logout |
+| GET | `/api/auth/get-session` | Get current session |
+| POST | `/api/auth/forget-password` | Request password reset |
+| POST | `/api/auth/reset-password` | Reset password with token |
+
+### Custom Email Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/email/send-welcome` | Send welcome email |
+| POST | `/api/email/send-verification` | Send verification email |
+| POST | `/api/email/send-reset-password` | Send password reset email |
+
+For complete API documentation, see [API Documentation](./doc/API.md).
+
+---
+
+## Project Structure
+
+```
+├── app/                          # Nuxt App Directory (Client)
+│   ├── app.vue                   # Root Vue component
+│   ├── assets/                   # Static assets
+│   │   └── css/
+│   │       ├── main.css          # Global styles
+│   │       └── content.css       # Content module styles
+│   ├── components/               # Vue components
+│   │   ├── layout/               # Layout components
+│   │   │   ├── AppFooter.vue
+│   │   │   ├── AppHeader.vue
+│   │   │   ├── AuthUser.vue
+│   │   │   └── languageSelector.vue
+│   │   ├── AuthAvatar.vue
+│   │   ├── AuthLogout.vue
+│   │   └── UPassword.vue
+│   ├── composables/              # Vue composables
+│   │   ├── useAuthConfig.ts      # Auth page configuration
+│   │   ├── useAuthSession.ts     # Session management
+│   │   ├── useEmailRateLimit.ts  # Email rate limiting
+│   │   └── useSessionMonitor.ts  # Session expiration monitor
+│   ├── config/                   # Configuration files
+│   │   └── auth.config.ts        # Auth pages customization
+│   ├── layouts/                  # Layout components
+│   │   ├── default.vue           # Main layout
+│   │   └── blank.vue             # Minimal layout
+│   ├── lib/                      # Client utilities
+│   │   └── auth-client.ts        # Better-Auth client
+│   ├── middleware/               # Route middleware
+│   │   ├── auth.ts               # Authentication guard
+│   │   └── register-allowed.ts   # Registration control
+│   ├── pages/                    # File-based routing
+│   │   ├── auth/                 # Auth pages
+│   │   │   ├── forgot-password.vue
+│   │   │   ├── index.vue
+│   │   │   ├── login.vue
+│   │   │   ├── register.vue
+│   │   │   └── reset-password.vue
+│   │   ├── dashboard.vue
+│   │   ├── example-content.vue
+│   │   ├── index.vue
+│   │   └── profile.vue
+│   └── schemas/                  # Validation schemas
+│       └── auth.ts               # Auth validation schemas
+├── server/                       # Server-side code
+│   ├── api/                      # API endpoints
+│   │   ├── auth/                 # Better-Auth handler
+│   │   │   └── [...all].ts
+│   │   └── email/                # Email endpoints
+│   ├── emails/                   # Email templates
+│   │   └── templates/            # Handlebars templates
+│   │       ├── reset-password.hbs
+│   │       ├── verify-again.hbs
+│   │       └── welcome.hbs
+│   ├── lib/                      # Server utilities
+│   │   └── auth.ts               # Better-Auth configuration
+│   └── middleware/               # Server middleware
+├── i18n/                         # Internationalization
+│   └── locales/                  # Translation files
+│       ├── en.json
+│       └── es.json
+├── public/                       # Static assets
+│   ├── favicon.ico
+│   └── images/
+├── doc/                          # Documentation
+│   ├── API.md                    # API endpoints
+│   ├── AUTH_CONFIG.md            # Auth pages configuration
+│   ├── BETTER_AUTH.md            # Better-Auth complete guide
+│   ├── I18N.md                   # Internationalization guide
+│   ├── COMPONENTS.md             # Components reference
+│   ├── MIDDLEWARES.md            # Middlewares guide
+│   └── COMPOSABLES.md            # Composables reference
+├── .env.example                  # Environment variables template
+├── app.config.ts                 # App configuration
+├── auth.ts                       # Better-Auth export
+├── content.config.ts             # Content module config
+├── nuxt.config.ts                # Nuxt configuration
+├── package.json                  # Dependencies
+└── tsconfig.json                 # TypeScript configuration
 ```
 
-#### Using yarn
-```bash
-yarn install
-```
+---
 
-## Optional Content Module
+## Development
 
-This boilerplate includes an easy way to add @nuxt/content for content management:
+### Start Development Server
 
 ```bash
-npm run add:content
-```
-
-This command will:
-- Install @nuxt/content automatically
-- The module is already configured in `nuxt.config.ts` to load conditionally
-- CSS styles for content are automatically included when the module is present
-- No additional configuration needed - it works out of the box!
-
-After adding the content module, you can:
-- Create `.md` files in the `content/` directory
-- Access them via the `/example-content` route (already included)
-- Use the powerful content query API in your components
-
-## Development Server
-
-Start the development server:
-
-```bash
-# Using pnpm
 pnpm dev
-
-# Using npm
-npm run dev
-
-# Using yarn
-yarn dev
 ```
 
 The application will be available at `http://localhost:3000`
+
+### Type Definitions
+
+Generate TypeScript types:
+
+```bash
+pnpm nuxi prepare
+```
+
+### Code Style
+
+The project uses ESLint and Prettier for code quality. Run:
+
+```bash
+# Lint code
+pnpm lint
+
+# Fix issues
+pnpm lint:fix
+```
+
+### Testing
+
+```bash
+# Unit tests with Vitest
+pnpm test
+
+# E2E tests with Playwright
+pnpm test:e2e
+```
+
+### Optional Content Module
+
+Add the Nuxt Content module for file-based CMS:
+
+```bash
+pnpm add:content
+```
+
+The module is pre-configured in `nuxt.config.ts` and works out of the box.
+
+---
 
 ## Production
 
 ### Build for Production
 
 ```bash
-# Using pnpm
 pnpm build
-
-# Using npm
-npm run build
-
-# Using yarn
-yarn build
 ```
 
 ### Preview Production Build
 
 ```bash
-# Using pnpm
 pnpm preview
-
-# Using npm
-npm run preview
-
-# Using yarn
-yarn preview
 ```
 
 ### Generate Static Site
 
 ```bash
-# Using pnpm
 pnpm generate
-
-# Using npm
-npm run generate
-
-# Using yarn
-yarn generate
 ```
 
-## Project Structure
+### Deployment
 
-```
-├── app/
-│   ├── app.vue              # Root Vue component
-│   ├── assets/              # Stylesheets, images, fonts
-│   │   └── css/
-│   │       ├── main.css     # Main styles
-│   │       └── content.css  # Content module styles
-│   ├── components/          # Vue components
-│   ├── composables/         # Vue composables
-│   ├── layouts/             # Layout components
-│   │   └── default.vue      # Default layout
-│   ├── middleware/          # Route middleware
-│   ├── pages/               # File-based routing
-│   │   ├── index.vue        # Home page
-│   │   └── example-content.vue # Content example
-│   └── plugins/             # Nuxt plugins
-├── content/                 # Content files (when @nuxt/content is added)
-│   └── example-content.md   # Example markdown content
-├── public/                  # Static assets
-│   ├── favicon.ico
-│   └── robots.txt
-├── server/                  # Server-side code
-├── app.config.ts           # App configuration
-├── content.config.ts       # Content module configuration
-├── nuxt.config.ts          # Nuxt configuration
-├── package.json            # Dependencies and scripts
-└── tsconfig.json           # TypeScript configuration
-```
+The boilerplate works with any Nuxt-compatible hosting:
 
-## Contributing
+- [Vercel](https://vercel.com)
+- [Netlify](https://netlify.com)
+- [Cloudflare Pages](https://pages.cloudflare.com)
+- [Railway](https://railway.app)
+- Self-hosted with Node.js
 
-We welcome contributions to improve this boilerplate! Here's how you can help:
+#### Environment Variables
 
-### Getting Started
+Don't forget to set all required environment variables in production!
 
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/your-username/nuxt4-nuxt-ui-boilerplate.git`
-3. Create a new branch: `git checkout -b feature/your-feature-name`
-4. Make your changes
-5. Test your changes thoroughly
-6. Commit your changes: `git commit -m "Add your feature"`
-7. Push to your branch: `git push origin feature/your-feature-name`
-8. Open a Pull Request
-
-### Guidelines
-
-- Follow the existing code style and conventions
-- Write clear, descriptive commit messages
-- Test your changes in both development and production modes
-- Update documentation if needed
-- Keep dependencies up to date
-- Ensure TypeScript types are properly defined
-
-### Reporting Issues
-
-If you find a bug or have a suggestion:
-
-1. Check if the issue already exists in the [Issues](https://github.com/arpixnet/nuxt4-nuxt-ui-boilerplate/issues) section
-2. If not, create a new issue with:
-   - Clear description of the problem or suggestion
-   - Steps to reproduce (for bugs)
-   - Expected vs actual behavior
-   - Environment details (Node.js version, package manager, OS)
+---
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### Node.js Version Compatibility
-**Problem**: Build fails or dependencies don't install properly
-**Solution**: Ensure you're using Node.js v20.19.5 or compatible version as specified in `package.json`
+#### Node.js Version
+
+Ensure you're using a compatible Node.js version (v20.19.5+):
 
 ```bash
-node --version  # Should be v20.19.5 or compatible
+node --version
 ```
 
-#### Package Manager Issues
-**Problem**: Dependencies fail to install or version conflicts
-**Solution**:
-1. Clear cache and reinstall:
-   ```bash
-   # For npm
-   npm cache clean --force
-   rm -rf node_modules package-lock.json
-   npm install
+#### Build Errors
 
-   # For pnpm
-   pnpm store prune
-   rm -rf node_modules pnpm-lock.yaml
-   pnpm install
-   ```
+Clear cache and reinstall:
 
-#### @nuxt/content Not Working
-**Problem**: Content module doesn't load after running `npm run add:content`
-**Solution**:
-1. Restart the development server after adding the content module
-2. Ensure the content directory exists and contains `.md` files
-3. Check that the module is properly detected in the Nuxt config
-
-#### Build Errors in Production
-**Problem**: Application builds successfully but fails in production
-**Solution**:
-1. Check for environment-specific configurations
-2. Ensure all dependencies are properly installed
-3. Verify that the `nitro.compressPublicAssets` setting is compatible with your deployment platform
+```bash
+# pnpm
+pnpm store prune
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+```
 
 #### TypeScript Errors
-**Problem**: TypeScript compilation errors
-**Solution**:
-1. Run `npx nuxi prepare` to regenerate type definitions
-2. Restart your IDE/editor
-3. Check that all dependencies have proper type definitions
+
+Regenerate type definitions:
+
+```bash
+pnpm nuxi prepare
+```
+
+Restart your IDE/editor after running this command.
+
+#### Gradient Colors Not Showing
+
+If gradient colors appear white on Tailwind 4, the issue is with dynamic class generation. The boilerplate now uses inline CSS styles to solve this. See [Auth Configuration - Troubleshooting](./doc/AUTH_CONFIG.md#solución-de-problemas) for details.
 
 ### Getting Help
 
-If you're still experiencing issues:
-
-1. Check the [Nuxt 4 documentation](https://nuxt.com/docs)
-2. Visit the [@nuxt/ui documentation](https://ui.nuxt.com/)
-3. Search existing [GitHub Issues](https://github.com/arpixnet/nuxt4-nuxt-ui-boilerplate/issues)
-4. Join the [Nuxt Discord community](https://discord.com/invite/ps2h6QT)
-
-## Changelog
-
-### v1.0.0 (2025-09-04)
-
-**Initial Release**
-
-- ✨ Initial boilerplate setup with Nuxt 4
-- ✨ Integrated @nuxt/ui for component library
-- ✨ Added @nuxt/image for optimized image handling
-- ✨ Included @nuxt/scripts for third-party script optimization
-- ✨ Optional @nuxt/content integration with automatic configuration
-- ✨ TypeScript support with proper type definitions
-- ✨ Responsive default layout
-- ✨ Production-ready configuration with compression
-- ✨ SQLite database integration with better-sqlite3
-- ✨ Development tools and DevTools enabled
-- ✨ Example pages and content structure
-- 📚 Comprehensive documentation and setup instructions
+- Check the [Nuxt 4 documentation](https://nuxt.com/docs)
+- Visit the [@nuxt/ui documentation](https://ui.nuxt.com/)
+- See [Better-Auth documentation](https://better-auth.com/docs)
+- Search existing [GitHub Issues](https://github.com/arpixnet/nuxt4-nuxt-ui-better-auth-boilerplate/issues)
+- Join the [Nuxt Discord community](https://discord.com/invite/ps2h6QT)
 
 ---
 
-**Built with ❤️ using Nuxt 4 and @nuxt/ui**
+## Contributing
 
-For more information, visit:
-- [Nuxt 4 Documentation](https://nuxt.com/docs)
-- [@nuxt/ui Documentation](https://ui.nuxt.com/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+Contributions are welcome! Please see our contributing guidelines:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Make your changes
+4. Test thoroughly
+5. Commit: `git commit -m "Add your feature"`
+6. Push: `git push origin feature/your-feature`
+7. Open a Pull Request
+
+### Guidelines
+
+- Follow existing code style and conventions
+- Write clear, descriptive commit messages
+- Test in both development and production modes
+- Update documentation as needed
+- Ensure TypeScript types are properly defined
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Better-Auth Guide](./doc/BETTER_AUTH.md) | Complete Better-Auth configuration, JWT, social providers, database schema |
+| [Auth Pages Config](./doc/AUTH_CONFIG.md) | Customize login/register pages: logos, colors, gradients, images |
+| [API Reference](./doc/API.md) | All API endpoints and their usage |
+| [Internationalization](./doc/I18N.md) | Multi-language support, adding new languages, translation files |
+| [Components](./doc/COMPONENTS.md) | Layout components, auth components, customization guide |
+| [Middlewares](./doc/MIDDLEWARES.md) | Route middleware, server middleware, custom middleware |
+| [Composables](./doc/COMPOSABLES.md) | Authentication composables, utility composables, custom composables |
+
+---
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## Credits
+
+Built with:
+
+- [Nuxt 4](https://nuxt.com) - The Vue.js Framework
+- [@nuxt/ui](https://ui.nuxt.com) - UI Component Library
+- [Better-Auth](https://better-auth.com) - Authentication Solution
+- [Tailwind CSS](https://tailwindcss.com) - Utility-First CSS Framework
+- [@nuxtjs/i18n](https://i18n.nuxtjs.org) - Internationalization
+
+---
+
+**Built with ❤️ by [Arpix Solutions](https://arpixnet.com)**
