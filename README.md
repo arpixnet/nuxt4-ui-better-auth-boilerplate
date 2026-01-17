@@ -1,11 +1,40 @@
-# Nuxt 4 + @nuxt/ui + Better-Auth Boilerplate
+🚀 Nuxt 4 + @nuxt/ui + Better-Auth Boilerplate
 
 [![Nuxt 4](https://img.shields.io/badge/Nuxt-4.0-00DC82?logo=nuxt.js)](https://nuxt.com)
 [![Vue](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A modern, production-ready boilerplate for building web applications with **Nuxt 4**, **@nuxt/ui**, and **Better-Auth**. This template provides a solid foundation with essential modules, optimized configuration, authentication system, and best practices for rapid development.
+> A modern, production-ready boilerplate for building web applications with **Nuxt 4**, **@nuxt/ui**, and **Better-Auth**. This template provides a solid foundation with essential modules, optimized configuration, complete authentication system, and best practices for rapid development.
+
+## 🎯 Key Features
+
+- 🔐 **Complete Authentication**: Email/password, OAuth 2.0 social login (100% dynamic), 2FA, JWT sessions, and password reset
+- 🎨 **Modern UI**: Pre-styled components with **@nuxt/ui**, **Tailwind CSS**, and dark/light mode support
+- 🌍 **Internationalization**: Multi-language support (Spanish/English) with **@nuxtjs/i18n**
+- 📧 **Transactional Emails**: Handlebars templates with Gmail OAuth2 support
+- 💾 **Database Ready**: PostgreSQL with migrations and SQLite fallback
+- 🧪 **Testing**: Vitest for unit tests, Playwright for E2E
+- 📦 **TypeScript**: Strict type safety with optimized configuration
+- 🎯 **Rate Limiting**: Email rate limiting with Redis and route middleware
+- 📈 **SEO**: Optimized with **@nuxtjs/seo** module
+- 🚀 **Production-Ready**: Built with best practices and security in mind
+
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|------------|---------|
+| [Nuxt 4](https://nuxt.com) | Full-stack framework with App Router |
+| [@nuxt/ui](https://ui.nuxt.com) | UI component library |
+| [Better-Auth](https://better-auth.com) | Complete authentication solution |
+| [Tailwind CSS](https://tailwindcss.com) | Utility-first CSS framework |
+| [PostgreSQL](https://www.postgresql.org) | Primary database |
+| [@nuxtjs/i18n](https://i18n.nuxtjs.org) | Internationalization |
+| [nuxt-arpix-email-sender](https://npmjs.com/package/nuxt-arpix-email-sender) | Transactional emails |
+
+---
+
+## 📦 Quick Start
 
 ## Quick Start
 
