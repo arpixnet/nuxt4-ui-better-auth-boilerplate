@@ -101,7 +101,7 @@ onMounted(() => {
             {{ t('common.appName') }}
           </h2>
         </NuxtLink>
-        <LanguageSelector />
+        <LayoutLanguageSelector />
       </div>
 
       <!-- Card -->

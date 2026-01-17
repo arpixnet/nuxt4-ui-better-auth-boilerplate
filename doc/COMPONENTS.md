@@ -275,7 +275,7 @@ None.
 ```vue
 <template>
   <div>
-    <LanguageSelector />
+    <LayoutLanguageSelector />
   </div>
 </template>
 ```

@@ -174,7 +174,7 @@ const handleRegister = async (event: any) => {
               {{ t('common.appName') }}
             </h2>
           </NuxtLink>
-          <LanguageSelector />
+          <LayoutLanguageSelector />
         </div>
 
         <div>
