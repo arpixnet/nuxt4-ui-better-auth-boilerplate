@@ -5,6 +5,14 @@
   --font-sans: 'Poppins', Impact, sans-serif;
 }
 
+:root {
+  --ui-primary: #490886;
+}
+
+.dark {
+  --ui-primary: #9333ea;
+}
+
 /* Add cursor-pointer to all Nuxt UI buttons */
 button[data-slot="base"] {
   cursor: pointer;

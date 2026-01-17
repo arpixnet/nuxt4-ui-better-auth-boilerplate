@@ -49,7 +49,7 @@ const navItems = computed<NavigationMenuItem[]>(() => {
         <h2 
           v-else 
           :class="[
-            'font-bold tracking-tight text-primary',
+            'font-bold tracking-tight text-gray-900 dark:text-white',
             `text-${authPageConfig.logo.size}`
           ]"
         >
