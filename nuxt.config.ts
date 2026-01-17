@@ -27,14 +27,16 @@ const colorModePreference = themeMode === 'light'
     ? 'dark' 
     : 'system'
 
+// For forced modes, disable storage to prevent conflicts
+const colorModeConfig: any = {
+  preference: colorModePreference,
+  fallback: 'dark',
+  storageKey: 'arpix_color_mode'
+}
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  colorMode: {
-    preference: colorModePreference,
-    fallback: 'light',
-    classSuffix: ''
-  },
 
   modules: [
     '@nuxt/image',
@@ -50,6 +52,7 @@ export default defineNuxtConfig({
     '~/assets/css/main.css',
     optionalModule('@nuxt/content') ? '~/assets/css/content.css' : undefined
   ].filter(Boolean),
+  colorMode: colorModeConfig,
   image: {
     format: ['avif', 'webp'],
     provider: 'ipx',

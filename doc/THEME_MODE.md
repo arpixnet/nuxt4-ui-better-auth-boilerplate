@@ -58,8 +58,8 @@ THEME_MODE=toggle
 ### Files Involved
 
 - `nuxt.config.ts` - Main configuration with `THEME_MODE` detection
-- `app/config/themeMode.ts` - Theme mode logic (build-time)
-- `app/plugins/theme-force.client.ts` - Plugin that forces themes in forced modes
+- `app.config.ts` - App-level configuration for theme mode
+- `app/plugins/theme-force.client.ts` - Plugin that forces themes in forced modes and clears localStorage
 - `app/components/layout/themeSelector.vue` - Toggle button component
 - `app/components/layout/AppHeader.vue` - Header that includes the theme selector
 - `i18n/locales/es.json` - Spanish translations
