@@ -79,7 +79,7 @@ export default defineNuxtConfig({
 
   arpixEmailSender: {
     transport: 'smtp',
-    defaultFrom: process.env.EMAIL_FROM || '"Example Test" <info@ebppublicidad.com>',
+    defaultFrom: process.env.EMAIL_FROM || '"Your App" <noreply@example.com>',
     smtp: {
       service: 'gmail',
       auth: {

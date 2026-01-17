@@ -4,7 +4,7 @@ import { jwtClient, twoFactorClient } from "better-auth/client/plugins"
 
 
 // Singleton client instance
-let authClientInstance: any = null
+let authClientInstance: AuthClient | null = null
 
 /**
  * Better-Auth Client Composable

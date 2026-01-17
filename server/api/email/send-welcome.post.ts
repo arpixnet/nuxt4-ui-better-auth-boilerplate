@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
         appName,
         requiresVerification,
         currentYear: new Date().getFullYear(),
-        unsubscribeUrl: `${config.public.betterAuth.url}/unsubscribe?email=${userEmail}`,
+        unsubscribeUrl: `${config.public.betterAuth.url}/unsubscribe?email=${encodeURIComponent(userEmail)}`,
       },
     })
 
