@@ -194,6 +194,13 @@
       "rateLimit": "Too many requests. Please try again later. ({remaining} remaining)",
       "panelTitle": "Verify Your Email",
       "panelSubtitle": "Almost there! Just one more step"
+    },
+    "social": {
+      "orContinueWith": "Or continue with",
+      "continueWith": "Continue with {provider}",
+      "signingIn": "Signing in with {provider}...",
+      "signingUp": "Signing up with {provider}...",
+      "error": "Failed to sign in with {provider}. Please try again."
     }
   },
   "verifyEmail": {

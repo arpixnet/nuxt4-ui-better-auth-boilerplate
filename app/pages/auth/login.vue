@@ -45,6 +45,10 @@ const error = ref<string | null>(null)
 const success = ref(false)
 const resendLoading = ref(false)
 
+// Social providers
+const socialProviders = ref<string[]>([])
+const providersLoading = ref(true)
+
 // Auth client
 const authClient = useAuthClient()
 
@@ -62,6 +66,23 @@ const redirectTo = computed(() => {
 // Check if user was redirected due to expired session
 const isSessionExpired = computed(() => {
   return route.query.expired === 'true'
+})
+
+/**
+ * Fetch available social providers on component mount
+ */
+onMounted(async () => {
+  try {
+    const response = await $fetch<{ providers: string[] }>('/api/auth/social-providers')
+    if (response?.providers) {
+      socialProviders.value = response.providers
+    }
+  } catch (err) {
+    console.error('[Login] Failed to fetch social providers:', err)
+    // Continue without social providers if fetch fails
+  } finally {
+    providersLoading.value = false
+  }
 })
 
 // Validate form in real-time
@@ -304,8 +325,8 @@ const handleTwoFactorVerify = async () => {
             </div>
           </div>
 
-          <!-- Login Form -->
-          <UForm v-else :schema="loginSchema" :state="formState" @submit="handleLogin">
+          <!-- Login Form (always shown) -->
+          <UForm :schema="loginSchema" :state="formState" @submit="handleLogin">
             <!-- Error Alert -->
             <UAlert v-if="error" :description="error" color="error" variant="subtle"
               icon="heroicons:information-circle-20-solid" class="mb-6" />
@@ -361,8 +382,16 @@ const handleTwoFactorVerify = async () => {
             </UButton>
           </UForm>
 
+          <!-- Social Login Buttons (shown after form if providers are configured) -->
+          <AuthSocialButtons
+            v-if="socialProviders.length > 0 && !providersLoading"
+            :providers="socialProviders"
+            :loading="loading"
+            class="mt-4"
+          />
+
           <!-- Register Link (only shown if registration is allowed) -->
-          <div v-if="allowRegistration" class="text-center mt-4">
+          <div v-if="allowRegistration" class="text-center">
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{ t('auth.login.noAccount') }}
             </span>

@@ -183,17 +183,24 @@
     },
     "verifyEmailPending": {
       "title": "Verificación de Correo Requerida",
-      "subtitle": "Por favor verifica tu correo para continuar",
+      "subtitle": "Por favor verifica tu correo electrónico para continuar",
       "checkYourEmail": "📧 Revisa tu correo",
-      "instructions": "Te hemos enviado un enlace de verificación a tu correo. Haz clic en el enlace para verificar tu cuenta e iniciar sesión.",
+      "instructions": "Hemos enviado un enlace de verificación a tu correo. Haz clic en el enlace para verificar tu cuenta e iniciar sesión.",
       "resendVerificationEmail": "Reenviar Correo de Verificación",
       "sending": "Enviando...",
-      "backToLogin": "← Volver al Inicio",
+      "backToLogin": "← Volver al Inicio de Sesión",
       "success": "¡Correo de verificación enviado! Por favor revisa tu bandeja de entrada.",
-      "errorGeneric": "Fallo al reenviar el correo de verificación. Por favor intenta nuevamente.",
-      "rateLimit": "Demasiadas solicitudes. Por favor intenta nuevamente más tarde. ({remaining} restantes)",
-      "panelTitle": "Verifica Tu Correo",
+      "errorGeneric": "Error al reenviar el correo de verificación. Por favor intenta nuevamente.",
+      "rateLimit": "Demasiadas solicitudes. Por favor intenta más tarde. ({remaining} restantes)",
+      "panelTitle": "Verifica tu Correo",
       "panelSubtitle": "¡Casi listo! Solo un paso más"
+    },
+    "social": {
+      "orContinueWith": "O continúa con",
+      "continueWith": "Continuar con {provider}",
+      "signingIn": "Iniciando sesión con {provider}...",
+      "signingUp": "Registrándose con {provider}...",
+      "error": "Error al iniciar sesión con {provider}. Por favor intenta nuevamente."
     }
   },
   "verifyEmail": {

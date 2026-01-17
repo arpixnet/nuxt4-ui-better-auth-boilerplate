@@ -40,6 +40,10 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
 
+// Social providers
+const socialProviders = ref<string[]>([])
+const providersLoading = ref(true)
+
 // Auth client
 const authClient = useAuthClient()
 const config = useRuntimeConfig()
@@ -47,6 +51,23 @@ const config = useRuntimeConfig()
 // Check if email verification is required
 const requiresEmailVerification = computed(() => {
   return config.public.betterAuth.emailVerification === true
+})
+
+/**
+ * Fetch available social providers on component mount
+ */
+onMounted(async () => {
+  try {
+    const response = await $fetch<{ providers: string[] }>('/api/auth/social-providers')
+    if (response?.providers) {
+      socialProviders.value = response.providers
+    }
+  } catch (err) {
+    console.error('[Register] Failed to fetch social providers:', err)
+    // Continue without social providers if fetch fails
+  } finally {
+    providersLoading.value = false
+  }
 })
 
 // Validate form in real-time
@@ -170,7 +191,7 @@ const handleRegister = async (event: any) => {
             </p>
           </div>
 
-          <!-- Form -->
+          <!-- Form (always shown) -->
           <UForm
             :schema="registerSchema"
             :state="formState"
@@ -252,8 +273,16 @@ const handleRegister = async (event: any) => {
             </UButton>
           </UForm>
 
+          <!-- Social Login Buttons (shown after form if providers are configured) -->
+          <AuthSocialButtons
+            v-if="socialProviders.length > 0 && !providersLoading"
+            :providers="socialProviders"
+            :loading="loading"
+            class="mt-4"
+          />
+
           <!-- Login Link -->
-          <div class="text-center mt-4">
+          <div class="text-center">
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{ t('auth.register.hasAccount') }}
             </span>
