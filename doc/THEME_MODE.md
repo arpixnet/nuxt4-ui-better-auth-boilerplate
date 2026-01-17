@@ -43,15 +43,13 @@ THEME_MODE=toggle
 
 1. The toggle button is hidden from the UI
 2. Light theme is forced on page load
-3. Any attempts to change the theme are automatically reverted
-4. `localStorage` preference is set to `'light'`
+3. Theme preference is saved to `localStorage` with key `'arpix_color_mode'`
 
 ### Forced Dark Mode (`THEME_MODE=dark`)
 
 1. The toggle button is hidden from the UI
 2. Dark theme is forced on page load
-3. Any attempts to change the theme are automatically reverted
-4. `localStorage` preference is set to `'dark'`
+3. Theme preference is saved to `localStorage` with key `'arpix_color_mode'`
 
 ## Implementation Details
 
@@ -59,7 +57,6 @@ THEME_MODE=toggle
 
 - `nuxt.config.ts` - Main configuration with `THEME_MODE` detection
 - `app.config.ts` - App-level configuration for theme mode
-- `app/plugins/theme-force.client.ts` - Plugin that forces themes in forced modes and clears localStorage
 - `app/components/layout/themeSelector.vue` - Toggle button component
 - `app/components/layout/AppHeader.vue` - Header that includes the theme selector
 - `i18n/locales/es.json` - Spanish translations
@@ -72,14 +69,6 @@ The `ThemeSelector` component:
 - Only renders the toggle button when `THEME_MODE=toggle`
 - Uses `@nuxtjs/color-mode` composable for theme management
 - Supports internationalization with `changeTheme` translation key
-
-### Plugin Implementation
-
-The `theme-force.client.ts` plugin:
-- Runs only on the client side
-- Checks if `THEME_MODE` is `'light'` or `'dark'`
-- Forces the theme and watches for changes
-- Reverts any attempts to change the theme in forced modes
 
 ## Translations
 
@@ -123,6 +112,23 @@ THEME_MODE=toggle
 THEME_MODE=light
 ```
 
+## Important: Clearing localStorage
+
+**⚠️ CRITICAL**: Every time you change the `THEME_MODE` configuration, you must clear the `arpix_color_mode` key from browser localStorage for the new theme to take effect.
+
+### How to Clear localStorage
+
+1. Open your browser's Developer Tools (F12 or right-click → Inspect)
+2. Go to the **Application** tab
+3. In the left sidebar, expand **Local Storage**
+4. Click on your domain (e.g., `http://localhost:3000`)
+5. Find and delete the `arpix_color_mode` key
+6. **Refresh the page** to see the new theme
+
+### Why This Is Necessary
+
+The theme preference is cached in localStorage to persist across page reloads. When you change `THEME_MODE` in your `.env` file, the old cached preference may conflict with the new configuration, preventing the new theme from being applied.
+
 ## Nuxt Color Mode Configuration
 
 The `@nuxtjs/color-mode` module is configured in `nuxt.config.ts`:
@@ -139,6 +145,7 @@ export default defineNuxtConfig({
   colorMode: {
     preference: colorModePreference,
     fallback: 'light',
+    storageKey: 'arpix_color_mode',
     classSuffix: ''
   }
 })
@@ -146,14 +153,37 @@ export default defineNuxtConfig({
 
 ## Troubleshooting
 
+### Theme Not Changing After Switching THEME_MODE
+
+**Problem**: You changed `THEME_MODE` in your `.env` file, but the theme remains the same.
+
+**Solution**: Follow these steps:
+
+1. **Delete `arpix_color_mode` from localStorage**:
+   - Open Developer Tools (F12 or right-click → Inspect)
+   - Go to **Application** tab
+   - Expand **Local Storage** in left sidebar
+   - Click on your domain (e.g., `http://localhost:3000`)
+   - Delete the `arpix_color_mode` key
+2. **Refresh the page** (Ctrl+R or Cmd+R)
+3. **Restart the dev server** if still not working (stop with Ctrl+C, then `npm run dev`)
+
+**Why This Happens**: The old theme preference is cached in localStorage and persists even when you change the configuration in `.env`.
+
 ### Toggle Button Not Showing
 
 Check that `THEME_MODE` is set to `'toggle'` in your `.env` file and restart the dev server.
 
-### Theme Not Changing
+### Theme Reverting After Change in Toggle Mode
 
-Clear browser `localStorage` for `'nuxt-color-mode'` key and reload the page.
+If you're in toggle mode and the theme keeps reverting:
+- Check that `THEME_MODE` is set to `'toggle'` (not `'light'` or `'dark'`)
+- Clear `arpix_color_mode` from localStorage
+- Refresh the page
 
-### Theme Reverting After Change
+### Wrong Theme on First Load After Server Restart
 
-Verify `THEME_MODE` is not set to `'light'` or `'dark'` (forced modes will revert any changes).
+After restarting the dev server with a new `THEME_MODE`:
+1. Clear `arpix_color_mode` from localStorage
+2. Refresh the page
+3. The new theme should now apply correctly

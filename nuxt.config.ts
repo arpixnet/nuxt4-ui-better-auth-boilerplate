@@ -30,7 +30,7 @@ const colorModePreference = themeMode === 'light'
 // For forced modes, disable storage to prevent conflicts
 const colorModeConfig: any = {
   preference: colorModePreference,
-  fallback: 'dark',
+  fallback: 'light',
   storageKey: 'arpix_color_mode'
 }
 
