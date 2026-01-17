@@ -325,8 +325,8 @@ const handleTwoFactorVerify = async () => {
             </div>
           </div>
 
-          <!-- Login Form (always shown) -->
-          <UForm :schema="loginSchema" :state="formState" @submit="handleLogin">
+          <!-- Login Form (hidden when 2FA is required) -->
+          <UForm v-if="!requiresTwoFactor" :schema="loginSchema" :state="formState" @submit="handleLogin">
             <!-- Error Alert -->
             <UAlert v-if="error" :description="error" color="error" variant="subtle"
               icon="heroicons:information-circle-20-solid" class="mb-6" />
@@ -382,16 +382,16 @@ const handleTwoFactorVerify = async () => {
             </UButton>
           </UForm>
 
-          <!-- Social Login Buttons (shown after form if providers are configured) -->
+          <!-- Social Login Buttons (hidden when 2FA is required) -->
           <AuthSocialButtons
-            v-if="socialProviders.length > 0 && !providersLoading"
+            v-if="!requiresTwoFactor && socialProviders.length > 0 && !providersLoading"
             :providers="socialProviders"
             :loading="loading"
             class="mt-4"
           />
 
-          <!-- Register Link (only shown if registration is allowed) -->
-          <div v-if="allowRegistration" class="text-center">
+          <!-- Register Link (only shown if registration is allowed and 2FA is not required) -->
+          <div v-if="!requiresTwoFactor && allowRegistration" class="text-center">
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{ t('auth.login.noAccount') }}
             </span>
