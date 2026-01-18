@@ -40,7 +40,7 @@
 
 ```bash
 # Create a new project
-npx nuxi init my-project -t github:arpixnet/nuxt4-nuxt-ui-better-auth-boilerplate
+npx nuxi init my-project -t github:arpixnet/nuxt4-ui-better-auth-boilerplate
 cd my-project
 
 # Install dependencies
@@ -91,14 +91,14 @@ pnpm dev
 ### Method 1: Using nuxi (Recommended)
 
 ```bash
-npx nuxi init my-project -t github:arpixnet/nuxt4-nuxt-ui-better-auth-boilerplate
+npx nuxi init my-project -t github:arpixnet/nuxt4-ui-better-auth-boilerplate
 cd my-project
 ```
 
 ### Method 2: Git Clone
 
 ```bash
-git clone https://github.com/arpixnet/nuxt4-nuxt-ui-better-auth-boilerplate.git my-project
+git clone https://github.com/arpixnet/nuxt4-ui-better-auth-boilerplate.git my-project
 cd my-project
 rm -rf .git
 git init
@@ -778,7 +778,7 @@ If gradient colors appear white on Tailwind 4, the issue is with dynamic class g
 - Check the [Nuxt 4 documentation](https://nuxt.com/docs)
 - Visit the [@nuxt/ui documentation](https://ui.nuxt.com/)
 - See [Better-Auth documentation](https://better-auth.com/docs)
-- Search existing [GitHub Issues](https://github.com/arpixnet/nuxt4-nuxt-ui-better-auth-boilerplate/issues)
+- Search existing [GitHub Issues](https://github.com/arpixnet/nuxt4-ui-better-auth-boilerplate/issues)
 - Join the [Nuxt Discord community](https://discord.com/invite/ps2h6QT)
 
 ---
