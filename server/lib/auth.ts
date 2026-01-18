@@ -184,20 +184,23 @@ export const auth = betterAuth({
         audience: ["hasura"],
 
         definePayload: async ({ user, session }) => {
-          const hasuraEnabled = process.env.BETTER_AUTH_WITH_HASURA === "true"
-
           const base = {
             sub: user.id,
             email: user.email,
             sessionId: session.id,
           }
 
+          // Hasura JWT claims are always included when Hasura is configured
+          // The BETTER_AUTH_WITH_HASURA env var controls this behavior
+          const hasuraEnabled = process.env.BETTER_AUTH_WITH_HASURA === "true"
+
           if (!hasuraEnabled) return base
 
           // Hasura JWT claims
-          // Note: Roles and permissions are project-specific.
-          // Uncomment and customize as needed:
+          // These claims are used by Hasura for authorization and permissions
+          // Customize roles and permissions based on your application requirements
           //
+          // Advanced: Fetch user roles from database
           // const rolesData = await getUserRolesAndOrganization(user.id)
           //
           // return {
@@ -206,6 +209,7 @@ export const auth = betterAuth({
           //     "x-hasura-default-role": rolesData.defaultRole,
           //     "x-hasura-allowed-roles": rolesData.allowedRoles,
           //     "x-hasura-user-id": user.id,
+          //     "x-hasura-org-id": rolesData.orgId,
           //   },
           // }
 

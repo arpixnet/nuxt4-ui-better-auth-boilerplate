@@ -139,13 +139,20 @@ Edit `.env` with your configuration. See [Configuration](#configuration) for det
 # Application
 APP_NAME=Your App Name
 
-# Better-Auth (Generate with: openssl rand -base64 32)
+# Better-Auth (Generate with: openssl rand -base64 64)
 BETTER_AUTH_SECRET=your-secret-key-minimum-32-characters
 BETTER_AUTH_URL=http://localhost:3000
 BETTER_AUTH_EMAIL_VERIFICATION=true
 
-# Database
-DATABASE_URL=postgres://user:password@localhost:5432/your-db
+# Database (used by both app and Hasura)
+DATABASE_URL=postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@localhost:5432/${DATABASE_NAME}
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgrespassword
+DATABASE_NAME=whasabi_db
+
+# Hasura
+HASURA_ADMIN_SECRET=your-hasura-admin-secret-minimum-32-characters
+BETTER_AUTH_WITH_HASURA=true
 
 # Email (see Email Configuration below)
 EMAIL_USER=your-email@gmail.com
@@ -167,12 +174,10 @@ BETTER_AUTH_SESSION_UPDATE_AGE=86400         # 1 day in seconds
 BETTER_AUTH_COOKIE_MAX_AGE=300               # 5 minutes in seconds
 BETTER_AUTH_JWT_EXPIRATION_TIME=7d           # JWT expiration
 
-# Hasura Integration
-BETTER_AUTH_WITH_HASURA=false
-
 # Redis (Rate Limiting)
 REDIS_HOST=localhost
 REDIS_PORT=6379
+# REDIS_PASSWORD=your-redis-password
 ```
 
 ### Email Configuration
@@ -811,6 +816,7 @@ Contributions are welcome! Please see our contributing guidelines:
 |----------|-------------|
 | [Better-Auth Guide](./doc/BETTER_AUTH.md) | Complete Better-Auth configuration, JWT, social providers, database schema |
 | [Auth Pages Config](./doc/AUTH_CONFIG.md) | Customize login/register pages: logos, colors, gradients, images |
+| [Hasura Integration](./doc/HASURA_INTEGRATION.md) | GraphQL Engine integration with JWT authentication, permissions, and best practices |
 | [API Reference](./doc/API.md) | All API endpoints and their usage |
 | [Internationalization](./doc/I18N.md) | Multi-language support, adding new languages, translation files |
 | [Components](./doc/COMPONENTS.md) | Layout components, auth components, customization guide |
