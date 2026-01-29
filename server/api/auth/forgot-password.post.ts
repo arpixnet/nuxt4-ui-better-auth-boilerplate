@@ -1,4 +1,6 @@
 import { auth } from "../../lib/auth"
+import { checkRateLimit, throwRateLimitError } from "../../utils/rate-limiter"
+import { authLogger, logError } from "../../utils/logger"
 
 /**
  * Forgot Password Endpoint
@@ -21,12 +23,11 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { email, redirectTo } = body
 
-  console.log('[Forgot-Password] Password reset request received')
-  console.log('[Forgot-Password] Email:', email)
+  authLogger.info({ email }, 'Password reset request received')
 
   // Validate email
   if (!email) {
-    console.error('[Forgot-Password] ❌ Email is required')
+    authLogger.error('Email is required for password reset')
     throw createError({
       statusCode: 400,
       statusMessage: 'Email is required'
@@ -36,7 +37,7 @@ export default defineEventHandler(async (event) => {
   // Validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(email)) {
-    console.error('[Forgot-Password] ❌ Invalid email format')
+    authLogger.warn({ email }, 'Invalid email format for password reset')
     throw createError({
       statusCode: 400,
       statusMessage: 'Invalid email format'
@@ -51,11 +52,17 @@ export default defineEventHandler(async (event) => {
   })
 
   if (!rateLimitResult.allowed) {
-    console.warn('[Forgot-Password] ⚠️ Rate limit exceeded for:', email)
+    authLogger.warn({
+      email,
+      remaining: rateLimitResult.remaining,
+    }, 'Rate limit exceeded for password reset')
     throwRateLimitError(rateLimitResult)
   }
 
-  console.log('[Forgot-Password] Rate limit check passed. Remaining:', rateLimitResult.remaining)
+  authLogger.debug({
+    email,
+    remaining: rateLimitResult.remaining,
+  }, 'Rate limit check passed for password reset')
 
   try {
     // Use Better-Auth's built-in API to request password reset
@@ -71,7 +78,7 @@ export default defineEventHandler(async (event) => {
       }
     })
 
-    console.log('[Forgot-Password] ✅ Password reset request processed successfully')
+    authLogger.info({ email }, 'Password reset request processed successfully')
 
     // Always return success for security (don't reveal if email exists)
     // This prevents email enumeration attacks
@@ -80,8 +87,7 @@ export default defineEventHandler(async (event) => {
       message: 'If an account exists with this email, you will receive a password reset link shortly.'
     }
   } catch (error: any) {
-    console.error('[Forgot-Password] ❌ Error processing password reset')
-    console.error('[Forgot-Password] Error details:', error)
+    logError(authLogger, error, 'Error processing password reset', { email })
 
     // For security, still return success even if user doesn't exist
     // This prevents email enumeration attacks

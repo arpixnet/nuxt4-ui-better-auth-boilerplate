@@ -18,11 +18,12 @@ export default defineEventHandler(async (event) => {
   for (const varName of providerVars) {
     const value = process.env[varName]
     if (!value || value.trim() === '') continue
-    
+
     // Extract provider name
     // Format: SOCIAL_PROVIDER_GOOGLE_CLIENT_ID
     const parts = varName.split('_')
-    const provider = parts[2].toLowerCase()
+    if (parts.length < 3) continue // Skip malformed variables
+    const provider = parts[2]?.toLowerCase() || ''
     
     // Mark provider as having at least one configured variable
     providersMap[provider] = true

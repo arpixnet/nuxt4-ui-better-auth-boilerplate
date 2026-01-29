@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth"
 import { jwt, twoFactor } from "better-auth/plugins"
 import { Pool } from "pg"
+import { authLogger, emailLogger, logError } from "../utils/logger"
 
 
 
@@ -37,7 +38,7 @@ const toCamelCase = (str: string): string => {
   return str
     .toLowerCase()
     .split("_")
-    .map((word, index) => 
+    .map((word, index) =>
       index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
     )
     .join("")
@@ -88,33 +89,42 @@ const buildSocialProviders = () => {
   // Find all SOCIAL_PROVIDER_* environment variables
   const providerVars = Object.keys(process.env)
     .filter(key => key.startsWith("SOCIAL_PROVIDER_"))
-  
+
   // Group variables by provider name
   const providersMap: Record<string, Record<string, string | string[]>> = {}
-  
+
   for (const varName of providerVars) {
     const value = process.env[varName]
     if (!value) continue
-    
+
     // Extract provider and field name
     // Format: SOCIAL_PROVIDER_GOOGLE_CLIENT_ID
     const parts = varName.split("_")
-    const provider = parts[2].toLowerCase()
+    if (parts.length < 4) continue // Skip malformed variables
+    const provider = parts[2]?.toLowerCase() || ''
     const rawField = parts.slice(3).join("_") // CLIENT_ID
-    
+
     // Convert SNAKE_CASE to camelCase
     const field = toCamelCase(rawField)
-    
+
     // Parse value (string or array)
     const parsedValue = parseEnvValue(value)
-    
+
     if (!providersMap[provider]) {
       providersMap[provider] = {}
     }
-    
+
     providersMap[provider][field] = parsedValue
   }
-  
+
+  // Log loaded providers
+  const loadedProviders = Object.keys(providersMap)
+  if (loadedProviders.length > 0) {
+    authLogger.debug({ providers: loadedProviders }, 'Social providers loaded')
+  } else {
+    authLogger.debug('No social providers configured')
+  }
+
   // Return all providers without validation
   // Better-Auth will handle validation and throw errors if something is missing
   return providersMap
@@ -122,12 +132,16 @@ const buildSocialProviders = () => {
 
 /**
  * Check if registration is allowed
- * 
+ *
  * This function checks the ALLOW_REGISTRATION environment variable
  * to determine if new user registration is permitted.
  */
 const isRegistrationAllowed = (): boolean => {
-  return process.env.ALLOW_REGISTRATION !== "false"
+  const allowed = process.env.ALLOW_REGISTRATION !== "false"
+  if (!allowed) {
+    authLogger.warn('Registration is currently disabled')
+  }
+  return allowed
 }
 
 /**
@@ -155,7 +169,7 @@ export const auth = betterAuth({
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
   }),
-  
+
   logger: {
     level: "debug",
   },
@@ -169,7 +183,7 @@ export const auth = betterAuth({
       strategy: "jwt",
     }
   },
-  
+
   user: {
     deleteUser: {
       enabled: true,
@@ -237,9 +251,9 @@ export const auth = betterAuth({
   verification: {
     modelName: "verification",
   },
-  
+
   twoFactor: {
-    modelName: "twoFactor", 
+    modelName: "twoFactor",
   },
 
   // Email Verification Configuration
@@ -248,15 +262,17 @@ export const auth = betterAuth({
       try {
         // Check if registration is allowed
         if (!isRegistrationAllowed()) {
-          console.error('[Better-Auth Hook] Registration attempt when disabled')
+          authLogger.warn({ email: user.email }, 'Registration attempt when disabled')
           throw new Error('Registration is currently disabled')
         }
 
-        console.log('[Better-Auth Hook] sendVerificationEmail called for:', user.email)
-        console.log('[Better-Auth Hook] Verification URL:', url)
-        console.log('[Better-Auth Hook] Token:', token)
-
         const requiresVerification = process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true"
+
+        emailLogger.info({
+          email: user.email,
+          userName: user.name,
+          requiresVerification,
+        }, 'Sending verification email')
 
         // Send welcome email with verification link
         // This hook is called ONLY on sign-up (sendOnSignUp: true, sendOnSignIn: false)
@@ -273,12 +289,15 @@ export const auth = betterAuth({
 
         if (!response.ok) {
           const errorText = await response.text()
-          console.error('[Better-Auth Hook] Failed to send welcome email. Status:', response.status, 'Error:', errorText)
+          logError(emailLogger, errorText, 'Failed to send welcome email', {
+            email: user.email,
+            status: response.status,
+          })
         } else {
-          console.log('[Better-Auth Hook] ✅ Welcome email sent successfully to:', user.email)
+          emailLogger.info({ email: user.email }, 'Welcome email sent successfully')
         }
       } catch (error) {
-        console.error('[Better-Auth Hook] ❌ Failed to send welcome email:', error)
+        logError(emailLogger, error, 'Failed to send welcome email', { email: user.email })
         // Don't throw error to allow registration to complete even if email fails
       }
     },
@@ -292,16 +311,24 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: process.env.BETTER_AUTH_EMAIL_VERIFICATION === "true",
-    signUp: async ({ email, password, name }: SignUpHookParams) => {
+    signUp: async ({ email, name }: SignUpHookParams) => {
+      // Log sign-up attempt
+      authLogger.info({ email, name }, 'Sign-up attempt')
+
       // Check if registration is allowed before processing
       if (!isRegistrationAllowed()) {
+        authLogger.warn({ email }, 'Sign-up blocked: registration disabled')
         throw new Error('Registration is currently disabled')
       }
+
+      authLogger.info({ email }, 'Sign-up completed successfully')
     },
     sendResetPassword: async ({ user, url }: { user: EmailHookUser, url: string }) => {
       try {
-        console.log('[Better-Auth Hook] sendResetPassword called for:', user.email)
-        console.log('[Better-Auth Hook] Reset URL:', url)
+        emailLogger.info({
+          email: user.email,
+          userName: user.name,
+        }, 'Sending password reset email')
 
         // Call internal API endpoint to send reset password email
         const response = await fetch(`${process.env.BETTER_AUTH_URL}/api/email/send-reset-password`, {
@@ -318,12 +345,15 @@ export const auth = betterAuth({
 
         if (!response.ok) {
           const errorText = await response.text()
-          console.error('[Better-Auth Hook] Failed to send reset password email. Status:', response.status, 'Error:', errorText)
+          logError(emailLogger, errorText, 'Failed to send reset password email', {
+            email: user.email,
+            status: response.status,
+          })
         } else {
-          console.log('[Better-Auth Hook] ✅ Reset password email sent successfully to:', user.email)
+          emailLogger.info({ email: user.email }, 'Reset password email sent successfully')
         }
       } catch (error) {
-        console.error('[Better-Auth Hook] ❌ Failed to send reset password email:', error)
+        logError(emailLogger, error, 'Failed to send reset password email', { email: user.email })
         // Don't throw error to allow reset request to complete even if email fails
       }
     },

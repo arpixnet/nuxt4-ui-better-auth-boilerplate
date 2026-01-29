@@ -1,4 +1,5 @@
 import { auth } from "../../lib/auth"
+import { authLogger, logError } from "../../utils/logger"
 
 /**
  * Reset Password Endpoint
@@ -18,11 +19,11 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { token, newPassword } = body
 
-  console.log('[Reset-Password] Password reset request received')
+  authLogger.info('Password reset request received')
 
   // Validate inputs
   if (!token) {
-    console.error('[Reset-Password] ❌ Token is required')
+    authLogger.error('Token is required for password reset')
     throw createError({
       statusCode: 400,
       statusMessage: 'Token is required'
@@ -30,7 +31,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (!newPassword || newPassword.length < 8) {
-    console.error('[Reset-Password] ❌ Invalid password')
+    authLogger.warn('Invalid password for password reset')
     throw createError({
       statusCode: 400,
       statusMessage: 'Password must be at least 8 characters'
@@ -51,15 +52,14 @@ export default defineEventHandler(async (event) => {
       },
     })
 
-    console.log('[Reset-Password] ✅ Password reset successfully')
+    authLogger.info('Password reset completed successfully')
 
     return {
       success: true,
       message: 'Password has been reset successfully'
     }
   } catch (error: any) {
-    console.error('[Reset-Password] ❌ Error resetting password')
-    console.error('[Reset-Password] Error details:', error)
+    logError(authLogger, error, 'Error resetting password')
 
     // Provide user-friendly error messages
     let errorMessage = 'Failed to reset password'

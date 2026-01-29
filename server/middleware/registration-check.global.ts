@@ -1,6 +1,9 @@
+import { getRequestURL } from 'h3'
+import { middlewareLogger } from '../utils/logger'
+
 /**
  * Global server middleware to block registration routes when ALLOW_REGISTRATION is false
- * 
+ *
  * This middleware intercepts all requests to Better-Auth endpoints
  * and blocks sign-up related operations (both email/password and OAuth).
  */
@@ -24,6 +27,11 @@ export default defineEventHandler((event) => {
   const isRegistrationPath = registrationPaths.some(path => url.pathname.includes(path))
 
   if (isRegistrationPath) {
+    middlewareLogger.warn({
+      path: url.pathname,
+      registrationAllowed: false,
+    }, 'Registration attempt blocked: registration is disabled')
+
     throw createError({
       statusCode: 403,
       statusMessage: 'Forbidden',

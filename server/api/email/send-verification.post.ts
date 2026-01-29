@@ -1,15 +1,19 @@
 /**
  * Send Verification Email (Resend)
- * 
+ *
  * Sends a verification email to a user who requested to resend
  * their verification link.
  */
+
+import { emailLogger, logError } from '../../utils/logger'
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { userEmail, userName, verificationLink, loginUrl } = body
 
   // Validate required fields
   if (!userEmail || !userName || !verificationLink) {
+    emailLogger.error('Missing required fields for verification email')
     throw createError({
       statusCode: 400,
       statusMessage: 'Missing required fields: userEmail, userName, verificationLink'
@@ -19,14 +23,17 @@ export default defineEventHandler(async (event) => {
   const sender = useMailSender()
   const config = event.context.runtimeConfig || useRuntimeConfig()
   const appName = config?.public?.appName || 'Your App'
-  
-  console.log('[Send-Verification] Preparing to send verification email...')
-  console.log('[Send-Verification] Recipient:', userEmail)
-  console.log('[Send-Verification] Template: verify-again')
-  console.log('[Send-Verification] Verification link:', verificationLink)
-  console.log('[Send-Verification] Login URL:', loginUrl)
-  console.log('[Send-Verification] App Name:', appName)
-  
+
+  emailLogger.info({
+    email: userEmail,
+    userName,
+  }, 'Preparing to send verification email (resend)')
+
+  emailLogger.debug({
+    template: 'verify-again',
+    appName,
+  }, 'Verification email context')
+
   try {
     const info = await sender.send({
       to: userEmail,
@@ -43,21 +50,20 @@ export default defineEventHandler(async (event) => {
       },
     })
 
-    console.log('[Send-Verification] ✅ Verification email sent successfully')
-    console.log('[Send-Verification] Message ID:', info.messageId)
-    console.log('[Send-Verification] Full response:', JSON.stringify(info, null, 2))
+    emailLogger.info({
+      email: userEmail,
+      messageId: info.messageId,
+    }, 'Verification email sent successfully (resend)')
 
     return {
       success: true,
       messageId: info.messageId,
     }
   } catch (error: any) {
-    console.error('[Send-Verification] ❌ Failed to send verification email')
-    console.error('[Send-Verification] Error details:', error)
-    if (error instanceof Error) {
-      console.error('[Send-Verification] Error message:', error.message)
-      console.error('[Send-Verification] Error stack:', error.stack)
-    }
+    logError(emailLogger, error, 'Failed to send verification email', {
+      email: userEmail,
+      userName,
+    })
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to send verification email',

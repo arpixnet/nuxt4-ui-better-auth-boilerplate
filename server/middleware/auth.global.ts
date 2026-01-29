@@ -1,11 +1,12 @@
 import { getRequestURL, sendRedirect, getCookie } from 'h3'
+import { middlewareLogger } from '../utils/logger'
 
 /**
  * Global Authentication Middleware
- * 
+ *
  * This middleware prevents authenticated users from accessing
  * authentication pages (login, register, etc.)
- * 
+ *
  * - If user is authenticated and tries to access /auth/* → Redirect to home
  * - If user is not authenticated → Allow access to any page
  * - API routes are not affected by this middleware
@@ -40,6 +41,10 @@ export default defineEventHandler(async (event) => {
 
   // If session cookie exists, user is authenticated - redirect to home
   if (sessionCookie) {
+    middlewareLogger.info({
+      path,
+      hasSession: true,
+    }, 'Authenticated user redirected from auth route')
     return sendRedirect(event, '/', 302)
   }
 

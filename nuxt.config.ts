@@ -114,7 +114,11 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    compressPublicAssets: true
+    compressPublicAssets: true,
+    alias: {
+      '#utils': './server/utils',
+      '#lib': './server/lib',
+    }
   },
 
   runtimeConfig: {
